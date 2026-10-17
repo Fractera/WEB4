@@ -17,10 +17,10 @@ import { spawn, spawnSync } from 'node:child_process'
 import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs'
 import { join, relative } from 'node:path'
 import { createRequire } from 'node:module'
-import paths from '../lib/agi-items/paths.cjs'
+import paths from '../lib/web4-items/paths.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
-import { elementLanguages } from '../lib/agi-items/element-languages.mjs'
-import elementProps from '../lib/agi-items/element-props.cjs'
+import { elementLanguages } from '../lib/web4-items/element-languages.mjs'
+import elementProps from '../lib/web4-items/element-props.cjs'
 import { dropStaleTypes } from '../lib/deploy/stale-types.mjs'
 
 const require = createRequire(import.meta.url)
@@ -46,7 +46,7 @@ const alive = (pid) => { try { process.kill(pid, 0); return true } catch (e) { r
 function childEnv(extra = {}) {
   const out = {}
   for (const [k, v] of Object.entries(process.env)) {
-    if (k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('AGI_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV') continue
+    if (k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV') continue
     out[k] = v
   }
   return { ...out, ...extra }
@@ -61,7 +61,7 @@ function run(cmd, args, env = {}) {
 // «Развернуть» зовёт установщик, и тот переписывает `.env.local` из APP-CONFIG (`languages`); предпросмотр установщика не
 // зовёт — без этого он собирал сайт со СТАРЫМ набором языков, и кнопка «Запустить новое развёртывание» на «Настройках
 // сайта» вела бы к предпросмотру, в котором изменения нет. Переменные процесса у Next сильнее `.env.local`. Выборка одна с
-// установщиком — `lib/agi-items/element-languages.mjs` (341-1: у подключённого к CONFIG — поверх копия настроек проекта);
+// установщиком — `lib/web4-items/element-languages.mjs` (341-1: у подключённого к CONFIG — поверх копия настроек проекта);
 // записи нет — пусто, и сборка читает `.env.local` как прежде.
 function languagesEnv() {
   const l = elementLanguages(dir, id, ROOT)
@@ -237,5 +237,5 @@ spawnSync(pm2, ['save'], { cwd: ROOT, shell: IS_WIN, windowsHide: true, env: chi
 writeFileSync(join(ROOT, 'logs', 'deploy-history.jsonl'), JSON.stringify({ id, version: `${base}+${current.commit}`, ok: true, at: new Date().toISOString(), via: 'preview' }) + '\n', { flag: 'a' })
 rmSync(FILE, { force: true })
 // 344-3: принятая версия уходит и в копию публичных страниц в Cloudflare (только у элемента со своим доменом).
-require('../lib/agi-items/static-copy-start.cjs').startStaticCopy(ROOT, id)
+require('../lib/web4-items/static-copy-start.cjs').startStaticCopy(ROOT, id)
 process.exit(0)

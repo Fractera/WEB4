@@ -1,4 +1,4 @@
-// @api tell the born AGI element agent page whether this machine has a Claude subscription
+// @api tell the born WEB4 element agent page whether this machine has a Claude subscription
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
@@ -7,7 +7,7 @@ import { claudeAuthState } from "../../_agent-kit/server/claude-cli.cjs"
 
 // СОСТОЯНИЕ ПОДПИСКИ CLAUDE CODE (267-2). Подписка одна на машину — у всех служб ответ одинаковый.
 // 🔒 ДВЕРЬ КОПИИ КОМПЛЕКТА АГЕНТА (271): шаблон `kits/_agent-kit/api/*/route.ts.tpl`, установщик подставил
-// имя службы вместо `born AGI element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
+// имя службы вместо `born WEB4 element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
 //
 // 🔒 ОТВЕЧАЕТ САМ `claude auth status`, А НЕ НАША ПАМЯТЬ О ТОМ, ЧТО ЧЕЛОВЕК ВХОДИЛ: вход живёт в папке
 // `~/.claude` машины и меняется без нашего ведома (выход в другом терминале, истёкший токен).

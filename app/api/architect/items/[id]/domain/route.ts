@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
-import { attachDomain, checkDomain, detachDomain, domainOf, setPrimary } from "@/lib/agi-items/element-domain"
+import { isBornElement } from "@/lib/web4-items/element-delete"
+import { attachDomain, checkDomain, detachDomain, domainOf, setPrimary } from "@/lib/web4-items/element-domain"
 
 // «СВОЙ ДОМЕН» ЭЛЕМЕНТА (324-1). GET `?name=` — форма имени по правилам DNS, занятость другим элементом, зона в аккаунте
 // Cloudflare узла и её статус (серверы имён — если зона ждёт их у регистратора). Ничего не пишет. Подключение — 324-2.

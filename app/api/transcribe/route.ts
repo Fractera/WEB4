@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { PROTECTED_GROUP_ROLES } from "@/lib/roles"
 import { openAiKey } from "@/lib/openai-key"
-import { isBornElement } from "@/lib/agi-items/element-delete"
+import { isBornElement } from "@/lib/web4-items/element-delete"
 import { transcribeAudio } from "@/_tools/voice-input/server/transcribe"
 
 // Дверь расшифровки речи для приложения.

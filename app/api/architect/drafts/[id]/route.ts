@@ -2,7 +2,7 @@
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
-import { deleteDraft, draftAddress, getDraft } from "@/lib/agi-items/drafts"
+import { deleteDraft, draftAddress, getDraft } from "@/lib/web4-items/drafts"
 import { getService } from "@/lib/microservices/registry"
 
 // УДАЛЕНИЕ ЧЕРНОВИКА (314-1). Тело `{ confirm }` обязано совпасть с адресом черновика `<id>.<зона>` буква в букву —

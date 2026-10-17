@@ -1,9 +1,9 @@
-// @api list the order summaries one AGI ITEM saved
+// @api list the order summaries one WEB4 ITEM saved
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { listOrders } from "@/lib/agi-items/element-orders"
-import { idOfAddress } from "@/lib/agi-items/element-address"
+import { listOrders } from "@/lib/web4-items/element-orders"
+import { idOfAddress } from "@/lib/web4-items/element-address"
 
 // СДЕЛКИ ЭЛЕМЕНТА ДЛЯ СТРАНИЦЫ «Связи (A2A) → Сделки» (412-6; 436-2 — прежде «Процесс → Заказы»). Сводки пишет агент элемента при закрытии заказа A2A; страница
 // предрендерена, поэтому список спрашивается здесь, при открытии. Беседу заказа островок берёт из `/api/node/a2a-log?context=`.

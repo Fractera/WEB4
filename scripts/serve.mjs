@@ -15,7 +15,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import os from 'node:os'
 import { createRequire } from 'node:module'
-import paths from '../lib/agi-items/paths.cjs'
+import paths from '../lib/web4-items/paths.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
@@ -26,7 +26,7 @@ const tunnelFile = path.join(root, 'logs', 'tunnel.json')
 
 const isWindows = process.platform === 'win32'
 const pm2 = isWindows ? 'pm2.cmd' : 'pm2'
-const TASK_NAME = 'FracteraAGI'
+const TASK_NAME = 'FracteraWEB4'
 
 function pm2run(args, options = {}) {
   // shell только на Windows и только потому, что node отказывается запускать
@@ -64,7 +64,7 @@ function ensurePm2() {
 /**
  * Обязательные элементы узла, которых на этой машине нет (280-7).
  *
- * 🔒 ЗАЧЕМ. Клон узла несёт только `AGI-ITEMS-REGISTRY/agi-items.json`: сами элементы (вход, данные,
+ * 🔒 ЗАЧЕМ. Клон узла несёт только `WEB4-ITEMS-REGISTRY/web4-items.json`: сами элементы (вход, данные,
  * сайт) приезжают установщиком из своих репозиториев по закреплённому тегу. README велит одну команду
  * — `serve:start`, — и без этой проверки человек получал ядро без входа, данных и сайта.
  * «Нет» — это нет отметки установки ИЛИ нет файла сервера, который она называет: сборка, прерванная
@@ -122,10 +122,10 @@ async function start() {
   // туннель при КАЖДОМ запуске — адрес менялся молча, хотя `publish()` написан ровно затем, чтобы живой адрес не трогать.
   // Туннелем распоряжается только `publish()`, ниже.
   const require = createRequire(import.meta.url)
-  const names = require(ecosystem).apps.map((a) => a.name).filter((n) => n !== 'fractera-agi-tunnel')
+  const names = require(ecosystem).apps.map((a) => a.name).filter((n) => n !== 'fractera-web4-tunnel')
   const result = pm2run(['start', ecosystem, '--only', names.join(',')])
   if (result.status !== 0) {
-    console.error('Запустить не удалось. Журнал: logs/agi-err.log')
+    console.error('Запустить не удалось. Журнал: logs/web4-err.log')
     process.exit(1)
   }
   // Сервер поднимается не мгновенно: Next собирает страницы. Адрес берётся из
@@ -133,7 +133,7 @@ async function start() {
   // ответа двери здоровья ждём по факту, а не фиксированной паузой.
   const url = await waitLocal(120000)
   if (!url) {
-    console.log('\nAGI запускается. Через минуту проверьте: npm run serve:status')
+    console.log('\nWEB4 запускается. Через минуту проверьте: npm run serve:status')
     return
   }
   // 🔒 ПЕРВЫЙ ЗАПУСК САМ ВЫХОДИТ В ИНТЕРНЕТ (371-1). Слово владельца 2026-10-02: «Вся архитектура строилась на идее того
@@ -206,14 +206,14 @@ async function printAddresses(coreUrl, freshInstall = false) {
     architectHost = d.architectHostname || null
   } catch { /* домена нет */ }
   // 🔒 ИТОГ — ОДНА ССЫЛКА (372-3). Слово владельца 2026-10-02: «заканчивается установка и ссылка: Здесь начинается ваша
-  // путешествия в мире AGI: адрес сети интернет открывающий административную панель». ✗ 371 печатал три равных адреса — человек
+  // путешествия в мире WEB4: адрес сети интернет открывающий административную панель». ✗ 371 печатал три равных адреса — человек
   // не знал, какой его. Главная строка — пульт в интернете (свой домен → `architect.<зона>`, иначе временный адрес); адреса этого
   // компьютера — ниже, справкой. Агент отдаёт человеку только главную строку (README).
   const journey = own ? `https://${architectHost || own}` : internet ?? coreUrl
   console.log('')
   console.log(`===PUBLIC_URL=== ${journey}`)
-  console.log(`Здесь начинается ваше путешествие в мире AGI: ${journey}`)
-  console.log(`Your journey into the world of AGI starts here: ${journey}`)
+  console.log(`Здесь начинается ваше путешествие в мире WEB4: ${journey}`)
+  console.log(`Your journey into the world of WEB4 starts here: ${journey}`)
   console.log('')
   console.log('===ADDRESSES=== (справка: на этом компьютере)')
   console.log(`Пульт узла на этом компьютере: ${coreUrl}`)
@@ -239,15 +239,15 @@ function stop() {
   // Останавливаем обоих жителей: сторож, оставленный один, перезапускал бы
   // сервер, который человек только что попросил остановить, — и выглядело бы
   // это как «кнопка не работает».
-  pm2run(['stop', 'fractera-agi-watch'], { quiet: true })
-  pm2run(['stop', 'fractera-agi'], { quiet: true })
-  console.log('AGI остановлен. Запустить снова: npm run serve:start')
+  pm2run(['stop', 'fractera-web4-watch'], { quiet: true })
+  pm2run(['stop', 'fractera-web4'], { quiet: true })
+  console.log('WEB4 остановлен. Запустить снова: npm run serve:start')
 }
 
 // ── СНЯТЬ УЗЕЛ С МАШИНЫ ЦЕЛИКОМ (371-3) ─────────────────────────────────────
 //
 // 🔒 ЗАЧЕМ. «Один компьютер — один узел» (369): `check-local` отказывает, пока в pm2 или в его снимке `dump.pm2` числится
-// `fractera-agi` из другой папки. ✗ Оплачено на Mac 2026-10-02: узел встал не в ту папку, а команды, которая убирает его,
+// `fractera-web4` из другой папки. ✗ Оплачено на Mac 2026-10-02: узел встал не в ту папку, а команды, которая убирает его,
 // не было — повторить установку можно было только ручной чисткой pm2. `serve:stop` останавливает, но снимок остаётся.
 //
 // 🔒 ЧТО СНИМАЕТСЯ: все процессы pm2 этого узла (ядро, сторож, оба туннеля, элементы и их сторожа) — по имени И по папке
@@ -266,7 +266,7 @@ function nodeApps() {
     const rel = path.relative(root, dir)
     return rel === '' || (!rel.startsWith('..') && !path.isAbsolute(rel))
   }
-  return apps.filter((a) => /^fractera-(agi|svc-)/.test(a.name) && inside(a.pm2_env?.pm_cwd ?? a.pm2_env?.cwd))
+  return apps.filter((a) => /^fractera-(web4|svc-)/.test(a.name) && inside(a.pm2_env?.pm_cwd ?? a.pm2_env?.cwd))
 }
 
 function remove() {
@@ -285,14 +285,14 @@ function remove() {
     console.error('Идёт развёртывание элемента — дождитесь его окончания и повторите.')
     process.exit(1)
   }
-  // 🛑 По номеру pm2, не по имени: pm2 допускает одинаковые имена, и `delete fractera-agi` снял бы одноимённый процесс
+  // 🛑 По номеру pm2, не по имени: pm2 допускает одинаковые имена, и `delete fractera-web4` снял бы одноимённый процесс
   // другой папки (ровно случай «узел встал не туда»).
   for (const a of apps) pm2run(['delete', String(a.pm_id)], { quiet: true })
   pm2run(['save', '--force'], { quiet: true })
   // 🛑 Файл автозапуска ОДИН на учётную запись (`pm2 resurrect`), а не на папку узла. ✗ Измерено 2026-10-02: снятие пробного
   // узла рядом с живым удалило и автозапуск живого. Поэтому он удаляется, только если в pm2 не осталось ни одного ядра узла.
   let otherCore = false
-  try { otherCore = JSON.parse(pm2run(['jlist'], { quiet: true }).stdout).some((a) => a.name === 'fractera-agi') } catch { otherCore = true }
+  try { otherCore = JSON.parse(pm2run(['jlist'], { quiet: true }).stdout).some((a) => a.name === 'fractera-web4') } catch { otherCore = true }
   if (startupFile && existsSync(startupFile) && !otherCore) {
     try { rmSync(startupFile) } catch (error) { console.error(`Файл автозапуска не удалён: ${error.message}`) }
   }
@@ -312,15 +312,15 @@ async function status() {
   try {
     apps = JSON.parse(list.stdout)
   } catch {
-    console.log('AGI не запущен (pm2 не отвечает или ничего не запущено).')
+    console.log('WEB4 не запущен (pm2 не отвечает или ничего не запущено).')
     return
   }
 
-  const server = apps.find((a) => a.name === 'fractera-agi')
-  const watch = apps.find((a) => a.name === 'fractera-agi-watch')
+  const server = apps.find((a) => a.name === 'fractera-web4')
+  const watch = apps.find((a) => a.name === 'fractera-web4-watch')
 
   if (!server) {
-    console.log('AGI не запущен. Запустить: npm run serve:start')
+    console.log('WEB4 не запущен. Запустить: npm run serve:start')
     return
   }
 
@@ -420,7 +420,7 @@ async function reportDomain(apps, localCommit) {
     return
   }
 
-  const app = apps.find((a) => a.name === "fractera-agi-domain")
+  const app = apps.find((a) => a.name === "fractera-web4-domain")
   const alive = app && app.pm2_env.status === "online"
   const probe = await ask(`https://${domain.hostname}/api/health`)
 
@@ -436,7 +436,7 @@ async function reportDomain(apps, localCommit) {
   // Именно оно и есть отказ: cloudflared переживает смерть своего туннеля.
   console.log(`⚠ свой домен: https://${domain.hostname} — НЕ ОТВЕЧАЕТ (${probe.status})`)
   console.log(`⚠ житель туннеля: ${alive ? "online — процесс жив, а адрес молчит" : "не запущен"}`)
-  if (!alive) console.log("⚠ поднять: npx pm2 start ecosystem.config.cjs --only fractera-agi-domain")
+  if (!alive) console.log("⚠ поднять: npx pm2 start ecosystem.config.cjs --only fractera-web4-domain")
 }
 // 🔒 «РАБОТАЕТ ЛОКАЛЬНО» И «ВИДЕН ИЗ ИНТЕРНЕТА» — РАЗНЫЕ ВОПРОСЫ, И ВТОРОЙ
 // ИЗМЕРЯЕТСЯ, А НЕ ВСПОМИНАЕТСЯ. Файл `logs/tunnel.json` говорит, как было
@@ -444,7 +444,7 @@ async function reportDomain(apps, localCommit) {
 // адрес из файла, пока Cloudflare отдавал по нему ошибку 1016, — прибор врал
 // ровно там, где на него полагались, и простой нашёл человек, а не он.
 async function reportInternet(apps, localCommit) {
-  const tunnel = apps.find((a) => a.name === 'fractera-agi-tunnel')
+  const tunnel = apps.find((a) => a.name === 'fractera-web4-tunnel')
   if (!tunnel || tunnel.pm2_env.status !== 'online') {
     console.log('в интернете: нет (включить: npm run serve:publish)')
     return
@@ -519,7 +519,7 @@ function autostart() {
   pm2run(['save'], { quiet: true })
 
   if (!isWindows) {
-    console.log(`Прошу ${process.platform === 'darwin' ? 'launchd' : 'systemd'} поднимать AGI при входе…`)
+    console.log(`Прошу ${process.platform === 'darwin' ? 'launchd' : 'systemd'} поднимать WEB4 при входе…`)
     const result = pm2run(['startup'])
     if (result.status !== 0) {
       console.log('\npm2 напечатал команду, которую нужно выполнить от администратора — скопируйте её выше.')
@@ -535,7 +535,7 @@ function autostart() {
   // 🛑 ПОЧЕМУ НЕ ПЛАНИРОВЩИК ЗАДАЧ, ХОТЯ ОН ПРАВИЛЬНЕЕ ПО УЧЕБНИКУ. Измерено
   // 2026-09-18: `schtasks /create` на этой машине отвечает `Access is denied`
   // и с `/ru`, и без него — нужен терминал администратора. Человек, ставящий
-  // AGI, администратором не является и не должен им становиться ради сайта на
+  // WEB4, администратором не является и не должен им становиться ради сайта на
   // своём же компьютере. Папка автозагрузки прав не требует вовсе.
   //
   // ✗ ПО ДОРОГЕ ОПЛАЧЕНО ВТОРОЕ, И ОНО ПЕРЕЖИВЁТ ЭТОТ ВЫБОР: имя учётной записи
@@ -559,7 +559,7 @@ function autostart() {
     mkdirSync(startupDir, { recursive: true })
     writeFileSync(
       startupFile,
-      ['@echo off', 'rem AGI Fractera — автозапуск при входе в систему (npm run serve:autostart)', `call ${pm2Call} resurrect`, ''].join('\r\n'),
+      ['@echo off', 'rem WEB4 Fractera — автозапуск при входе в систему (npm run serve:autostart)', `call ${pm2Call} resurrect`, ''].join('\r\n'),
     )
   } catch (error) {
     console.error(`Не удалось записать файл автозапуска: ${error.message}`)
@@ -567,7 +567,7 @@ function autostart() {
   }
 
   console.log(`Автозапуск включён: ${startupFile}`)
-  console.log('AGI поднимется при следующем входе в систему. Проверить: npm run serve:status')
+  console.log('WEB4 поднимется при следующем входе в систему. Проверить: npm run serve:status')
 }
 
 // ── ПЕРЕСБОРКА ───────────────────────────────────────────────────────────────
@@ -626,7 +626,7 @@ function rebuild() {
 
   waitDeploy()
   console.log("\nСборка готова, перезапускаю сайт…")
-  pm2run(["restart", "fractera-agi"], { quiet: true })
+  pm2run(["restart", "fractera-web4"], { quiet: true })
   console.log("Готово. Проверить: npm run serve:status")
 }
 
@@ -673,7 +673,7 @@ async function publish({ quietPrice = false } = {}) {
     } catch {
       apps = []
     }
-    const tunnel = apps.find((a) => a.name === 'fractera-agi-tunnel')
+    const tunnel = apps.find((a) => a.name === 'fractera-web4-tunnel')
     const state = readTunnel()
     if (tunnel?.pm2_env?.status === 'online' && state?.url) {
       // Спрашиваем сеть, а не файл: адрес мог умереть, пока мы не смотрели.
@@ -730,15 +730,15 @@ async function publish({ quietPrice = false } = {}) {
   const online = (() => {
     try {
       return JSON.parse(pm2run(['jlist'], { quiet: true }).stdout)
-        .some((a) => a.name === 'fractera-agi-tunnel' && a.pm2_env?.status === 'online')
+        .some((a) => a.name === 'fractera-web4-tunnel' && a.pm2_env?.status === 'online')
     } catch {
       return false
     }
   })()
 
   const result = online
-    ? pm2run(['restart', 'fractera-agi-tunnel'], { quiet: true })
-    : pm2run(['start', ecosystem, '--only', 'fractera-agi-tunnel'])
+    ? pm2run(['restart', 'fractera-web4-tunnel'], { quiet: true })
+    : pm2run(['start', ecosystem, '--only', 'fractera-web4-tunnel'])
   if (result.status !== 0) {
     console.error("Не удалось открыть туннель. Журнал: logs/tunnel-err.log")
     process.exit(1)
@@ -761,7 +761,7 @@ async function publish({ quietPrice = false } = {}) {
 }
 
 function unpublish() {
-  pm2run(["stop", "fractera-agi-tunnel"], { quiet: true })
+  pm2run(["stop", "fractera-web4-tunnel"], { quiet: true })
   // 371-1: метка «человек сам убрал сайт» — следующий `serve:start` не выводит его в интернет без команды.
   try { writeFileSync(tunnelFile, JSON.stringify({ ...(readTunnel() ?? {}), url: null, unpublished: true }, null, 2)) } catch { /* без метки start опубликует снова */ }
   pm2run(["save"], { quiet: true })

@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { passportCards } from "@/lib/agi-items/node-passport"
-import { readWallet } from "@/lib/agi-items/node-wallet"
+import { passportCards } from "@/lib/web4-items/node-passport"
+import { readWallet } from "@/lib/web4-items/node-wallet"
 
 // КАРТОЧКИ «ПАСПОРТА» УЗЛА (478-1). Страница предрендерена, поэтому состав узла и описания спрашиваются здесь, на запрос.
 // 🔒 ДВЕРЬ ЗАКРЫТА ВОРОТАМИ И РОЛЬЮ (как `/api/node/projects`): состав узла — сведения о машине человека.

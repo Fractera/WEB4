@@ -3,15 +3,15 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { ArchitectPage } from '../../../_lib/architect-page'
 import { ARCHITECT_HOME } from '../../../_lib/architect-menu'
-import { agiDraftsUi } from '../../../_i18n/agi-drafts.i18n'
+import { web4DraftsUi } from '../../../_i18n/web4-drafts.i18n'
 import { DraftCards } from '../../../_components/draft-cards'
 import { DeleteDraftButton } from '../../../_components/delete-draft-button.client'
 import { appDialogUi } from '@/components/dialog/app-dialog.i18n'
-import { draftAddress, getDraft } from '@/lib/agi-items/drafts'
-import { findTreePage, MOVED_PAGES, MOVED_WITH, TREE_GROUPS, treeLang, treeVisible, type TreeGroup, type TreePage } from '@/lib/agi-items/item-tree'
+import { draftAddress, getDraft } from '@/lib/web4-items/drafts'
+import { findTreePage, MOVED_PAGES, MOVED_WITH, TREE_GROUPS, treeLang, treeVisible, type TreeGroup, type TreePage } from '@/lib/web4-items/item-tree'
 import { getService, listServices, serviceUrl } from '@/lib/microservices/registry'
 import { BirthButton } from '../../../_components/birth-button.client'
-import { birthState } from '@/lib/agi-items/birth'
+import { birthState } from '@/lib/web4-items/birth'
 import { ServicePort } from '@/components/services/service-port.client'
 import { servicePortWords } from '@/components/services/service-port.i18n'
 import { ElementGithub } from '../../../_components/element-github.client'
@@ -20,9 +20,9 @@ import { elementDeploymentsUi } from '../../../_i18n/element-deployments.i18n'
 import { elementDeployUi, rejectTaskUi } from '../../../_i18n/element-deploy.i18n'
 import { ElementDeploy } from '../../../_components/element-deploy.client'
 import { ElementRollback } from '../../../_components/element-rollback.client'
-import { elementCodeState } from '@/lib/agi-items/element-code-state'
-import { elementDir } from '@/lib/agi-items/element-github'
-import { elementVersions } from '@/lib/agi-items/element-versions'
+import { elementCodeState } from '@/lib/web4-items/element-code-state'
+import { elementDir } from '@/lib/web4-items/element-github'
+import { elementVersions } from '@/lib/web4-items/element-versions'
 import type { Block } from '@/lib/content/blocks/types'
 import { ElementDangerZone } from '../../../_components/element-danger-zone'
 import { DeleteElementButton } from '../../../_components/delete-element-button.client'
@@ -30,15 +30,15 @@ import { elementSettingsUi } from '../../../_i18n/element-settings.i18n'
 import { ElementDescribe } from '../../../_components/element-describe.client'
 import { ElementAddress } from '../../../_components/element-address.client'
 import { ElementDomain } from '../../../_components/element-domain.client'
-import { domainRecord } from '@/lib/agi-items/element-domain'
+import { domainRecord } from '@/lib/web4-items/element-domain'
 import { primaryDomain } from '@/lib/domain/node-domains'
 import { ElementOwnDomainSignIn } from '../../../_components/element-own-domain-signin'
-import { readStaticCopy } from '@/lib/agi-items/static-copy-state'
-import { readLinks } from '@/lib/agi-items/element-links'
+import { readStaticCopy } from '@/lib/web4-items/static-copy-state'
+import { readLinks } from '@/lib/web4-items/element-links'
 import { ElementLink } from '../../../_components/element-link.client'
 import { ElementSiteSettings } from '../../../_components/element-site-settings'
-import { addressOf, idOfAddress } from '@/lib/agi-items/element-address'
-import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/agi-items/element-describe'
+import { addressOf, idOfAddress } from '@/lib/web4-items/element-address'
+import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/web4-items/element-describe'
 import { terminalLink } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs'
 import { agentKitWidget, openAiKeyHref, type AgentKitPage } from '../_agent-kit/widgets'
 import { ElementPreview } from '@/components/preview/element-preview.client'
@@ -48,9 +48,9 @@ import { ElementPassport, type NodeElementRow, type PassportView } from '../../.
 import { nodeEntries } from '@/lib/a2a/node-registry'
 import { elementPassportUi } from '../../../_i18n/element-passport.i18n'
 import { elementMessengers, elementPassport, hasCatalog } from '@/lib/a2a/element-passport'
-import { listOrders } from '@/lib/agi-items/element-orders'
+import { listOrders } from '@/lib/web4-items/element-orders'
 import { elementDashboardUi } from '../../../_i18n/element-dashboard.i18n'
-import { hasDoc } from '@/lib/agi-items/element-docs'
+import { hasDoc } from '@/lib/web4-items/element-docs'
 import { ElementDocIsland } from '@/components/element-docs/element-doc.client'
 import { PassportDoor } from '@/components/element-docs/passport-door.client'
 import { elementDocsUi, elementOrdersUi, passportDoorUi } from '../../../_i18n/element-docs.i18n'
@@ -59,7 +59,7 @@ import { LagrixRating } from '@/components/element-docs/lagrix-rating'
 import { lagrixRatingUi } from '../../../_i18n/lagrix-rating.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
-// `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/agi-items/item-tree.ts`, черновики — `data/agi-drafts.json`.
+// `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
 //
 // 🔒 НИ ОДНОГО НОВОГО ФАЙЛА НА НОВЫЙ ЧЕРНОВИК: адреса отдаются по первому запросу и кэшируются как весь слой (ISR); создание и
 // удаление перерисовывают слой дверью. Поэтому группа появляется и исчезает без пересборки.
@@ -81,7 +81,7 @@ const PASSPORT_TASK: Record<'en' | 'ru', string> = {
 // 326-3: страница дерева «Строительство» → вид острова комплекта агента (имя шаблона комплекта).
 const AGENT_PAGES: Record<string, AgentKitPage | undefined> = { subscription: 'claude-code', terminal: 'terminal', telegram: 'telegram' }
 
-// 325-3: сегмент пути — адрес элемента в ядре или его id (id неизменен; адрес — слой над ним, `lib/agi-items/element-address.ts`).
+// 325-3: сегмент пути — адрес элемента в ядре или его id (id неизменен; адрес — слой над ним, `lib/web4-items/element-address.ts`).
 function resolve(p: Params) {
   const id = idOfAddress(p.item)
   const draft = id ? getDraft(id) : null
@@ -134,7 +134,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const slug = addressOf(item)
   if (p.item !== slug) redirect(`/${lang}${ARCHITECT_HOME}/${[slug, ...(p.page ?? [])].join('/')}`)
   const l = treeLang(lang)
-  const ui = agiDraftsUi(lang)
+  const ui = web4DraftsUi(lang)
   const address = draftAddress(item)
   const dir = `${ARCHITECT_HOME}/${slug}`
 
@@ -237,7 +237,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     : null
 
   // 326-3: «Подписка Claude Code», «Терминал», «Telegram бот» — острова ОБЩЕЙ копии комплекта агента (`../_agent-kit`, 326-1);
-  // Claude Code живёт в папке элемента `AGI-ITEMS/user/<id>`. У черновика — объяснение.
+  // Claude Code живёт в папке элемента `WEB4-ITEMS/user/<id>`. У черновика — объяснение.
   // 472: Telegram-бот — и в H2A (у элементов с флагом H2A), и в «Строительстве» (у остальных).
   const kitPage = (section.slug === 'build' || section.slug === 'h2a') && page ? AGENT_PAGES[page.slug] : undefined
   const agent = kitPage

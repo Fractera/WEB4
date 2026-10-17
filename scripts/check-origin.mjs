@@ -18,8 +18,8 @@ import { dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
-const ORIGINAL = 'fractera/agi'
-const ORIGINAL_URL = 'https://github.com/fractera/agi'
+const ORIGINAL = 'fractera/web4'
+const ORIGINAL_URL = 'https://github.com/fractera/web4'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const RECORD = join(root, 'logs', 'origin.json')
 const ENV = join(root, '.env.local')

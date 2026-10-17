@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { P } from "@/components/ui/typography"
 import { ElementDoc, type ElementDocWords } from "./element-doc"
-import type { DocFile } from "@/lib/agi-items/element-docs"
+import type { DocFile } from "@/lib/web4-items/element-docs"
 
 // ISLAND OF ONE ELEMENT DOCUMENT (step 412-2): the page is prerendered, the agent rewrites its documents at any minute, so the
 // text is asked from `GET /api/node/element-docs` when the page opens. Four states: loading · files · empty folder · refused

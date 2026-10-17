@@ -1,9 +1,9 @@
-// @api list and stop the live Claude Code terminals of born AGI elements
+// @api list and stop the live Claude Code terminals of born WEB4 elements
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { addressOf } from "@/lib/agi-items/element-address"
+import { addressOf } from "@/lib/web4-items/element-address"
 import { list, stop } from "@/app/[lang]/(architectLayer)/architect/[item]/_agent-kit/server/session.cjs"
 import { isBornItem } from "@/app/[lang]/(architectLayer)/architect/[item]/_agent-kit/server/workspace.cjs"
 
@@ -11,7 +11,7 @@ import { isBornItem } from "@/app/[lang]/(architectLayer)/architect/[item]/_agen
 // Cloud Code терминалов … только тогда я смогу их закрыть … отслеживают только те терминалы которые создаются через наш новый
 // стартовый шаблон». Поэтому в списке — только рождённые элементы (`isBornItem`), терминалы встроенных разделов ядра не видны.
 //
-// Источник — одна карта сессий в процессе ядра (`_agent-kit/server/session.cjs`, `globalThis.__agiTerminalSessions`): все копии
+// Источник — одна карта сессий в процессе ядра (`_agent-kit/server/session.cjs`, `globalThis.__web4TerminalSessions`): все копии
 // комплекта пишут в неё, поэтому любой копией её можно прочесть. Процесс ядра умер — умерли и терминалы (они его дети;
 // замерено 2026-09-30 после пересборки ядра): сирот, которых список не видит, нет.
 //

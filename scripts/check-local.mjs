@@ -7,9 +7,9 @@
 // ✓ Доказано живым облачным сеансом 2026-10-01 (новый аккаунт): агент остановился на шаге 0 README.
 //
 // 2. ОДИН УЗЕЛ НА КОМПЬЮТЕР (решение владельца 2026-10-01: «да, запрещай»). Вторая копия сталкивается с первой по устройству: имена
-// процессов pm2 одинаковы (`fractera-agi`, `fractera-svc-auth`…), а pm2 у пользователя один — пересборки, развёртывания и переезды
+// процессов pm2 одинаковы (`fractera-web4`, `fractera-svc-auth`…), а pm2 у пользователя один — пересборки, развёртывания и переезды
 // второй копии управляли бы процессами первой; автозапуск один (`pm2 resurrect`); блок портов 24680–24699 общий. Новые проекты —
-// AGI ITEM внутри одного узла. Признак: процесс `fractera-agi` из ДРУГОЙ папки в работающем pm2 или в его сохранённом снимке
+// WEB4 ITEM внутри одного узла. Признак: процесс `fractera-web4` из ДРУГОЙ папки в работающем pm2 или в его сохранённом снимке
 // (`dump.pm2` — из него поднимает автозапуск, то есть узел установлен, даже если сейчас остановлен). Папки того узла уже нет —
 // запись устарела, отказа нет.
 
@@ -34,14 +34,14 @@ const root = resolve(join(dirname(fileURLToPath(import.meta.url)), '..'))
 const IS_WIN = process.platform === 'win32'
 const same = (a, b) => (IS_WIN ? resolve(a).toLowerCase() === resolve(b).toLowerCase() : resolve(a) === resolve(b))
 
-/** Папки, за которыми pm2 числит процесс `fractera-agi`: работающий pm2 и его сохранённый снимок. */
+/** Папки, за которыми pm2 числит процесс `fractera-web4`: работающий pm2 и его сохранённый снимок. */
 function nodeFolders() {
   const found = new Set()
   const take = (list) => {
     if (!Array.isArray(list)) return
     for (const p of list) {
       const env = p?.pm2_env ?? p
-      if ((p?.name ?? env?.name) !== 'fractera-agi') continue
+      if ((p?.name ?? env?.name) !== 'fractera-web4') continue
       const cwd = env?.pm_cwd ?? env?.cwd
       if (typeof cwd === 'string' && cwd) found.add(cwd)
     }
@@ -57,11 +57,11 @@ const other = nodeFolders().find((dir) => !same(dir, root) && existsSync(join(di
 if (other) {
   console.error('')
   console.error(`На этом компьютере уже установлен узел Fractera: ${other}`)
-  console.error('Один компьютер — один узел. Вторая копия не нужна: внутри одного узла живёт много сайтов и приложений — AGI ITEM.')
-  console.error('Новый проект создаётся там кнопкой «Создать AGI ITEM» в слое архитектора.')
+  console.error('Один компьютер — один узел. Вторая копия не нужна: внутри одного узла живёт много сайтов и приложений — WEB4 ITEM.')
+  console.error('Новый проект создаётся там кнопкой «Создать WEB4 ITEM» в слое архитектора.')
   console.error('Если тот узел больше не нужен, остановите и удалите его процессы (в его папке: npm run serve:stop, затем pm2 delete all и')
   console.error('pm2 save) и повторите установку здесь.')
-  console.error('A Fractera node is already installed on this computer — one computer, one node. New projects are AGI ITEMS inside it.')
+  console.error('A Fractera node is already installed on this computer — one computer, one node. New projects are WEB4 ITEMS inside it.')
   console.error(`===NODE_EXISTS=== ${other}`)
   process.exit(1)
 }

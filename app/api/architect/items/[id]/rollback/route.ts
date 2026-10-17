@@ -2,10 +2,10 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { rollbackElement } from "@/lib/agi-items/element-rollback"
+import { rollbackElement } from "@/lib/web4-items/element-rollback"
 
 // «ОТКАТИТЬ К ВЕРСИИ» НА «РАЗВЁРТЫВАНИЯХ» ЭЛЕМЕНТА (шаг 322). Только по кнопке человека: POST `{ commit }`. Логика и законы —
-// `lib/agi-items/element-rollback.ts` (новый коммит, правки агента сохраняются коммитом, файлы узла не откатываются, сборка без
+// `lib/web4-items/element-rollback.ts` (новый коммит, правки агента сохраняются коммитом, файлы узла не откатываются, сборка без
 // простоя). Отказы — кодом, экран переводит их в слова.
 export const dynamic = "force-dynamic"
 

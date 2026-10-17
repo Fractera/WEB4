@@ -1,13 +1,13 @@
 # `/architect/root` — the section of the node's root element
 
 The root of the domain belongs to the `root` element (repository `fractera-root-starter` by
-default), installed in `AGI-ITEMS/core/root`. This section is where the architect works with it.
+default), installed in `WEB4-ITEMS/core/root`. This section is where the architect works with it.
 
 | Page | Order | What it is |
 |---|---|---|
 | `preview` | 10 | the first page of the section; its content is still to be agreed with the owner |
 | `claude-code` | 30 | Claude Code subscription (agent kit) |
-| `terminal` | 40 | the element's own agent, started in `AGI-ITEMS/core/root` (agent kit) |
+| `terminal` | 40 | the element's own agent, started in `WEB4-ITEMS/core/root` (agent kit) |
 | `telegram` | 50 | the element's Telegram bot (agent kit) |
 | `external-github` | 60 | how a foreign repository becomes the root of the node (step 280-8) |
 

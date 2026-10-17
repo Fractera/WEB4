@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AppDialog } from "@/components/dialog/app-dialog.client"
 import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
-import type { AgiDraftsUi } from "../_i18n/agi-drafts.i18n"
+import type { Web4DraftsUi } from "../_i18n/web4-drafts.i18n"
 
 // «УДАЛИТЬ» ЧЕРНОВИК (314-1). Слово владельца: «кнопку удалить которая должно вызывать модельное окно с подтверждением где
 // пользователь должен ввести созданный для него домен». Кнопка подтверждения неактивна, пока адрес не совпал буква в букву;
@@ -19,7 +19,7 @@ export function DeleteDraftButton({ lang, id, address, ui, dialogUi }: {
   lang: string
   id: string
   address: string
-  ui: AgiDraftsUi
+  ui: Web4DraftsUi
   dialogUi: AppDialogUi
 }) {
   const [open, setOpen] = useState(false)

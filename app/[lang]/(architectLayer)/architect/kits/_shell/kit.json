@@ -15,7 +15,7 @@
       "params": [
         [
           "<service source folder>",
-          "the service's repository or fork — not AGI-ITEMS/: a reinstall would reset that folder to its tag"
+          "the service's repository or fork — not WEB4-ITEMS/: a reinstall would reset that folder to its tag"
         ],
         [
           "--from <site folder>",
@@ -62,7 +62,7 @@
       "params": [
         [
           "<папка исходника службы>",
-          "репозиторий службы или её форк, а не AGI-ITEMS/: переустановка вернула бы ту папку к тегу"
+          "репозиторий службы или её форк, а не WEB4-ITEMS/: переустановка вернула бы ту папку к тегу"
         ],
         [
           "--from <папка сайта>",

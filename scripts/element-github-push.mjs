@@ -1,4 +1,4 @@
-// ОТПРАВИТЬ AGI ITEM В ЕГО РЕПОЗИТОРИЙ GITHUB ИЗ ТЕРМИНАЛА АГЕНТА (шаг 374-4). `node <узел>/scripts/element-github-push.mjs <id>`.
+// ОТПРАВИТЬ WEB4 ITEM В ЕГО РЕПОЗИТОРИЙ GITHUB ИЗ ТЕРМИНАЛА АГЕНТА (шаг 374-4). `node <узел>/scripts/element-github-push.mjs <id>`.
 //
 // Слово владельца 2026-10-02: отправка — «кнопке, Но нельзя запрещать делать коммит по требованию непосредственно в Claude Code
 // Agent, отдельно стоит отметить работу через Telegram бот, коммит автоматически всегда» — «коммит и сразу отправка в GitHub».
@@ -28,7 +28,7 @@ if (!core) {
   process.exit(1)
 }
 const WORDS = {
-  'not-connected': 'this AGI ITEM has no GitHub repository or key yet — the person adds the key on the GitHub page of the node',
+  'not-connected': 'this WEB4 ITEM has no GitHub repository or key yet — the person adds the key on the GitHub page of the node',
   'no-write': 'the key cannot write to the repository',
   'needs-workflow': 'the key lacks the workflow right (this item carries .github/workflows)',
   rejected: 'the repository has other history — ask the person',

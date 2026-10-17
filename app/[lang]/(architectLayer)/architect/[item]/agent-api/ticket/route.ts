@@ -1,4 +1,4 @@
-// @api issue a one-minute single-use ticket for the born AGI element agent terminal socket
+// @api issue a one-minute single-use ticket for the born WEB4 element agent terminal socket
 import { NextRequest, NextResponse } from "next/server"
 
 import { getSession } from "@/lib/auth/get-session"
@@ -8,7 +8,7 @@ import { mintTicket } from "../../_agent-kit/server/ticket.cjs"
 
 // БИЛЕТ НА ТЕРМИНАЛ СЛУЖБЫ (267-1).
 // 🔒 ДВЕРЬ КОПИИ КОМПЛЕКТА АГЕНТА (271): шаблон `kits/_agent-kit/api/*/route.ts.tpl`, установщик подставил
-// имя службы вместо `born AGI element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
+// имя службы вместо `born WEB4 element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
 //
 // 🔒 РОЛЬ ПРОВЕРЯЕТСЯ ЗДЕСЬ И ТОЛЬКО ЗДЕСЬ. Сокет `/pty/<служба>` принимает `server.js` до Next, замок слоя его не
 // видит — сокет верит лишь билету, который выдала эта дверь.

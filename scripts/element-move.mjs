@@ -1,9 +1,9 @@
 // ПЕРЕНОС ПАПКИ ЭЛЕМЕНТА ПО ЕГО АДРЕСУ (узел, шаг 343): `node scripts/element-move.mjs <id>`.
 //
-// Слово владельца 2026-09-30: «при создании нового AGI ITEM для него создается рандом суб домен as cuid и затем мы можем его
-// переименовать … но проблема остается в файловой системе» → выбор «Папка = адрес». Папка `AGI-ITEMS/<kind>/<…>` получает имя
+// Слово владельца 2026-09-30: «при создании нового WEB4 ITEM для него создается рандом суб домен as cuid и затем мы можем его
+// переименовать … но проблема остается в файловой системе» → выбор «Папка = адрес». Папка `WEB4-ITEMS/<kind>/<…>` получает имя
 // адреса (`data/services/<id>/address.json`; нет адреса — id). id остаётся внутри: процесс pm2 `fractera-svc-<id>`, данные
-// `data/services/<id>`, реестр. Путь к папке читают через `lib/agi-items/paths.cjs` — он сам находит перенесённую папку.
+// `data/services/<id>`, реестр. Путь к папке читают через `lib/web4-items/paths.cjs` — он сам находит перенесённую папку.
 //
 // Порядок: отказ, если идёт развёртывание или предпросмотр элемента → pm2 stop сервера и его сторожа (иначе Windows не даёт
 // переименовать папку, в которой работает процесс) → rename → абсолютные пути в `.env.local` и `.install-stamp.json` →
@@ -16,10 +16,10 @@ import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync, readdirSync, renameSync, writeFileSync, appendFileSync, mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import { homedir } from 'node:os'
-import paths from '../lib/agi-items/paths.cjs'
-import elementProps from '../lib/agi-items/element-props.cjs'
+import paths from '../lib/web4-items/paths.cjs'
+import elementProps from '../lib/web4-items/element-props.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
-import { addressOf } from '../lib/agi-items/address-file.mjs'
+import { addressOf } from '../lib/web4-items/address-file.mjs'
 
 const ROOT = join(paths.ITEMS_DIR, '..')
 const IS_WIN = process.platform === 'win32'
@@ -32,7 +32,7 @@ const say = (m) => { const line = `${new Date().toISOString()} ${m}`; console.lo
 const save = (s) => { try { mkdirSync(join(ROOT, 'data', 'services', id), { recursive: true }); writeFileSync(STATE, JSON.stringify({ ...s, at: new Date().toISOString() }, null, 2) + '\n') } catch { /* состояние не главное */ } }
 // 🛑 Чистое окружение для pm2: перенос зовёт дверь ядра (сервер Next), и без чистки элемент получил бы `__NEXT_PROCESSED_ENV` ядра
 // и не прочитал бы свой `.env.local` (✗ найдено 2026-09-30 на «Принять», тот же механизм).
-const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('AGI_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
+const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
 const run = (args) => spawnSync(pm2, args, { cwd: ROOT, encoding: 'utf8', shell: IS_WIN, windowsHide: true, env: cleanEnv })
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const alive = (pid) => { try { process.kill(pid, 0); return true } catch (e) { return e?.code === 'EPERM' } }
@@ -85,7 +85,7 @@ say('папка перенесена')
 // Абсолютные пути прежней папки — в обоих написаниях (обратные и прямые косые).
 const variants = (p) => [p, p.split('\\').join('/'), p.split('\\').join('\\\\')]
 // ✗ 343, замерено на roman-2: собранный сервер читает СВОЮ копию окружения `<сборка>/standalone/.env.local` — с прежними путями
-// он через 5 с после запуска записал оформление в `AGI-ITEMS/user/<id>/DESIGN-CONFIG` и воскресил старую папку.
+// он через 5 с после запуска записал оформление в `WEB4-ITEMS/user/<id>/DESIGN-CONFIG` и воскресил старую папку.
 const builds = readdirSync(target, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name.startsWith('.next'))
   .flatMap((d) => ['.env.local', '.env'].map((f) => join(d.name, 'standalone', f)))
 for (const f of ['.env.local', '.install-stamp.json', ...builds]) {

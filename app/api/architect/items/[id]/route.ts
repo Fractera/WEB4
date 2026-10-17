@@ -1,12 +1,12 @@
-// @api delete a born AGI element after its address is typed back
+// @api delete a born WEB4 element after its address is typed back
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { draftAddress } from "@/lib/agi-items/drafts"
-import { deleteElement, deletionRisk, isBornElement } from "@/lib/agi-items/element-delete"
+import { draftAddress } from "@/lib/web4-items/drafts"
+import { deleteElement, deletionRisk, isBornElement } from "@/lib/web4-items/element-delete"
 
-// УДАЛЕНИЕ РОЖДЁННОГО AGI ЭЛЕМЕНТА (325-5, «Удалить насовсем»). GET — что потеряется (коммиты, которых нет в GitHub); DELETE
+// УДАЛЕНИЕ РОЖДЁННОГО WEB4 ЭЛЕМЕНТА (325-5, «Удалить насовсем»). GET — что потеряется (коммиты, которых нет в GitHub); DELETE
 // `{ confirm }` — адрес `<id>.<зона>` буква в букву, иначе 409 и ничего не снято. Только рождённые элементы: встроенные
 // службы — 404. Ворота architect/admin; на временном публичном адресе — отказ.
 

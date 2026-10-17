@@ -305,7 +305,7 @@ async function done(service, { close = false, reviewed = false } = {}) {
   // 414 (владелец 2026-10-06: «Он сначала мне предлагает закончить разговор а потом кидает ответы»): 5 с — только чтобы рассылка
   // успела начаться; дальше порядок по событию — ждём, пока пара разговора с этим элементом уйдёт в Telegram (перевод занимает
   // десятки секунд), не дольше 2 минут. Реестр пишет `lib/a2a/telegram-relay.ts` ядра.
-  const relay = globalThis.__agiRelayPending?.get(service)
+  const relay = globalThis.__web4RelayPending?.get(service)
   if (relay) await Promise.race([relay, new Promise((r) => setTimeout(r, 120_000))])
   if (session.current(service) !== live) return { ok: false, reason: 'no-session' }
   // Владелец 2026-10-06: «второй раз не предлагать разбор после первого» — разбор в этой сессии был, строки «разбор» больше нет.

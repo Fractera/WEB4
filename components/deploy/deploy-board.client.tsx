@@ -52,7 +52,7 @@ type Element = {
   takesSettings: boolean
   pending: boolean
   previous: { version: string; source: "history" | "git" } | null
-  /** 337-2: состояние кода элемента по git (`lib/agi-items/element-code-state.ts`). */
+  /** 337-2: состояние кода элемента по git (`lib/web4-items/element-code-state.ts`). */
   code: { head: string | null; running: string | null; changed: number; changes: string[]; pending: boolean } | null
 }
 type Deployment = {

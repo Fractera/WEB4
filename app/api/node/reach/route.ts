@@ -7,8 +7,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { getService, serviceUrl } from "@/lib/microservices/registry"
 import { accountOfZone, getIngress, hasDnsRecord, listZones, setIngress, upsertTunnelRecord } from "@/lib/domain/cloudflare"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
-import { startStaticCopy } from "@/lib/agi-items/static-copy-start.cjs"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
+import { startStaticCopy } from "@/lib/web4-items/static-copy-start.cjs"
 
 // АДРЕС СЛУЖБЫ В ИНТЕРНЕТЕ (шаг 289-2).
 //

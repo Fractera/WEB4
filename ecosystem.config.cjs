@@ -1,4 +1,4 @@
-// ЖИВУЧЕСТЬ СЕРВЕРА AGI — описание для pm2.
+// ЖИВУЧЕСТЬ СЕРВЕРА WEB4 — описание для pm2.
 //
 // Зачем он есть. `node server.js` умирает вместе с окном терминала и не
 // возвращается после падения: человек, закрывший окно или перезагрузивший
@@ -17,7 +17,7 @@
 // проверка по HTTP, и она живёт отдельно (232-3, `scripts/health-watch.mjs`).
 
 const path = require('node:path')
-const paths = require('./lib/agi-items/paths.cjs')
+const paths = require('./lib/web4-items/paths.cjs')
 const fs = require('node:fs')
 
 const root = __dirname
@@ -25,7 +25,7 @@ const root = __dirname
 // ── ЖИТЕЛИ СМЕННЫХ БЛОКОВ ПОРОЖДАЮТСЯ ИЗ РЕЕСТРА, А НЕ ПЕРЕЧИСЛЯЮТСЯ (257-5).
 //
 // 🔒 ПОЧЕМУ НЕ СПИСКОМ. Состав узла меняется: блок покупают, заменяют, удаляют
-// строкой в AGI-ITEMS-REGISTRY/agi-items.json. Рукописный список здесь разошёлся бы с реестром
+// строкой в WEB4-ITEMS-REGISTRY/web4-items.json. Рукописный список здесь разошёлся бы с реестром
 // молча — и в худшую сторону: pm2 поднимал бы удалённую службу или не поднимал
 // купленную, а ни сборка, ни типы этого не видят.
 //
@@ -117,7 +117,7 @@ function serviceApps() {
 module.exports = {
   apps: [
     {
-      name: 'fractera-agi',
+      name: 'fractera-web4',
       script: path.join(root, 'server.js'),
       cwd: root,
 
@@ -149,8 +149,8 @@ module.exports = {
       // которая держит порт и отвечает старой сборкой.
       kill_timeout: 10000,
 
-      out_file: path.join(root, 'logs', 'agi-out.log'),
-      error_file: path.join(root, 'logs', 'agi-err.log'),
+      out_file: path.join(root, 'logs', 'web4-out.log'),
+      error_file: path.join(root, 'logs', 'web4-err.log'),
       merge_logs: true,
 
       // Без отметки времени лог отвечает на вопрос «что случилось» и молчит о
@@ -181,7 +181,7 @@ module.exports = {
     // затеян шаг 232: процесс жив, а страницы не отдаются. pm2 для этого
     // непригоден по устройству, и в этом нет его вины: он следит за процессом.
     {
-      name: 'fractera-agi-watch',
+      name: 'fractera-web4-watch',
       script: path.join(root, 'scripts', 'health-watch.mjs'),
       cwd: root,
       instances: 1,
@@ -215,7 +215,7 @@ module.exports = {
     // Включённый однажды, он попадает в снимок pm2 save и дальше поднимается
     // сам при входе в систему — вместе с остальными.
     {
-      name: 'fractera-agi-tunnel',
+      name: 'fractera-web4-tunnel',
       script: path.join(root, 'scripts', 'tunnel.mjs'),
       cwd: root,
       instances: 1,
@@ -238,7 +238,7 @@ module.exports = {
         // здесь, а не в коде: подбирать их придётся под сеть человека.
         //
         // 🛑 pm2 ХРАНИТ ОКРУЖЕНИЕ ПРОЦЕССА: изменив эти значения, нужен
-        // `pm2 delete fractera-agi-tunnel` и `pm2 start` заново — ни reload, ни
+        // `pm2 delete fractera-web4-tunnel` и `pm2 start` заново — ни reload, ни
         // `--update-env` старого окружения не вычищают. Встречено дважды за один
         // вечер 2026-09-18 и оба раза выглядело как «правка не применилась».
         FRACTERA_TUNNEL_INTERVAL_MS: '60000',
@@ -260,7 +260,7 @@ module.exports = {
     // туннеля имя принадлежит человеку и не меняется никогда — защищать нечего,
     // а молчащий сайт надо поднимать.
     {
-      name: 'fractera-agi-domain',
+      name: 'fractera-web4-domain',
       script: path.join(root, 'scripts', 'domain-tunnel.mjs'),
       cwd: root,
       instances: 1,

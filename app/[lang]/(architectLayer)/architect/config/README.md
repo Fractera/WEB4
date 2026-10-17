@@ -1,6 +1,6 @@
 # `/architect/config` — the CONFIG element's section
 
-The node element CONFIG (`AGI-ITEMS/core/config`, project settings every service reads)
+The node element CONFIG (`WEB4-ITEMS/core/config`, project settings every service reads)
 as seen from the architect layer. Built as a clone of `/architect/data` by the owner's
 word of 2026-09-25: same shape, only the element id differs.
 
@@ -12,7 +12,7 @@ word of 2026-09-25: same shape, only the element id differs.
 | `_data/` | `meta.ts` (slug `config`, `order` 24.5 — right under "Data"), `en.ts`, `ru.ts` |
 | `_components/index.ts` | one block `servicePort` with `serviceId: 'config'`: port on the machine and address on the internet |
 | `preview/` | live preview (`elementPreview`), opens `https://config.<zone>` in a new tab too |
-| `claude-code/`, `terminal/`, `telegram/`, `agent-api/`, `_agent-kit/`, `agent-kit.json` | the agent kit — written by `npm run agent-kit:add -- config`, never edited by hand; the agent works in `AGI-ITEMS/core/config` |
+| `claude-code/`, `terminal/`, `telegram/`, `agent-api/`, `_agent-kit/`, `agent-kit.json` | the agent kit — written by `npm run agent-kit:add -- config`, never edited by hand; the agent works in `WEB4-ITEMS/core/config` |
 
 ## Changing it
 

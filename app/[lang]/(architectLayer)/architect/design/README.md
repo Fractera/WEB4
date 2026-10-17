@@ -1,7 +1,7 @@
 # `/architect/design` — the Design element's section
 
 Step 309 (owner, 2026-09-26): the design editor left the core. The look of the project is now the node element **Design**
-(`AGI-ITEMS/core/design`, repository `fractera-design-starter`): colours of the light and dark theme, fonts, text scale,
+(`WEB4-ITEMS/core/design`, repository `fractera-design-starter`): colours of the light and dark theme, fonts, text scale,
 shapes and spacing, block settings. A save there sends a signal, and every service of the node re-styles itself in seconds,
 without a rebuild. This section is shaped like «Blocks» and «Config».
 

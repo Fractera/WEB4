@@ -15,7 +15,7 @@ const { randomBytes } = require('node:crypto')
 
 const TTL_MS = 60_000
 const MAX_TICKETS = 64
-const KEY = '__agiTerminalTickets'
+const KEY = '__web4TerminalTickets'
 
 function store() {
   if (!globalThis[KEY]) globalThis[KEY] = new Map()

@@ -2,8 +2,8 @@
   "enableAllProjectMcpServers": true,
   "permissions": {
     "deny": [
-      "Read(./AGI-ITEMS/**)",
-      "Edit(./AGI-ITEMS/**)"
+      "Read(./WEB4-ITEMS/**)",
+      "Edit(./WEB4-ITEMS/**)"
     ]
   },
   "hooks": {

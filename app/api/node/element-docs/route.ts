@@ -1,10 +1,10 @@
-// @api read one development document of an AGI ITEM
+// @api read one development document of a WEB4 ITEM
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { readDoc } from "@/lib/agi-items/element-docs"
-import { ITEM_TREE } from "@/lib/agi-items/item-tree"
-import { idOfAddress } from "@/lib/agi-items/element-address"
+import { readDoc } from "@/lib/web4-items/element-docs"
+import { ITEM_TREE } from "@/lib/web4-items/item-tree"
+import { idOfAddress } from "@/lib/web4-items/element-address"
 
 // ДОКУМЕНТ ЭЛЕМЕНТА ДЛЯ СТРАНИЦЫ «Документы» (412-2). Страница предрендерена, а агент элемента переписывает свои документы в
 // любую минуту (`current-step.md` — на каждом событии): текст, запечённый в HTML, врал бы с первой правки. Поэтому островок

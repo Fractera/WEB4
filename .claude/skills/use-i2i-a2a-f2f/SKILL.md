@@ -3,7 +3,7 @@ name: use-i2i-a2a-f2f
 description: >
   Where a task about elements talking, agents, deals, prices, ratings, Lagrix or exchanging elements belongs: i2i (inside the node),
   a2a (work for outside agents through Lagrix) or f2f (whole elements exchanged with other Fractera projects through Lagrix). Load it
-  before touching the element menu (`lib/agi-items/item-tree.ts`: «Build» with its groups «Inside the node (i2i)» and «Exchange with
+  before touching the element menu (`lib/web4-items/item-tree.ts`: «Build» with its groups «Inside the node (i2i)» and «Exchange with
   Fractera (f2f)», the section «A2A»), the Deals page, the Lagrix rating card, a deal summary, a connector between elements, an F2F
   card, or anything that mentions payment between agents, a token, escrow, a wallet or reputation; and whenever a person asks «where
   does this go?». The rule that changes behaviour: inside the node aim at a connector over the API so that no model is needed; to the

@@ -1,19 +1,19 @@
-// @api check and set the core address of a born AGI element
+// @api check and set the core address of a born WEB4 element
 import { spawnSync } from "node:child_process"
 import { join } from "node:path"
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
-import { addressOf, checkAddress, setAddress } from "@/lib/agi-items/element-address"
-import { moveSubdomain } from "@/lib/agi-items/element-subdomain"
-import { renameElementRepo } from "@/lib/agi-items/element-github"
-import { saveNodeMap } from "@/lib/agi-items/node-map"
+import { isBornElement } from "@/lib/web4-items/element-delete"
+import { addressOf, checkAddress, setAddress } from "@/lib/web4-items/element-address"
+import { moveSubdomain } from "@/lib/web4-items/element-subdomain"
+import { renameElementRepo } from "@/lib/web4-items/element-github"
+import { saveNodeMap } from "@/lib/web4-items/node-map"
 
 // «ПЕРЕИМЕНОВАТЬ АДРЕС» (325-3). GET `?name=` — свободно ли имя (занято — варианты); POST `{ address }` — записать, id не
 // меняется. Только рождённые элементы; ворота architect/admin; на временном публичном адресе — отказ. 🪦 «Поддомен не трогается»
-// отменено 2026-10-01: подключённый поддомен переезжает на новое имя (`lib/agi-items/element-subdomain.ts`).
+// отменено 2026-10-01: подключённый поддомен переезжает на новое имя (`lib/web4-items/element-subdomain.ts`).
 
 export const dynamic = "force-dynamic"
 

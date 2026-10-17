@@ -17,13 +17,13 @@ import { spawnSync } from 'node:child_process'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import paths from '../lib/agi-items/paths.cjs'
+import paths from '../lib/web4-items/paths.cjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
 const runtimeFile = path.join(root, 'logs', 'runtime.json')
 
-const APP_NAME = process.env.FRACTERA_APP_NAME || 'fractera-agi'
+const APP_NAME = process.env.FRACTERA_APP_NAME || 'fractera-web4'
 // Пусто — сторожим сам узел; имя блока — сторожим этот блок.
 const WATCH_SERVICE = process.env.FRACTERA_WATCH_SERVICE || ''
 const INTERVAL_MS = Number(process.env.FRACTERA_HEALTH_INTERVAL_MS) || 30000

@@ -1,4 +1,4 @@
-// @api report or stop the born AGI element agent terminal session
+// @api report or stop the born WEB4 element agent terminal session
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
@@ -8,7 +8,7 @@ import { isBornItem, serviceDir } from "../../_agent-kit/server/workspace.cjs"
 
 // СОСТОЯНИЕ СЕССИИ АГЕНТА СЛУЖБЫ (267-1; в маршруте службы — 271).
 // 🔒 ДВЕРЬ КОПИИ КОМПЛЕКТА АГЕНТА (271): шаблон `kits/_agent-kit/api/*/route.ts.tpl`, установщик подставил
-// имя службы вместо `born AGI element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
+// имя службы вместо `born WEB4 element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
 // 🔒 ОБЩАЯ КОПИЯ ДЛЯ РОЖДЁННЫХ (326): установщик с `--born` ставит вместо имени метку `__BORN__`, и имя элемента
 // берётся ИЗ АДРЕСА (`architect/[item]/agent-api/…`) — только рождённого элемента, иначе 404.
 //

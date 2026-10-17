@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
-import { setLink, type LinkKind } from "@/lib/agi-items/element-links"
+import { isBornElement } from "@/lib/web4-items/element-delete"
+import { setLink, type LinkKind } from "@/lib/web4-items/element-links"
 
 // СВЯЗИ ЭЛЕМЕНТА (324-7). PATCH `{ kind: "config" | "design" | "blocks", on }`. Только рождённые элементы; ворота
 // architect/admin; на временном публичном адресе — отказ.

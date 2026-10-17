@@ -1,6 +1,6 @@
 import type { SectionRenderer } from '@/sections/contract'
 import { ConfigImage } from '@/components/media/config-image.server'
-import { AgiNodeDiagram } from '@/components/media/agi-node-diagram.server'
+import { Web4NodeDiagram } from '@/components/media/web4-node-diagram.server'
 import { StaticImage } from '@/components/media/static-image.server'
 import { getAppConfig } from '@/config/app-config'
 import { getLogoPath } from '@/config/app-config.defaults'
@@ -147,11 +147,11 @@ export const heroSplit: SectionRenderer<'heroSplit'> = (b, { key: k }) => {
           <div className="w-full">
             {/* 🔒 ДВА ИСТОЧНИКА ИЗОБРАЖЕНИЯ, И ВЫБИРАЕТ ИХ ДАННЫЕ, А НЕ КОД.
                 Картинка `homePage` настраивается владельцем и уезжает с проектом;
-                схема `agiNode` нарисована здесь и объясняет продукт. Подменить
+                схема `web4Node` нарисована здесь и объясняет продукт. Подменить
                 одно другим значило бы либо лишить владельца его картинки, либо
                 дать ему стереть объяснение, не поняв этого. */}
-            {b.image === 'agiNode' && b.diagram ? (
-              <AgiNodeDiagram
+            {b.image === 'web4Node' && b.diagram ? (
+              <Web4NodeDiagram
                 labels={b.diagram}
                 className="h-auto w-full rounded-2xl border border-border bg-card p-6 text-foreground"
               />
@@ -161,7 +161,7 @@ export const heroSplit: SectionRenderer<'heroSplit'> = (b, { key: k }) => {
               // выше. Сужение записано явно — типы иначе видят здесь оба варианта,
               // и это не придирка компилятора, а честный вопрос «что покажется,
               // если однажды появится третий источник».
-              slot={b.image === 'agiNode' ? 'homePage' : b.image}
+              slot={b.image === 'web4Node' ? 'homePage' : b.image}
               alt={b.imageAlt}
               // Первый экран — грузить сразу: по этой картинке поисковик меряет
               // скорость появления страницы.

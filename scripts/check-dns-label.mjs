@@ -1,6 +1,6 @@
-// СТОРОЖ ИМЕНИ-МЕТКИ DNS (325-7). Случаи из первоисточников (`lib/agi-items/dns-label.mjs`): каждое правило — хотя бы один
+// СТОРОЖ ИМЕНИ-МЕТКИ DNS (325-7). Случаи из первоисточников (`lib/web4-items/dns-label.mjs`): каждое правило — хотя бы один
 // случай «отказать». Порча правила в модуле обязана окрасить этот прибор красным (проверено порчей запрета «--»).
-import { isDnsLabel, isElementAddress } from '../lib/agi-items/dns-label.mjs'
+import { isDnsLabel, isElementAddress } from '../lib/web4-items/dns-label.mjs'
 
 const ok = [
   'shop', 'shop-2', 'my-shop-2026', 'a1b2', 'xn-a', 'abcdefghijklmnopqrstuvwx',

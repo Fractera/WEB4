@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
   if (!/^[a-z][a-z0-9-]{0,39}$/.test(service)) {
     return NextResponse.json({ ok: false, reason: "service must be an element id" }, { status: 400, headers: HEADERS })
   }
-  const wake = (globalThis as { __agiAgentWake?: Wake }).__agiAgentWake
+  const wake = (globalThis as { __web4AgentWake?: Wake }).__web4AgentWake
   if (typeof wake !== "function") {
     return NextResponse.json({ ok: false, reason: "agent kits are not mounted in this process" }, { status: 503, headers: HEADERS })
   }

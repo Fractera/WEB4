@@ -4,15 +4,15 @@ import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { tokenState } from "@/app/[lang]/(architectLayer)/architect/build/github/_github/server/token.cjs"
-import paths from "@/lib/agi-items/paths.cjs"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
-import { elementDir, elementGithubState } from "@/lib/agi-items/element-github"
-import { readReposJob, startReposJob } from "@/lib/agi-items/element-repos-job"
-import { updateState } from "@/lib/agi-items/element-update"
+import paths from "@/lib/web4-items/paths.cjs"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
+import { elementDir, elementGithubState } from "@/lib/web4-items/element-github"
+import { readReposJob, startReposJob } from "@/lib/web4-items/element-repos-job"
+import { updateState } from "@/lib/web4-items/element-update"
 
 // СОХРАНЯЕТСЯ ЛИ РАБОТА В GITHUB (шаг 374-9, 374-2, 374-3). Слово владельца 2026-10-02: «до тех пор пока пользователь не подключил
 // Токен нужно показывать тревожный баннер»; «как только вёл сразу же в его репозитории создаются классические репозитории под
-// каждой AGI ITEMS». GET — есть ли общий ключ (сам ключ не отдаётся), каждый элемент: репозиторий, каким ключом идёт выгрузка,
+// каждой WEB4 ITEMS». GET — есть ли общий ключ (сам ключ не отдаётся), каждый элемент: репозиторий, каким ключом идёт выгрузка,
 // незакоммиченные правки, последняя выгрузка; ход создания. POST `{ action: "create" }` — создать недостающие (кнопка человека).
 export const dynamic = "force-dynamic"
 

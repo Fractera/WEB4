@@ -5,7 +5,7 @@ import { join } from "node:path"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { elementDir, parseRepo, tokenFor } from "@/lib/agi-items/element-github"
+import { elementDir, parseRepo, tokenFor } from "@/lib/web4-items/element-github"
 import { checkAccess } from "@/app/[lang]/(architectLayer)/architect/build/github/_github/server/github.cjs"
 import { SHAPE } from "@/app/[lang]/(architectLayer)/architect/build/github/_github/server/token.cjs"
 
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 async function publicRepo(owner: string, repo: string): Promise<boolean> {
   try {
     const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
-      headers: { Accept: "application/vnd.github+json", "User-Agent": "fractera-agi-node", "X-GitHub-Api-Version": "2022-11-28" },
+      headers: { Accept: "application/vnd.github+json", "User-Agent": "fractera-web4-node", "X-GitHub-Api-Version": "2022-11-28" },
       signal: AbortSignal.timeout(15_000),
     })
     if (!r.ok) return false

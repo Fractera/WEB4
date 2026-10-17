@@ -1,4 +1,4 @@
-// @api set up the born AGI element agent Telegram bot and read its state
+// @api set up the born WEB4 element agent Telegram bot and read its state
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
@@ -8,7 +8,7 @@ import { isBornItem } from "../../_agent-kit/server/workspace.cjs"
 
 // БОТ TELEGRAM АГЕНТА СЛУЖБЫ (267-3; в маршруте службы — 271).
 // 🔒 ДВЕРЬ КОПИИ КОМПЛЕКТА АГЕНТА (271): шаблон `kits/_agent-kit/api/*/route.ts.tpl`, установщик подставил
-// имя службы вместо `born AGI element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
+// имя службы вместо `born WEB4 element`. Живёт в маршруте службы — удалили папку службы, ушла и дверь.
 // 🔒 ОБЩАЯ КОПИЯ ДЛЯ РОЖДЁННЫХ (326): метка `__BORN__` — имя элемента из адреса, только рождённого, иначе 404.
 //
 // 🔒 ТОКЕН НАРУЖУ НЕ ВОЗВРАЩАЕТСЯ НИКОГДА — только четыре последних знака, по ним человек узнаёт свой.

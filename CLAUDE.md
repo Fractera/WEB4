@@ -1,3 +1,8 @@
+> **Renamed 2026-10-17 (node step 519, owner's word):** the repository `github.com/Fractera/AGI` is now
+> `github.com/Fractera/WEB4`, and every AGI entity became WEB4: AGI ITEMS → **WEB4 ITEMS**, folders `WEB4-ITEMS/` and
+> `WEB4-ITEMS-REGISTRY/web4-items.json`, modules `lib/web4-items/`, pm2 `fractera-web4` · `-domain` · `-tunnel` · `-watch`,
+> environment `WEB4_COMMIT` · `WEB4_STARTED_AT`. The owner's verbatim quotes keep the old word; public page URLs (`/agi-item`) did not change.
+
 # Who you are
 
 The agent-programmer on the owner's machine. You build a **Next 16+ application** that runs on a
@@ -149,7 +154,7 @@ chosen number is written to `logs/runtime.json`.
 🔒 **Ask the server which port it took — never remember it.** `logs/runtime.json` is the answer. Code
 that remembers a port knocks on emptiness the day the port is yielded.
 
-🛑 **Two things are alive, not one:** `fractera-agi` (the site) and `fractera-agi-watch` (the health
+🛑 **Two things are alive, not one:** `fractera-web4` (the site) and `fractera-web4-watch` (the health
 watchdog). The watchdog exists because a process can stay `online` while every page returns 500 — pm2
 cannot see that, and neither can a container. It asks `/api/health` and restarts the site after three
 failures in a row. **Patience is its point, not sensitivity:** a cold dev compile takes up to 41 seconds,
@@ -361,25 +366,25 @@ no users yet (the first one becomes the architect) and shows "First time here?" 
 
 ---
 
-## AGI items: the folder, the registry and the two kinds (step 272, 2026-09-22)
+## WEB4 items: the folder, the registry and the two kinds (step 272, 2026-09-22)
 
-🔒 **AN ITEM OF THIS NODE LIVES IN `AGI-ITEMS/<kind>/<id>/`, AND `kind` DECIDES THE PATH** (owner's word
+🔒 **AN ITEM OF THIS NODE LIVES IN `WEB4-ITEMS/<kind>/<id>/`, AND `kind` DECIDES THE PATH** (owner's word
 2026-09-22): `core` — installed by the node itself (`auth`, `data`, `root` — see the next section), `user` —
 connected by the person.
-The registry is **`AGI-ITEMS-REGISTRY/agi-items.json`** (repo + pinned tag + port + `kind`), and its README
+The registry is **`WEB4-ITEMS-REGISTRY/web4-items.json`** (repo + pinned tag + port + `kind`), and its README
 says out loud that this folder is **not** one of the four configs: no schema, no defaults, it is the state
 of one machine. 🪦 Until 272: `MICROSERVICES.json` in the root and `microservices/<id>`. 🪦 Until 398 (2026-10-05) the
-folder was `AGI-ITEMS-CONFIG` — renamed by the owner's word («вместо CONFIG написать реестр»).
-🛑 **Updating a node whose registry carries local state:** `agi-items.json` is in git AND holds this machine's state, so a
+folder was `WEB4-ITEMS-CONFIG` — renamed by the owner's word («вместо CONFIG написать реестр»).
+🛑 **Updating a node whose registry carries local state:** `web4-items.json` is in git AND holds this machine's state, so a
 plain `git pull` that touches it refuses («Your local changes … would be overwritten») and the node silently stays old.
 Update with `git stash && git pull && git stash pop` — measured in 398: the state follows even a folder rename. Then
 `npm run services:install` (services get the new `NODE_ITEMS_FILE`) and `npm run serve:rebuild`.
 
-🔒 **THE PATH IS BUILT IN ONE PLACE — `lib/agi-items/paths.cjs`** (`ITEMS_DIR`, `REGISTRY_FILE`,
+🔒 **THE PATH IS BUILT IN ONE PLACE — `lib/web4-items/paths.cjs`** (`ITEMS_DIR`, `REGISTRY_FILE`,
 `itemDir(id, kind)`, `entryDir(entry)`), read by the build (`.ts`), the scripts (`.mjs`) and
 `ecosystem.config.cjs`. 🛑 The second copy of that knowledge is deliberate and named: the agent kit's
 `_agent-kit/server/workspace.cjs`, because a kit copy must stay self-contained; `check:agent-kits` catches
-a divergence. 🛑 `AGI-ITEMS/` is in `.gitignore` and in `tsconfig.exclude`, and the item code never enters
+a divergence. 🛑 `WEB4-ITEMS/` is in `.gitignore` and in `tsconfig.exclude`, and the item code never enters
 this repository: each item is its own repository, cloned by `npm run services:install` at its pinned tag.
 
 🛑 **RENAMING THE FOLDER MOVES THREE THINGS THAT ARE NOT CODE:** `.install-stamp.json` of every item holds
@@ -393,7 +398,7 @@ Proven by the owner's full cycle on a Mac (remove → reinstall from the fork �
   replace them all — element subdomains and own domains were wiped) · rebuilds every element whose `ARCHITECT_URL` /
   `NEXT_PUBLIC_AUTH_URL` still name this computer (`lib/domain/stale-addresses.cjs` → `deploy-elements.mjs`; ✗ the site root,
   installed before the domain, sent a phone to `localhost:24680` after sign-in) · copies every address (`--all`).
-- 🔒 **A fork carrying the old node's map** (`AGI-ITEMS-REGISTRY/agi-items.node.json`) without a GitHub token installs the
+- 🔒 **A fork carrying the old node's map** (`WEB4-ITEMS-REGISTRY/web4-items.node.json`) without a GitHub token installs the
   required elements from the Fractera original; the person's own elements wait in `data/node/restore-pending.json` and come
   back on the next install with a token (`scripts/services-install.mjs`). ✗ Before: no element installed at all.
 - 🔒 **On this computer** a 30 px bar above the header says whether the site is online through Cloudflare («Ask Cloudflare»,
@@ -427,18 +432,18 @@ in the element (`# kind: own` in its `.env.example`). 🛑 There is no kind that
 The core reaches the site's settings through the site's settings door (step 280-6), never by copying its own.
 
 🔒 **TWO AGENTS, TWO FOLDERS.** The agent of «Build» (the node root) maintains the core: the architect pages,
-the installer, the doors. The agent of «Root» (`AGI-ITEMS/core/root`, pages `/architect/root/*`) builds the
+the installer, the doors. The agent of «Root» (`WEB4-ITEMS/core/root`, pages `/architect/root/*`) builds the
 site. The core agent does not edit the site's code; the site agent does not edit the core.
 
 🔒 **TO PUT ANOTHER SITE IN — ONE LINE, AND THE REPOSITORY MUST KEEP THE CONTRACT.** Change `repo` and
-`version` of the `root` line in `AGI-ITEMS-REGISTRY/agi-items.json`, then `npm run services:install`. The
+`version` of the `root` line in `WEB4-ITEMS-REGISTRY/web4-items.json`, then `npm run services:install`. The
 contract is in the site's `OWN-SERVICE-PROPS.json` and README: port from `PORT`, `GET /api/health` without a
 session, sign-in only through `auth`, data only through `data`, static public pages, and — inside the node —
 the build root named in `next.config` (`outputFileTracingRoot`, `turbopack.root`), otherwise Next takes the
 node for the project and compiles the node's `proxy.ts`. A foreign repository is adapted first by the
 procedure of «Root → External GitHub» (step 280-8).
 
-🔒 **THE FIRST EDIT MAKES THE SITE THE PERSON'S OWN REPOSITORY.** `AGI-ITEMS/` is outside this repository's
+🔒 **THE FIRST EDIT MAKES THE SITE THE PERSON'S OWN REPOSITORY.** `WEB4-ITEMS/` is outside this repository's
 git, the person has no write access to the Fractera original, and a reinstall resets the folder to the
 pinned tag — work done there is lost. So before changing the site, its agent forks the starter (or creates
 a repository from it) on the person's account, points the `root` line at it, and from then on commits and
@@ -475,9 +480,9 @@ build, no trace of the service in the code, and the mount finding only `auth`.
 (`architect/build/{subscription,terminal,telegram}`) carries a copy installed with `--node`: its agent is
 born in the **node root**, because its subject is the node's own code and the node's `CLAUDE.md` lives
 there. Two install parameters make that possible, and both are data, never a branch on a name:
-`workspace` (`agi-item` | `node`) and `pages` (template → slug and menu order) in `agent-kit.json`.
+`workspace` (`web4-item` | `node`) and `pages` (template → slug and menu order) in `agent-kit.json`.
 🛑 **A node agent sees the whole root, services included — unless the node says otherwise.** Therefore
-`.claude/settings.json` of the node denies `Read(./AGI-ITEMS/**)` and `Edit(./AGI-ITEMS/**)`; measured
+`.claude/settings.json` of the node denies `Read(./WEB4-ITEMS/**)` and `Edit(./WEB4-ITEMS/**)`; measured
 live, the agent answers «File is in a directory that is denied by your permission settings». Only
 `Read(path)` and `Edit(path)` rules are matched by file permission checks — a `Write(...)` or
 `MultiEdit(...)` rule is refused loudly at every start. 🛑 This is a rule of Claude Code, **not an OS
@@ -486,7 +491,7 @@ account or a container, and it is not built.
 
 **Commands:** `npm run agent-kit:add -- <group>` · `--node` · `--page <tpl>=<name>[:<order>]` · `--force` ·
 `npm run agent-kit:update -- <group>` (repeats the previous install from the manifest), then
-`npm run serve:rebuild`. A service must be in `AGI-ITEMS-REGISTRY/agi-items.json`, have `AGI-ITEMS/<kind>/<id>` and its
+`npm run serve:rebuild`. A service must be in `WEB4-ITEMS-REGISTRY/web4-items.json`, have `WEB4-ITEMS/<kind>/<id>` and its
 own page group; with `--node` the registry is not consulted. Embedded today: `auth`, `data`, `build` (the node).
 🛑 The first start in a new service folder asks Claude Code's trust question — answer «Yes» in its terminal.
 🛑 The subscription is one per machine: its page is the same for every service.
@@ -495,7 +500,7 @@ folder name in an import path as a dictionary shipped to the browser, even for a
 
 **Open terminals strip (step 345, owner 2026-09-30: «создать индикатор активных открытых Cloud Code терминалов … только тогда я
 смогу их закрыть … только те терминалы которые создаются через наш новый стартовый шаблон»).** All sessions are one map in the
-core process (`core/server/session.cjs`, `globalThis.__agiTerminalSessions`, `list()`); door `GET|POST /api/agents/sessions`
+core process (`core/server/session.cjs`, `globalThis.__web4TerminalSessions`, `list()`); door `GET|POST /api/agents/sessions`
 (architect/admin; loopback = the owner at the machine) lists and stops the terminals of **born** elements only
 (`isBornItem`) — `{ id, name: address, since, channel }`. The strip `(architectLayer)/_components/open-terminals.client.tsx`
 sits under the header in every architect-layer page: «Terminals loading your computer:», a card per terminal (name → its
@@ -503,8 +508,8 @@ Terminal page, «since», «Close» with an inline confirmation). No terminals �
 return, **no timers** (owner's choice). 🛑 Rebuilding or restarting the core kills every terminal (they are its children;
 measured 2026-09-30 — no orphans remain).
 
-**Element folder = its address (step 343, owner 2026-09-30: «Папка = адрес»).** `lib/agi-items/paths.cjs` `itemDir` (and the
-kit `workspace.cjs`) returns `AGI-ITEMS/<kind>/<address>` when that folder exists, else `<id>`; the id stays inside (pm2
+**Element folder = its address (step 343, owner 2026-09-30: «Папка = адрес»).** `lib/web4-items/paths.cjs` `itemDir` (and the
+kit `workspace.cjs`) returns `WEB4-ITEMS/<kind>/<address>` when that folder exists, else `<id>`; the id stays inside (pm2
 `fractera-svc-<id>`, `data/services/<id>`, registry). Renaming the address runs `scripts/element-move.mjs <id>` outside the core
 tree: refuses during a deployment or an open Preview; pm2 stop → rename → absolute paths in `.env.local`,
 `.install-stamp.json` **and the build copies `.next*/standalone/.env*`** (✗ measured: the built server read the old paths and
@@ -528,7 +533,7 @@ nothing (`===COPY_NO_ADDRESS===`). The temporary trycloudflare address gets no c
 🔒 **A closed site gets no copy (step 488):** an element whose `config/site-access.json` carries `site` (lagrix.dev, owner 2026-10-15) is
 skipped and its previous copy removed (`===COPY_SITE_CLOSED===`) — the copy is taken from the loopback, where the owner passes the lock,
 so it would publish the closed pages while the computer is off.
-Runs by itself via `lib/agi-items/static-copy-start.cjs` (one launcher, outside the core's process tree), only on a person's
+Runs by itself via `lib/web4-items/static-copy-start.cjs` (one launcher, outside the core's process tree), only on a person's
 action, no timers: Accept, Deploy, own domain connected / main address changed (element), detached → moves to the subdomain or is
 removed, subdomain connected (`/api/node/reach`) or moved (`element-subdomain.ts`), element deleted (`--remove --state=`), main
 domain activated and full `services:install` → `--all`. «Update» is a merge without a build: the next Deploy copies.
@@ -616,17 +621,17 @@ people run, each from a primary source: IANA registry, Synergy/Barrier `kDefault
 `lib/server-port.cjs` (`blockPorts()`, `isBlockPort()`); the installer (incl. a passport's desired port), the element preview and
 the registry guard read it. Was 24680–24699: the core + 6 native elements left only 13 own sites.
 **One node per computer** (owner 2026-10-01: «да, запрещай»): the same script refuses when pm2 (live or its `dump.pm2` snapshot)
-holds `fractera-agi` from ANOTHER existing folder — `===NODE_EXISTS===`. Two copies would share pm2 names, autostart and the port
+holds `fractera-web4` from ANOTHER existing folder — `===NODE_EXISTS===`. Two copies would share pm2 names, autostart and the port
 block. `scripts/ensure-env.mjs` creates `.env.local` from the example on a clean clone (preinstall, prebuild before check-origin,
 serve:start). `lib/server-port.cjs` `isFree` throws on a missing stack (EAFNOSUPPORT/EADDRNOTAVAIL) instead of «busy» — the `::1`
 catches in the installer and the element preview finally work on machines without IPv6.
 
-## 🔒 The node installs only from a direct fork of Fractera/AGI (node step 368)
+## 🔒 The node installs only from a direct fork of Fractera/WEB4 (node step 368)
 
 Owner 2026-10-01: «… продвижение моего проекта … зависит от количества Форк … хард кодом оставить проверку на соответствии того что
 Форк сделан именно из моего репозитория … отказ с ошибкой … что вы пытаетесь установить неоригинальный проект Fractera».
 `scripts/check-origin.mjs` — first in `prebuild` and in `serve:start`: `origin` must be a DIRECT fork of the original hard-coded in
-the file (`fractera/agi`; GitHub API fork=true, parent=original). The original itself, a fork of a fork, another repo, not GitHub —
+the file (`fractera/web4`; GitHub API fork=true, parent=original). The original itself, a fork of a fork, another repo, not GitHub —
 `===ORIGIN_FAILED===` with the reason; GitHub unreachable — refuse, «repeat later» (owner's choice). Success writes
 `logs/origin.json` (machine file, not in git: no network on rebuilds) and `NODE_REPO_URL` (the fork) to `.env.local` — a fact for
 the project, never read by the check. The author's node (origin = the original) has a one-time `author` record.
@@ -639,7 +644,7 @@ the architect layer (`components/node-state/origin-notice.client.tsx`). No netwo
 
 Owner 2026-09-29: the element's «Deployments» page shows the commit and the state — it gets **Deploy** and **Preview**
 (`app/[lang]/(architectLayer)/_components/element-deploy.client.tsx`), the core's board stays as the overview.
-**Pending is measured by git** (`lib/agi-items/element-code-state.ts`): uncommitted code or last commit ≠ the running one
+**Pending is measured by git** (`lib/web4-items/element-code-state.ts`): uncommitted code or last commit ≠ the running one
 (`+<hash>` of `.install-stamp.json`); files the node writes itself (config folders, `tsconfig.json`, `next-env.d.ts`, the
 stamp) are not changes. **Preview** — `scripts/element-preview.mjs stage|promote|discard <id>` via
 `/api/architect/items/<id>/preview`: builds into the neighbour dist folder and leaves the server on a spare port
@@ -662,7 +667,7 @@ the anchor block (`id` or `data-block`). **Reject** opens `_tools/block-task` in
 
 **Roll back to a version (node step 322, owner 2026-10-04: «откат новым коммитом», «Сохранить и откатить»).** On Deployments:
 pick a version (the same rows as the table) → «Roll back to a version» → confirmation naming the version and the unsaved files.
-`POST /api/architect/items/<id>/rollback {commit}` (`lib/agi-items/element-rollback.ts`): the commit must be in the element's
+`POST /api/architect/items/<id>/rollback {commit}` (`lib/web4-items/element-rollback.ts`): the commit must be in the element's
 history; unsaved agent files are committed first («Saved before rollback»); the files of the chosen version land as a NEW commit
 «Rollback to <hash>» — history is never rewritten, and the previous state is one more rollback away; node-written files
 (`NODE_WRITES`: DESIGN-CONFIG, APP-CONFIG, PLATFORM-CONFIG, tsconfig, next-env, install stamp) are not rolled back; the element is
@@ -670,7 +675,7 @@ rebuilt by the Deploy path (next to the running one; a failed build leaves the r
 `same-version`, `deploy-running`, `preview-pending`, `temporary-address`. 🛑 A Windows `next build` can fail on «Collecting page
 data» with `kill EPERM` twice in a row (measured on the 322 probe) — the rollback commit stays, press «Deploy» again.
 
-## AGI ITEM repositories — one fork, the key later, a private repository per element (node step 374)
+## WEB4 ITEM repositories — one fork, the key later, a private repository per element (node step 374)
 
 Owner 2026-10-02: «–пользователь делает только один Fork – отправляет его репозитории GitHub – запускает проекты и начинает им
 пользоваться – в какой-то момент при необходимости получает GitHub токен». Required elements (auth, data, config, design, later
@@ -689,22 +694,22 @@ Dashboard) are CHANGED by the person exactly like born ones — «их отли�
 - **Key precedence** `tokenFor(id)`: the element's own key (`data/services/<id>/github/.env`) → the node key (`data/node/github/.env`).
 - **Sending** — by button; an agent sends on request; a task from **Telegram is committed and sent at once**: the kit appends a rule to
   every element agent's launch (`--append-system-prompt`, `telegram.cjs githubRule`) naming `node <node>/scripts/element-github-push.mjs <id>`.
-- **Map** `lib/agi-items/registry-map.mjs` (`npm run registry:map`): `address`, `domain`, `github` next to `port` and `summary` in
-  `agi-items.json`; `lib/agi-items/node-map.ts` writes the snapshot `AGI-ITEMS-REGISTRY/agi-items.node.json` and pushes ONLY that file
-  to the person's fork. 🛑 A separate file: `agi-items.json` is changed by Fractera on every release — a person's commit in it would
+- **Map** `lib/web4-items/registry-map.mjs` (`npm run registry:map`): `address`, `domain`, `github` next to `port` and `summary` in
+  `web4-items.json`; `lib/web4-items/node-map.ts` writes the snapshot `WEB4-ITEMS-REGISTRY/web4-items.node.json` and pushes ONLY that file
+  to the person's fork. 🛑 A separate file: `web4-items.json` is changed by Fractera on every release — a person's commit in it would
   make «Sync fork» conflict. 🛑 The author's node (`logs/origin.json` verdict `author`) never pushes — it would write the original.
 - **Restore** = clone YOUR fork (not a new fork of Fractera): on a machine without `data/services` the installer merges the snapshot and
   clones each element from the person's repository (node key, or `FRACTERA_GITHUB_TOKEN`). Own domain, tunnel and data are not restored
   (owner: deferred).
 - 🛑 **A required element with its own commits is never moved back to the Fractera tag** — own work = commits outside every Fractera tag
   (`git rev-list HEAD --not --tags`); its version reads `<base tag>+<commit>`. ✗ Before 374 the installer checked out the tag on every
-  run and the person's changes vanished from the running element. A new tag is merged with **«Update»** (`lib/agi-items/element-update.ts`,
+  run and the person's changes vanished from the running element. A new tag is merged with **«Update»** (`lib/web4-items/element-update.ts`,
   `/api/architect/items/<id>/update`); a conflict leaves the merge open and opens the element's terminal with the task (owner: «fix with
   ai agent»); without own work the element moves to the tag on its next Deploy.
 - **Replace the code** (element's GitHub page → `/api/architect/items/<id>/github/import` → `scripts/element-import.mjs` via spawn-free):
   the old history goes to the element's repository first (refused without one), the new repository is cloned with the element's own key,
   a foreign project gets passport/launcher/agent files (`repo-element.mjs`), the folders swap with the service stopped, the installer
-  builds; id, port, address, domain stay. The previous folder stays in `AGI-ITEMS/.replaced/`.
+  builds; id, port, address, domain stay. The previous folder stays in `WEB4-ITEMS/.replaced/`.
 - **Step 384 (owner 2026-10-03) — the element's GitHub page.** Wording: **«GitHub token»**, never «key» (GitHub calls it a personal
   access token; «key» stays for Cloudflare and OpenAI). «GitHub» is the FIRST page of the element's Build (`item-tree.ts`). On top — a
   status plate from `tokenSource`/`activeTail` of `GET …/github`: green «saved to <repo> with the node's common token / own token …tail»
@@ -723,12 +728,12 @@ Dashboard) are CHANGED by the person exactly like born ones — «их отли�
   big green «the token is confirmed as active … can write to <repo>». 🛑 It never promises sending on Deploy — no such behaviour exists.
   Card «Rename the repository» → `POST …/github/rename {name}` → `renameRepoTo` (any connected repository, by the person's hand).
 
-## Dashboard → Projects — every AGI ITEM in one table (node step 339)
+## Dashboard → Projects — every WEB4 ITEM in one table (node step 339)
 
 Owner 2026-09-29: «После кнопки паспорт в левом меню добавлять кнопку Dashboard … кнопку проекты … нашу стандартную таблицу».
 Group `architect/dashboard` (order 12, right after Passport) → section `projects`: one block `projectsBoard`
 (`sections/blocks/projects-board.server.tsx` words → island `components/dashboard/projects-board.client.tsx`), rows from
-`GET /api/node/projects?lang=` (architect/admin; outside without a session → 401) built by `lib/agi-items/dashboard-rows.ts`.
+`GET /api/node/projects?lang=` (architect/admin; outside without a session → 401) built by `lib/web4-items/dashboard-rows.ts`.
 Native / custom = the left menu's split (custom = drafts). **Status is measured**: the element's port answers → running,
 no answer → stopped; deploy lock / preview build / birth for the id → building; a draft never born → not born. Meta title and
 description are read from the element's own home page (3 s). The table is the standard `TableTools` — its optional `toggles`
@@ -743,7 +748,7 @@ Owner 2026-10-14: «посмотри вкладку роман, дизайн в 
 четвёртую колонку отменённые заказы»; the wallet: «должна быть опция подключить кошелёк, нет кошелька есть видимость системе».
 Page `architect/passport` → one block `nodePassport` (`sections/blocks/node-passport.server.tsx` words → island
 `components/dashboard/node-passport.client.tsx`), data from `GET /api/node/passport?lang=` (architect/admin; outside without a session
-→ 401) built by `lib/agi-items/node-passport.ts` on top of `projectRows`. Order on the page:
+→ 401) built by `lib/web4-items/node-passport.ts` on top of `projectRows`. Order on the page:
 1. **The node rating card** — the Lagrix rating card of the element A2A home (`components/element-docs/lagrix-rating.tsx`, optional
    title / lead / marker / slot) with six tiles of changelog entries 43, 44 and 46: all orders · likes · dislikes · negative ratings ·
    cancelled orders · unreviewed, and the proven-violation line; no balance (step 495-1). Every tile is count · sum, except «negative
@@ -777,7 +782,7 @@ the rows come from ONE file, `lagrix-reviews.sample.ts`, and the card says «Exa
 replace that one file later; nothing is written anywhere. The countdown ticks only while the list is open and asks no door. The node card
 has its own hint (`lagrixNodeReviewsHint`). Skill `review-order` — first draft in roman (517-2).
 **Step 518 (owner 2026-10-17) — review pages of every element, public.** The item template v0.3.100 (pinned in
-`AGI-ITEMS-REGISTRY/item-template.json`) gives every born element the public branch `/<lang>/reviews` — the list with server search and
+`WEB4-ITEMS-REGISTRY/item-template.json`) gives every born element the public branch `/<lang>/reviews` — the list with server search and
 pages (10 · 20 · 50) — and `/<lang>/reviews/<slug>`, one review page the element published as the author of a review it gave a partner
 (snippet cover, verdict, facts with links to the original photos, timeline within 1000 px, summary, rating 0–10, recommendation, share,
 print as PDF). 🔒 Pages are rows of the node's data layer (`review_pages`, `review_events`, `review_images`, every key carries `element`:
@@ -790,10 +795,10 @@ weight) is the owner's task saved as federal step 482 — not designed yet.
 
 ## Element birth — a draft becomes a running element (node step 319)
 
-**Create a microservice** → draft `<id>` (`data/agi-drafts.json`) → **Give birth to the element** (the draft's home;
+**Create a microservice** → draft `<id>` (`data/web4-drafts.json`) → **Give birth to the element** (the draft's home;
 `POST /api/architect/drafts/<id>/birth` runs `scripts/item-birth.mjs <id>` detached, progress from `logs/birth-<id>.log`;
 CLI: `npm run items:birth -- <id>`). The birth clones `fractera-item-starter` at the tag in
-`AGI-ITEMS-REGISTRY/item-template.json` (owner: from the Fractera repository), cuts the template's history (own `main`, first
+`WEB4-ITEMS-REGISTRY/item-template.json` (owner: from the Fractera repository), cuts the template's history (own `main`, first
 commit «born from …», no `origin`), writes the passport id, adds a registry entry with `born: { from, version, at }`, runs the
 usual `services-install.mjs --only <id>`, starts the service and its watch in pm2 and waits for `/api/health` by fact.
 🔒 **Born in the project's look** (owner 2026-10-01: «по дефолту должен сразу подключиться к настройкам всего проекта»): before
@@ -812,18 +817,18 @@ A born element is not deleted as a draft (409). Not built yet: birth in seconds.
 **Settings — the Danger zone (node step 325)**, the last section of the element tree (`_components/element-danger-zone.tsx`):
 - **Capabilities description** — «Generate» opens `<address>/build/terminal?paste=<task>` (the element's own Claude Code, 326);
   the agent writes `summary` and `provides` into its `OWN-SERVICE-PROPS.json` and commits; a person sends the task.
-  «Take into the core» — `POST /api/architect/items/<id>/describe` (`lib/agi-items/element-describe.ts`) checks the shape
+  «Take into the core» — `POST /api/architect/items/<id>/describe` (`lib/web4-items/element-describe.ts`) checks the shape
   (template or birth summary, empty or malformed `provides` → 422 with a word, registry untouched) and writes
   `summary`/`provides`/`described {at, commit}` into the registry entry (working file, like the birth).
-- **Address** — the core address over the unchanged id (`lib/agi-items/element-address.ts`, `data/services/<id>/address.json`):
+- **Address** — the core address over the unchanged id (`lib/web4-items/element-address.ts`, `data/services/<id>/address.json`):
   menu and pages by address, `/<lang>/<id>` redirects to it; `GET|POST /api/architect/items/<id>/address` checks
   (sections, registry ids, drafts, other addresses, service paths → taken + 3 suggestions). 🪦 «Только ядро — the subdomain
   is not renamed» cancelled by the owner 2026-10-01 («переноси поддомен при переименовании»): a CONNECTED subdomain moves to
-  the new name (`lib/agi-items/element-subdomain.ts`: tunnel rule + DNS for the new name, old rule and our CNAME removed; own
+  the new name (`lib/web4-items/element-subdomain.ts`: tunnel rule + DNS for the new name, old rule and our CNAME removed; own
   domain and foreign records untouched; not connected — nothing created). Doors, pty, pm2 stay by id. Only the id path redirects, not earlier addresses.
-  Shape = a DNS label (RFC 1035/1123/5890/5891) plus the node policy — one module `lib/agi-items/dns-label.mjs`, sentinel
+  Shape = a DNS label (RFC 1035/1123/5890/5891) plus the node policy — one module `lib/web4-items/dns-label.mjs`, sentinel
   `scripts/check-dns-label.mjs` in prebuild (325-7); reserved names are one list with drafts (`RESERVED_NAMES`).
-- **Main mirror** (step 324-3…5, `lib/agi-items/element-domain.ts`, `_components/element-domain.client.tsx`): a drop-down
+- **Main mirror** (step 324-3…5, `lib/web4-items/element-domain.ts`, `_components/element-domain.client.tsx`): a drop-down
   of the node's domains (`/api/domain/list` — the same list as «Domain activation»; free·ready / waiting for name servers /
   connected elsewhere). «Connect» = the node's tunnel (`<domain>` → element port, `www.<domain>` and the element subdomain →
   core) + CNAME `<domain>`, `www.<domain>` (only A/AAAA on those names are removed; MX/TXT never) → `data/services/<id>/
@@ -840,7 +845,7 @@ A born element is not deleted as a draft (409). Not built yet: birth in seconds.
   takes the node's domain the same way; the seed `APP-CONFIG` of both templates carries an empty `url`.
   After every click the core redraws the element by loopback (`redrawElement`). «Disconnect» (DELETE) reverses it.
   🛑 Files with a dot in the path on the secondary name are not redirected (proxy matcher) — pages are.
-- **Links: CONFIG · Design · Blocks** (324-7, `lib/agi-items/element-links.ts`, `/api/architect/items/<id>/links`):
+- **Links: CONFIG · Design · Blocks** (324-7, `lib/web4-items/element-links.ts`, `/api/architect/items/<id>/links`):
   `data/services/<id>/links.json`; the element reads it (`linkOn`). CONFIG off — the last project-settings copy is adopted
   ONCE into the element's own APP/PLATFORM/DESIGN-CONFIG and no longer laid over them; Design off — no pull; Blocks off —
   `@fractera` removed from the element's `components.json`. The element's own «Site settings» page (template
@@ -859,21 +864,21 @@ A born element is not deleted as a draft (409). Not built yet: birth in seconds.
   `NEXT_PUBLIC_SUPPORTED_LANGUAGES`, CONFIG link not off), each linking to its Deployments — a born element to its own page,
   the node site (root) to the node board `/architect/build/deployments` (`/root/build/deployments` is 404). An element on an
   older template is marked: its code shows search engines every language. 🔒 **The build reads the same source as the running
-  element**: `lib/agi-items/element-languages.mjs` (installer + Preview) lays `data/services/<id>/project-settings.json`
+  element**: `lib/web4-items/element-languages.mjs` (installer + Preview) lays `data/services/<id>/project-settings.json`
   `patches.app.languages` over the element's own APP-CONFIG unless `links.json` says `config: false`. ✗ Before 341 the build
   read only the own APP-CONFIG: languages chosen in CONFIG (en,ru,fr since 2026-09-26) never reached root or xbmpu (built en,ru)
   — their next Deploy adds fr.
 - 🛑 **Accept and the folder move call pm2 with a CLEAN environment** (step 351): both are started by a core door (the Next
   server); an inherited `__NEXT_PROCESSED_ENV` made the element skip its own `.env.local` — aifa.dev sign-in went to a non-existent
-  `auth.aifa.dev`. Any new script that a core door may call and that runs pm2 strips `__NEXT*`, `NEXT_*`, `AGI_*`, PORT, HOSTNAME, NODE_ENV.
+  `auth.aifa.dev`. Any new script that a core door may call and that runs pm2 strips `__NEXT*`, `NEXT_*`, `WEB4_*`, PORT, HOSTNAME, NODE_ENV.
 - **Preview** on any main address: the element trusts its node core origin (`/api/core-origin` ← `NODE_DOMAIN_FILE`
   `architectHostname`); «Refresh» goes through `/api/architect/items/<id>/redraw` (core server, loopback) — the sign-in
   cookie of the node zone does not live on the element's own domain.
 - 🛑 **The Cloudflare key door refuses a key without Cloudflare Tunnel** (probe before saving, reason `no-tunnel-permission`).
   ✗ 2026-09-28: a key with Zone Edit only replaced the working key, and every tunnel action failed with 1001.
-- **Delete** — `DELETE /api/architect/items/<id>` with the address typed back (`lib/agi-items/element-delete.ts`): pm2 → own domain detached (324-10) →
+- **Delete** — `DELETE /api/architect/items/<id>` with the address typed back (`lib/web4-items/element-delete.ts`): pm2 → own domain detached (324-10) →
   tunnel route and DNS → registry → draft → `data/services/<id>` (address, GitHub key) → birth and pm2 logs → the folder.
-  🛑 Nothing in the door may block the server: pm2 async, the folder is RENAMED into `AGI-ITEMS/.trash/` and erased without
+  🛑 Nothing in the door may block the server: pm2 async, the folder is RENAMED into `WEB4-ITEMS/.trash/` and erased without
   waiting. ✗ 325-6: sync `rmSync` of ~1 GB froze the core, the core watch restarted it mid-deletion — half a folder left.
 
 ## Every page folder has a README.md — and two sections in it are mandatory (owner's decision 2026-09-24)
@@ -926,14 +931,14 @@ design is taken from the site before every build (`scripts/sync-site-design.mjs`
 
 ## The top menu and the M2M document (step 261, 2026-09-21)
 
-The owner's menu, in his order: **Core · Host · AGI · WEB3 · M2M · Nostr · Blog** (the brand link on the left is the root).
+The owner's menu, in his order: **Core · Host · WEB4 · WEB3 · M2M · Nostr · Blog** (the brand link on the left is the root).
 
 | Item | Route | What it is |
 |---|---|---|
 | Core | `/core` | a COPY of the home page cells, `noindex` until the home becomes a new landing |
 | Host | `/host` | a compact landing; its button leads to `/architect/hosting/hosting` — the deploy form will live THERE, never on the public page |
-| AGI | `/agi-item` | unchanged, label shortened |
-| WEB3 | `/web3` | a COPY of the AGI cells, `noindex` until it has its own text |
+| WEB4 | `/agi-item` | unchanged, label shortened |
+| WEB3 | `/web3` | a COPY of the WEB4 cells, `noindex` until it has its own text |
 | M2M | `/m2m` | the M2M document; `/architecture` answers 308 to it (`next.config.ts`) |
 | Nostr, Blog | — | inert buttons (`inert: true` on `MenuGroup`), no address on purpose |
 
@@ -2473,7 +2478,7 @@ own law about an instrument that prints a remembered value.
 
 | Piece | Where | What it does |
 |---|---|---|
-| door | `app/api/services/route.ts` — `GET /api/services` | the node's composition out of `AGI-ITEMS-REGISTRY/agi-items.json`, read on every request |
+| door | `app/api/services/route.ts` — `GET /api/services` | the node's composition out of `WEB4-ITEMS-REGISTRY/web4-items.json`, read on every request |
 | island | `components/services/service-port.client.tsx` | asks that door and prints the port |
 | its words | `components/services/service-port.i18n.ts` | `en` + `ru`, picked on the server, passed in as props |
 | block kind | `servicePort` — renderer `sections/blocks/service-port.server.tsx` | how a page puts the island on itself |
@@ -2758,7 +2763,7 @@ Owner: «мне не хватило определения о каком про�
 | element menu | «Build», «Product design», «Network (M2M)» | «Links (A2A)», «Process» |
 | element agent | the Builder nature (element `CLAUDE.md`, «Two natures») | the Worker nature |
 
-- **Element** (AGI ITEM) — one self-contained thing of the node with its own folder, port, address, repository and agent: to the
+- **Element** (WEB4 ITEM) — one self-contained thing of the node with its own folder, port, address, repository and agent: to the
   node a microservice that talks to its neighbours, to a person a whole project — a site, an app, an agent or a service.
 - **Node** — every element on one person's computer plus the core that links them (registry, discovery, install). It belongs to
   the person and works without Fractera. Elements of one node talk over A2A; nodes talk to each other over M2M.
@@ -2805,7 +2810,7 @@ Domain `lagrix.dev`.
   «Включить и ответить / Не сейчас — <caller> получит отказ» (`data/services/<id>/wake/pending.json`, node poller every 3 s);
   a person's text to the bot while the agent is off → «Включить и передать». No bot → start at once.
 - **Done** — `POST /api/agents/done {service}`: after the conversation pair has gone out (step 414: `lib/a2a/telegram-relay.ts` marks
-  its relay per element in `globalThis.__agiRelayPending`, `done` waits 5 s for it to start, then for it to finish, cap 2 min — translation
+  its relay per element in `globalThis.__web4RelayPending`, `done` waits 5 s for it to start, then for it to finish, cap 2 min — translation
   takes tens of seconds and a bare 5 s timer let the question overtake the answers) «Агент <имя> закончил. Выключить его? Ответьте «выключить»»; the agent gets
   the reply via the channel and sends `{service, close:true}`. Also asked 60 min after a wake. Text, not buttons: while the terminal
   runs, the channel plugin reads the bot and drops foreign buttons (plugin 0.0.7 accepts only `perm:…`). The rule is appended to the
@@ -2860,4 +2865,4 @@ Domain `lagrix.dev`.
 
 ## Element menu: H2A, H2H, A2A by passport flags (step 472, 2026-10-13)
 
-Owner: «каждый старт шаблон будет иметь эти вещи … правда или ложь должны передаваться в own-service-props.json». The element passport `OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json` carries `messengers: { h2a, h2h, a2a }` (template v0.3.96 gives true to all three; roman and lagrix set). The tree `lib/agi-items/item-tree.ts` marks pages with `needs`/`unless` and one function `treeVisible` answers for the left menu (`_lib/draft-menu.tsx`), the route (404 when hidden) and the section list. Order: Live site → H2A (native chat, Telegram bot, dashboard) → H2H (native messenger, Telegram, dashboard) → A2A (native messenger, Telegram, dashboard, then the showcase and Deals) → Build. With `h2a` on, the Telegram bot lives at `h2a/telegram` and `build/telegram` redirects there (`MOVED_WITH`); without it the bot stays in Build. Dashboards are core blocks (`metrics`, `table`, `cta` to the element terminal): A2A counts counterparts and deals from `listOrders`; H2A/H2H have no source yet. The registry (`nodeEntries`, `/api/node/a2a`) returns `messengers` read live from the passport — the orchestrator sees which elements use them.
+Owner: «каждый старт шаблон будет иметь эти вещи … правда или ложь должны передаваться в own-service-props.json». The element passport `OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json` carries `messengers: { h2a, h2h, a2a }` (template v0.3.96 gives true to all three; roman and lagrix set). The tree `lib/web4-items/item-tree.ts` marks pages with `needs`/`unless` and one function `treeVisible` answers for the left menu (`_lib/draft-menu.tsx`), the route (404 when hidden) and the section list. Order: Live site → H2A (native chat, Telegram bot, dashboard) → H2H (native messenger, Telegram, dashboard) → A2A (native messenger, Telegram, dashboard, then the showcase and Deals) → Build. With `h2a` on, the Telegram bot lives at `h2a/telegram` and `build/telegram` redirects there (`MOVED_WITH`); without it the bot stays in Build. Dashboards are core blocks (`metrics`, `table`, `cta` to the element terminal): A2A counts counterparts and deals from `listOrders`; H2A/H2H have no source yet. The registry (`nodeEntries`, `/api/node/a2a`) returns `messengers` read live from the passport — the orchestrator sees which elements use them.

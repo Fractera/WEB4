@@ -103,7 +103,7 @@ async function askHealth(url: string): Promise<{ health: Health | null; reachabl
  */
 function isUs(health: Health | null): boolean {
   if (!health || typeof health.pid !== 'number') return false
-  const ourStart = process.env.AGI_STARTED_AT ?? null
+  const ourStart = process.env.WEB4_STARTED_AT ?? null
   if (health.pid !== process.pid) return false
   if (ourStart && health.startedAt !== ourStart) return false
   return true
@@ -136,8 +136,8 @@ export async function measureNodeState(): Promise<NodeState> {
 
   const node = {
     port: Number(process.env.PORT) || null,
-    commit: process.env.AGI_COMMIT || process.env.NEXT_PUBLIC_GIT_COMMIT || null,
-    startedAt: process.env.AGI_STARTED_AT ?? null,
+    commit: process.env.WEB4_COMMIT || process.env.NEXT_PUBLIC_GIT_COMMIT || null,
+    startedAt: process.env.WEB4_STARTED_AT ?? null,
     pid: process.pid,
     mode: process.env.NODE_ENV === 'production' ? 'production' : 'dev',
   }

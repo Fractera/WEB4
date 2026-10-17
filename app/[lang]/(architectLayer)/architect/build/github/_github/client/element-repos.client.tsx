@@ -9,7 +9,7 @@ import { RateCountdown, RowCountdown } from "./rate-countdown.client"
 import { terminalLink } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
 import { announceGithubState, GITHUB_STATE_EVENT } from "@/components/node-state/github-token-alarm.client"
 
-// РЕПОЗИТОРИИ ВСЕХ AGI ITEMS НА СТРАНИЦЕ «СТРОИТЕЛЬСТВО → GITHUB» (шаг 374-2, 374-3).
+// РЕПОЗИТОРИИ ВСЕХ WEB4 ITEMS НА СТРАНИЦЕ «СТРОИТЕЛЬСТВО → GITHUB» (шаг 374-2, 374-3).
 //
 // 🔒 СЛОВА ВЛАДЕЛЬЦА 2026-10-02: репозитории создаёт узел («y, but privat as default»), отправка — «кнопке, Но нельзя запрещать
 // делать коммит по требованию непосредственно в Claude Code Agent … Telegram бот, коммит автоматически всегда». Здесь — кнопка

@@ -1,7 +1,7 @@
 // ПРАВО НА ЗАПУСК У spawn-helper МОДУЛЯ ТЕРМИНАЛА (шаг 372). Запуск: `postinstall` и в `serve:start` перед запуском узла.
 //
 // ✗ ИЗМЕРЕНО НА MAC ВЛАДЕЛЬЦА 2026-10-02 (macOS 12.7.6, Intel x86_64, Node 22.19): кнопка «Start agent» мигала и гасла.
-// `logs/agi-err.log`: `[pty] отказ: spawn-failed`; прямой тест `node-pty.spawn` → `Error: posix_spawnp failed`. Причина —
+// `logs/web4-err.log`: `[pty] отказ: spawn-failed`; прямой тест `node-pty.spawn` → `Error: posix_spawnp failed`. Причина —
 // `node_modules/node-pty/prebuilds/darwin-*/spawn-helper` лежит с правами `-rw-r--r--`: npm распаковал готовую сборку без бита
 // запуска, и macOS отказывается её запускать. На Windows этого файла нет — у меня терминал работал, у владельца нет.
 //

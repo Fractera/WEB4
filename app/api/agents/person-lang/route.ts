@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
   if (!/^[a-z][a-z0-9-]{0,39}$/.test(service)) {
     return NextResponse.json({ ok: false, error: "service must be an element id" }, { status: 400, headers: HEADERS })
   }
-  const setLang = (globalThis as { __agiPersonLang?: SetLang }).__agiPersonLang
+  const setLang = (globalThis as { __web4PersonLang?: SetLang }).__web4PersonLang
   if (typeof setLang !== "function") {
     return NextResponse.json({ ok: false, error: "agent kits are not mounted in this process" }, { status: 503, headers: HEADERS })
   }

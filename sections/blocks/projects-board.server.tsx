@@ -5,19 +5,19 @@ import { ProjectsBoard, type ProjectsBoardWords } from '@/components/dashboard/p
 // ТАБЛИЦА ПРОЕКТОВ УЗЛА (339): слова берутся здесь, на сервере, и уходят островку пропсами. Порядок колонок — слово владельца.
 const WORDS: Record<string, Omit<ProjectsBoardWords, 'table'>> = {
   en: {
-    loading: 'Asking the node about its AGI ITEMS…',
+    loading: 'Asking the node about its WEB4 ITEMS…',
     unavailable: 'The node did not answer, so the table is not shown.',
-    native: 'Show native AGI ITEMS',
-    custom: 'Show custom AGI ITEMS',
+    native: 'Show native WEB4 ITEMS',
+    custom: 'Show custom WEB4 ITEMS',
     head: ['#', 'Service address', 'Meta title', 'Meta description', 'Own domain', 'For sale in web3', 'Last commit', 'Status', 'Date', 'Commits', 'Link', 'Open', 'Users online'],
     status: { running: 'running', stopped: 'stopped', building: 'building', unborn: 'not born yet' },
     openLabel: 'Open',
   },
   ru: {
-    loading: 'Спрашиваю узел о его AGI ITEMS…',
+    loading: 'Спрашиваю узел о его WEB4 ITEMS…',
     unavailable: 'Узел не ответил, поэтому таблица не показана.',
-    native: 'Показывать нативные AGI ITEMS',
-    custom: 'Показывать кастомные AGI ITEMS',
+    native: 'Показывать нативные WEB4 ITEMS',
+    custom: 'Показывать кастомные WEB4 ITEMS',
     head: ['№', 'Служебный адрес', 'Заголовок из мета', 'Описание из мета', 'Свой домен', 'На продаже в web3', 'Последний коммит', 'Статус', 'Дата', 'Коммитов', 'Ссылка', 'Открыть', 'Пользователи онлайн'],
     status: { running: 'работает', stopped: 'остановлен', building: 'идёт сборка', unborn: 'ещё не рождён' },
     openLabel: 'Открыть',

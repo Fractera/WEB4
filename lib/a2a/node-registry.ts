@@ -1,11 +1,11 @@
 import "server-only"
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
-import paths from "@/lib/agi-items/paths.cjs"
+import paths from "@/lib/web4-items/paths.cjs"
 import { listServices, serviceUrl } from "@/lib/microservices/registry"
 import { fingerprintOf, messengersOf, passportProblems, registryEntryOf } from "@/lib/a2a/passport.mjs"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
-import elementProps from "@/lib/agi-items/element-props.cjs"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // РЕЕСТР A2A УЗЛА — ЯДРО КАК ЦЕНТР ОБНАРУЖЕНИЯ (шаг 406-6; владелец 2026-10-05: «центр … это будет ядро»; вызов — напрямую,
 // ядро подсказывает адрес). Запись элемента (уровень 1) выводится из его визитки и пишется в реестр при `describe:publish`

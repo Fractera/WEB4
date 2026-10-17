@@ -10,10 +10,10 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, relative, sep, dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { passportProblems, registryEntryOf, extensionOf, CARD_LIMIT } from '../lib/a2a/passport.mjs'
-import elementProps from '../lib/agi-items/element-props.cjs'
+import elementProps from '../lib/web4-items/element-props.cjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
-const SKIP = new Set(['node_modules', '.git', 'public', 'AGI-ITEMS', 'data', 'logs', 'storage'])
+const SKIP = new Set(['node_modules', '.git', 'public', 'WEB4-ITEMS', 'data', 'logs', 'storage'])
 const SRC = /\.(m?js|cjs|tsx?)$/
 
 function walk(dir, out = []) {
@@ -82,9 +82,9 @@ function checkElement(dir) {
 const arg = process.argv[2]
 let dirs = []
 if (arg === '--all') {
-  const reg = JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8')).services ?? []
+  const reg = JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8')).services ?? []
   const addr = (id) => { try { return JSON.parse(readFileSync(join(ROOT, 'data', 'services', id, 'address.json'), 'utf8')).address } catch { return id } }
-  dirs = reg.map((s) => join(ROOT, 'AGI-ITEMS', s.kind === 'user' ? 'user' : 'core', s.kind === 'user' ? addr(s.id) : s.id)).filter((d) => existsSync(d))
+  dirs = reg.map((s) => join(ROOT, 'WEB4-ITEMS', s.kind === 'user' ? 'user' : 'core', s.kind === 'user' ? addr(s.id) : s.id)).filter((d) => existsSync(d))
 } else if (arg) {
   dirs = [resolve(arg)]
 } else {

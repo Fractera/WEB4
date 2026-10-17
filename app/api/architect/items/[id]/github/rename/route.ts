@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { elementDir, elementGithubState, renameRepoTo } from "@/lib/agi-items/element-github"
-import { saveNodeMap } from "@/lib/agi-items/node-map"
+import { elementDir, elementGithubState, renameRepoTo } from "@/lib/web4-items/element-github"
+import { saveNodeMap } from "@/lib/web4-items/node-map"
 
 // ПЕРЕИМЕНОВАТЬ РЕПОЗИТОРИЙ ЭЛЕМЕНТА (шаг 384-7). Слово владельца 2026-10-03: «мне нужна карточка которая позволит мне переименовать
 // репозиторий». POST `{ name }` → `PATCH /repos/{owner}/{repo}` токеном элемента (свой → общий), затем данные элемента, реестр и

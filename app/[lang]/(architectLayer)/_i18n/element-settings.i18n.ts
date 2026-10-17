@@ -1,4 +1,4 @@
-// СЛОВА РАЗДЕЛА «НАСТРОЙКИ» (DANGER ZONE) AGI ЭЛЕМЕНТА (325). `en` основа, `ru` перевод; строки выбирает сервер.
+// СЛОВА РАЗДЕЛА «НАСТРОЙКИ» (DANGER ZONE) WEB4 ЭЛЕМЕНТА (325). `en` основа, `ru` перевод; строки выбирает сервер.
 
 type Card = { title: string; text: string; action: string; pending: string }
 
@@ -157,7 +157,7 @@ const DICT: Record<string, ElementSettingsUi> = {
         { path: "proxy.ts", what: "sign-in and sign-out on the own domain (this element)" },
         { path: "lib/runtime-urls.ts", what: "the «Sign in» link in the browser (this element)" },
         { path: "app/api/auth/callback/route.ts", what: "the return after sign-in (this element)" },
-        { path: "AGI-ITEMS/core/auth/lib/auth/auth.config.ts", what: "the sign-in providers of the node" },
+        { path: "WEB4-ITEMS/core/auth/lib/auth/auth.config.ts", what: "the sign-in providers of the node" },
         { path: "lib/domain/public-auth.cjs", what: "cookies and allowed addresses of the node's sign-in service (core)" },
       ],
       notSupported: "The current version does not do this automatically: you would have to do it yourself. Not recommended.",
@@ -175,7 +175,7 @@ const DICT: Record<string, ElementSettingsUi> = {
       pending: "Being built (step 325-5).",
     },
     removeDialog: {
-      title: "Delete this AGI element for good?",
+      title: "Delete this WEB4 element for good?",
       text: "Its process stops, its address on the internet and its record in the node disappear, and its folder with the code is erased. This cannot be undone. Type its address to confirm:",
       label: "Address",
       confirm: "Delete for good",
@@ -316,7 +316,7 @@ const DICT: Record<string, ElementSettingsUi> = {
         { path: "proxy.ts", what: "вход и выход на своём домене (этот элемент)" },
         { path: "lib/runtime-urls.ts", what: "ссылка «Войти» в браузере (этот элемент)" },
         { path: "app/api/auth/callback/route.ts", what: "возврат после входа (этот элемент)" },
-        { path: "AGI-ITEMS/core/auth/lib/auth/auth.config.ts", what: "провайдеры входа узла" },
+        { path: "WEB4-ITEMS/core/auth/lib/auth/auth.config.ts", what: "провайдеры входа узла" },
         { path: "lib/domain/public-auth.cjs", what: "cookie и разрешённые адреса службы входа узла (ядро)" },
       ],
       notSupported: "Текущая версия не поддерживает это решение автоматически: вам придётся сделать его самостоятельно. Не рекомендуется.",
@@ -334,7 +334,7 @@ const DICT: Record<string, ElementSettingsUi> = {
       pending: "В работе (подшаг 325-5).",
     },
     removeDialog: {
-      title: "Удалить этот AGI элемент насовсем?",
+      title: "Удалить этот WEB4 элемент насовсем?",
       text: "Его процесс остановится, адрес в интернете и запись в узле исчезнут, папка с кодом будет стёрта. Отменить это нельзя. Для подтверждения введите его адрес:",
       label: "Адрес",
       confirm: "Удалить навсегда",

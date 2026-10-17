@@ -14,7 +14,7 @@ import { spawnSync } from 'node:child_process'
 import { tmpdir } from 'node:os'
 
 const IS_WIN = process.platform === 'win32'
-const KIT = (root) => join(root, 'lib', 'agi-items', 'repo-element')
+const KIT = (root) => join(root, 'lib', 'web4-items', 'repo-element')
 
 /** Что за проект: `{ kind, mode, health, build }` или `{ reason }`. */
 function recognise(dir) {

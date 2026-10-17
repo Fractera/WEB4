@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { terminalServiceOf, updateElement, updateState } from "@/lib/agi-items/element-update"
+import { terminalServiceOf, updateElement, updateState } from "@/lib/web4-items/element-update"
 
 // «ОБНОВИТЬ» ОБЯЗАТЕЛЬНЫЙ ЭЛЕМЕНТ (шаг 374-7). GET — основа, цель, своя работа, идёт ли слияние. POST — слить (кнопка человека).
 // Конфликт — ответ 409 `conflict` с файлами, текстом задачи и сегментом терминала: островок открывает терминал элемента с задачей в

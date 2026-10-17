@@ -3,8 +3,8 @@ import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
-import { takeDescription } from "@/lib/agi-items/element-describe"
+import { isBornElement } from "@/lib/web4-items/element-delete"
+import { takeDescription } from "@/lib/web4-items/element-describe"
 
 // «ЗАБРАТЬ В ЯДРО» (325-2). POST — паспорт элемента (`summary`, `provides`, написанные его агентом) → запись реестра узла.
 // Неверная форма — 422 со словом ошибки, реестр не тронут. Только рождённые элементы; ворота architect/admin; на временном

@@ -2,9 +2,9 @@
 import { revalidatePath } from "next/cache"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
-import { getDraft } from "@/lib/agi-items/drafts"
-import { checkRepoOwner } from "@/lib/agi-items/repo-owner.mjs"
-import { BIRTH_LOOKS, birthState, isRepoUrl, markRevalidated, startBirth, wasRevalidated } from "@/lib/agi-items/birth"
+import { getDraft } from "@/lib/web4-items/drafts"
+import { checkRepoOwner } from "@/lib/web4-items/repo-owner.mjs"
+import { BIRTH_LOOKS, birthState, isRepoUrl, markRevalidated, startBirth, wasRevalidated } from "@/lib/web4-items/birth"
 import { getService } from "@/lib/microservices/registry"
 
 // РОЖДЕНИЕ ЧЕРНОВИКА (319-3). POST — запустить `scripts/item-birth.mjs <id>` отдельным процессом (только кнопкой человека);

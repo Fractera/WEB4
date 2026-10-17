@@ -1,11 +1,11 @@
 // ОДНА КОМАНДА, О КОТОРОЙ ПРОСИЛ ВЛАДЕЛЕЦ: `npm run services:install` (257-4).
 //
 // Слова владельца 2026-09-20: службы «размещены как бы внутри одного главного
-// репозитория стартер AGI то есть чтобы приехали через одну команду».
+// репозитория стартер WEB4 то есть чтобы приехали через одну команду».
 //
 // ── ЧТО ОН ДЕЛАЕТ, ПО ПОРЯДКУ
-//   1. читает AGI-ITEMS-REGISTRY/agi-items.json — состав узла и закреплённые ТЕГИ;
-//   2. приводит каждый элемент в AGI-ITEMS/<kind>/<id>/ ровно той версии;
+//   1. читает WEB4-ITEMS-REGISTRY/web4-items.json — состав узла и закреплённые ТЕГИ;
+//   2. приводит каждый элемент в WEB4-ITEMS/<kind>/<id>/ ровно той версии;
 //   3. читает паспорт блока (OWN-SERVICE-PROPS.json) — ТОЛЬКО читает;
 //   4. назначает порт: желаемый из паспорта, занят — следующий свободный из блока;
 //   5. ставит зависимости и, если блок того просит, собирает его;
@@ -39,10 +39,10 @@ import { join, dirname, relative } from 'node:path'
 import { spawnSync, spawn } from 'node:child_process'
 import { randomBytes, createHash } from 'node:crypto'
 import { createRequire } from 'node:module'
-import paths from '../lib/agi-items/paths.cjs'
-import elementProps from '../lib/agi-items/element-props.cjs'
-import { addressOf } from '../lib/agi-items/address-file.mjs'
-import { elementLanguages } from '../lib/agi-items/element-languages.mjs'
+import paths from '../lib/web4-items/paths.cjs'
+import elementProps from '../lib/web4-items/element-props.cjs'
+import { addressOf } from '../lib/web4-items/address-file.mjs'
+import { elementLanguages } from '../lib/web4-items/element-languages.mjs'
 import { dropStaleTypes } from '../lib/deploy/stale-types.mjs'
 
 const require = createRequire(import.meta.url)
@@ -50,7 +50,7 @@ const { isFree, PORT_BLOCK_START, PORT_BLOCK_END, blockPorts, isBlockPort } = re
 const { authEnvOverrides, publicAuth } = require('../lib/domain/public-auth.cjs')
 
 const ROOT = process.cwd()
-// 🔒 Пути элементов — из одного места узла (272): `lib/agi-items/paths.cjs`.
+// 🔒 Пути элементов — из одного места узла (272): `lib/web4-items/paths.cjs`.
 const { ITEMS_DIR: SERVICES_DIR, REGISTRY_FILE: REGISTRY, entryDir } = paths
 const NODE_ENV_FILE = join(ROOT, '.env.local')
 
@@ -64,7 +64,7 @@ const missingForeign = []
 // ── Окружение для чужих программ: без меток того, кто нас позвал (280-6).
 //
 // 🛑 ✗ ИЗМЕРЕНО 2026-09-24: установщик, запущенный дверью ядра (сервером Next), передал сборке и pm2
-// окружение ядра целиком — `__NEXT_PROCESSED_ENV: true`, `AGI_COMMIT`, секреты узла. Next сайта,
+// окружение ядра целиком — `__NEXT_PROCESSED_ENV: true`, `WEB4_COMMIT`, секреты узла. Next сайта,
 // увидев эту метку, считает окружение уже прочитанным и НЕ читает свой `.env.local`: дверь настроек
 // писала мимо `DESIGN_CONFIG_PATH` внутрь сборки. Тот же класс, что метки сессии Claude Code (267).
 // Поэтому каждый элемент получает окружение машины, а не узла: своё он прочитает из своего файла.
@@ -72,7 +72,7 @@ function childEnv() {
   const own = new Set(typeof nodeEnv === 'undefined' ? [] : [...nodeEnv.keys()])
   const out = {}
   for (const [k, v] of Object.entries(process.env)) {
-    if (k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('AGI_') || own.has(k)) continue
+    if (k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || own.has(k)) continue
     if (k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV') continue
     // 353-3: журнал хода — дело одного развёртывания; pm2 сохранил бы его в окружении службы навсегда.
     if (k === 'FRACTERA_LIVE_LOG') continue
@@ -109,10 +109,10 @@ const registry = JSON.parse(readFileSync(REGISTRY, 'utf8'))
 
 // ── 374-5: ВОССТАНОВЛЕНИЕ ПРОЕКТА ИЗ СВОЕГО ФОРКА ──────────────────────────────
 // Слово владельца 2026-10-02: «Если нужно восстановить весь проект то просто делаем Fork основного проекта» — уточнено: клон
-// СВОЕГО форка. В нём снимок карты `AGI-ITEMS-REGISTRY/agi-items.node.json` (пишет узел, 374-1): все элементы с адресом и
+// СВОЕГО форка. В нём снимок карты `WEB4-ITEMS-REGISTRY/web4-items.node.json` (пишет узел, 374-1): все элементы с адресом и
 // репозиторием человека. 🔒 Снимок читается ТОЛЬКО на свежей машине — нет `data/services`: на живом узле реестр и есть правда,
 // а снимок мог отстать (удалённый с тех пор элемент воскрес бы). Свой домен и туннель снимок не возвращает (решение: отложено).
-const SNAPSHOT_FILE = join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.node.json')
+const SNAPSHOT_FILE = join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.node.json')
 // 387-5 (полный цикл Mac 2026-10-04: из форка со снимком без токена не встал НИ ОДИН элемент — «токена GitHub нет»; владелец
 // на предложение ответил «y»): без токена восстановление не ломает узел. Обязательный элемент (есть в реестре Fractera) ставится
 // с оригинала, как при чистой установке, — репозиторий человека к нему не привязывается. Свой элемент человека (есть только в
@@ -337,10 +337,10 @@ function derivedValue(name, ctx) {
     case 'DATA_BIND': return '127.0.0.1'
     case 'NEXTAUTH_URL': return self
     case 'DATA_PUBLIC_URL': return self
-    // 297: общие имена для любого элемента — в коде узла нет имени службы (первый AGI ITEM вида user — «Блоки»).
+    // 297: общие имена для любого элемента — в коде узла нет имени службы (первый WEB4 ITEM вида user — «Блоки»).
     case 'SERVICE_BIND': return '127.0.0.1'
     // 297: публичный адрес элемента — по той же формуле, что у двери `/api/node/reach`: сайт — корень зоны, прочие —
-    // `<id>.<зона>` (публичная главная любого AGI ITEM индексируется: canonical и hreflang нужен настоящий адрес).
+    // `<id>.<зона>` (публичная главная любого WEB4 ITEM индексируется: canonical и hreflang нужен настоящий адрес).
     case 'SERVICE_PUBLIC_URL': {
       const pub = publicAuth(ROOT)
       if (pub) return id === 'root' ? `https://${pub.siteHost}` : `https://${addressOf(id)}.${pub.zone}` // 325-8: по адресу элемента
@@ -611,7 +611,7 @@ for (const entry of registry.services) {
     say(`  рождён из ${entry.born.from ?? 'шаблона'} ${entry.born.version ?? ''} — код элемента не трогаю, версия ${version}`)
   } else {
     // 374-7: у обязательного элемента своя работа поверх тега (слово владельца 2026-10-02: «пользователь их меняет … прогрессирует
-    // ровно точно также как и любой другой AGI ITEMS»). Тег Fractera — его предок, а HEAD ушёл дальше: переход на тег стёр бы
+    // ровно точно также как и любой другой WEB4 ITEMS»). Тег Fractera — его предок, а HEAD ушёл дальше: переход на тег стёр бы
     // эту работу из работающего элемента. Такой элемент не переводится на тег; версия — тег+коммит, как у рождённого; новый
     // тег Fractera вливается кнопкой «Обновить» (конфликт — агенту элемента).
     const fractera = existsSync(join(dir, '.git')) && run('git', ['remote', 'get-url', 'upstream'], dir, { quiet: true }).rc === 0 ? 'upstream' : 'origin'
@@ -821,10 +821,10 @@ for (const entry of registry.services) {
   // элемента, а у подключённого к CONFIG — поверх него копия настроек проекта.
 
   const lines = [
-    '# ПОРОЖДЁННЫЙ ФАЙЛ. Его пишет `npm run services:install` узла AGI.',
+    '# ПОРОЖДЁННЫЙ ФАЙЛ. Его пишет `npm run services:install` узла WEB4.',
     '#',
     '# 🛑 ПРАВКА ЗДЕСЬ ЖИВЁТ ДО СЛЕДУЮЩЕЙ УСТАНОВКИ И ИСЧЕЗАЕТ МОЛЧА.',
-    '# Настройки меняются в составе узла (AGI-ITEMS-REGISTRY/agi-items.json) и в паспорте элемента,',
+    '# Настройки меняются в составе узла (WEB4-ITEMS-REGISTRY/web4-items.json) и в паспорте элемента,',
     '# а не здесь. Исключение — чужие ключи: их вписывают сюда, потому что',
     '# установщик их не выдумывает.',
     `#`,
@@ -983,7 +983,7 @@ for (const entry of registry.services) {
   // службе и одинаков у всех, кто её поставил; путь к собранному серверу зависит
   // от того, как Next вывел корень трассировки НА ЭТОЙ машине. Измерено: из-за
   // соседнего package-lock.json узла standalone-сервер авторизации уехал в
-  // `.next/standalone/AGI-ITEMS/core/auth/server.js`, а не в корень standalone.
+  // `.next/standalone/WEB4-ITEMS/core/auth/server.js`, а не в корень standalone.
   //
   // 🛑 И ВТОРОЕ, ЧЕГО NEXT НЕ ДЕЛАЕТ САМ: статику в standalone он не копирует.
   // Без этого страницы рисуются, а КАЖДЫЙ стиль и скрипт отдают 404 — снаружи
@@ -1027,11 +1027,11 @@ if (Number.isInteger(dataPort)) newNodeVars.set('NEXT_PUBLIC_MEDIA_URL', `http:/
 if (newNodeVars.size > 0) {
   const existing = existsSync(NODE_ENV_FILE) ? readFileSync(NODE_ENV_FILE, 'utf8') : ''
   let text = existing
-  const header = '\n# ─── ПРОИЗВОДНОЕ ОТ agi-items.json — пишет npm run services:install ───\n' +
+  const header = '\n# ─── ПРОИЗВОДНОЕ ОТ web4-items.json — пишет npm run services:install ───\n' +
     '# Правка здесь держится до следующей установки. Источник — реестр состава.\n' +
     '# NEXT_PUBLIC_* стоят тут вынужденно: браузер реестра не читает, а эти\n' +
     '# значения запекаются в бандл на сборке — значит после установки нужна пересборка.\n'
-  if (!text.includes('ПРОИЗВОДНОЕ ОТ agi-items.json')) text += header
+  if (!text.includes('ПРОИЗВОДНОЕ ОТ web4-items.json')) text += header
   for (const [k, v] of newNodeVars) {
     const re = new RegExp(`^${k}=.*$`, 'm')
     if (re.test(text)) text = text.replace(re, `${k}=${v}`)
@@ -1106,7 +1106,7 @@ if (failed > 0) {
 
 // 385-3: полная установка пересобрала все элементы — копия в Cloudflare каждому адресу узла (одиночную `--only` копирует
 // `scripts/deploy-elements.mjs` сам). Узел без своего домена — ничего не запускается.
-if (!ONLY && require('../lib/agi-items/static-copy-start.cjs').startStaticCopyAll(ROOT)) say('\n  копии публичных страниц в Cloudflare обновляются в фоне — итог на «Активации домена»')
+if (!ONLY && require('../lib/web4-items/static-copy-start.cjs').startStaticCopyAll(ROOT)) say('\n  копии публичных страниц в Cloudflare обновляются в фоне — итог на «Активации домена»')
 
 say('\n🛑 После установки узлу нужна ПЕРЕСБОРКА: npm run serve:rebuild — значения')
 say('   NEXT_PUBLIC_* запекаются в сборку, и без неё правка не применится.')

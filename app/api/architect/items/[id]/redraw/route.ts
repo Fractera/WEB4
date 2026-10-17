@@ -1,7 +1,7 @@
 // @api redraw an element's pages now, from the core's own server
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
-import { redrawElement } from "@/lib/agi-items/element-domain"
+import { redrawElement } from "@/lib/web4-items/element-domain"
 import { serviceUrl } from "@/lib/microservices/registry"
 
 // «ОБНОВИТЬ» В PREVIEW (324-6). Прежде браузер звал `<адрес элемента>/api/revalidate` по куке входа; на собственном домене

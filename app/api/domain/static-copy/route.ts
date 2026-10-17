@@ -5,11 +5,11 @@ import { join } from "node:path"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { listServices } from "@/lib/microservices/registry"
-import { readStaticCopy } from "@/lib/agi-items/static-copy-state"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
-import { envValue } from "@/lib/agi-items/element-delete"
+import { readStaticCopy } from "@/lib/web4-items/static-copy-state"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
+import { envValue } from "@/lib/web4-items/element-delete"
 import { accountOfZone, getIngress, zoneByName } from "@/lib/domain/cloudflare"
-import { nodeHasDomain, startStaticCopyAll } from "@/lib/agi-items/static-copy-start.cjs"
+import { nodeHasDomain, startStaticCopyAll } from "@/lib/web4-items/static-copy-start.cjs"
 
 // КОПИИ В CLOUDFLARE ПО КАЖДОМУ АДРЕСУ УЗЛА (шаг 385-3). Владелец 2026-10-04: «хотелось бы чтобы выпали список доменов которые будут
 // обновлены», «А почему три? Разве другие такие как блоки, дизайн дата и прочее не участвуют».

@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
 
 // ПЕРЕАДРЕСАЦИЯ НА ГЛАВНЫЙ АДРЕС ЭЛЕМЕНТА (324-4, 324-5). Выбор владельца по плану — «Ядро отвечает 301»: правила туннеля
 // ведут второстепенные имена элемента на порт ядра, а ядро по имени хоста отвечает 301 на главный адрес с тем же путём.

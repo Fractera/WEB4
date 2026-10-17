@@ -17,7 +17,7 @@ import { writeFileSync, mkdirSync, appendFileSync, readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
-const { startStaticCopy } = createRequire(import.meta.url)('../lib/agi-items/static-copy-start.cjs')
+const { startStaticCopy } = createRequire(import.meta.url)('../lib/web4-items/static-copy-start.cjs')
 const { pendingPreview } = createRequire(import.meta.url)('../lib/deploy/preview-lock.cjs')
 const liveLog = createRequire(import.meta.url)('../lib/deploy/live-log.cjs')
 
@@ -27,8 +27,8 @@ const LOG = join(ROOT, 'logs', 'deploy.log')
 // 460-3: человек называет элемент адресом (lagrix), реестр знает его по id (rtyhh). Адрес переводится в id; неизвестное имя —
 // отказ с понятной строкой и кодом выхода 1. ✗ До этого неизвестное имя «собиралось» за секунду с ok: true и ничего не делало
 // (замер 2026-10-12: deploy-elements lagrix → seconds: 1, ok: true).
-const { addressOf } = createRequire(import.meta.url)('../lib/agi-items/paths.cjs')
-const known = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8')).services || [] } catch { return [] } })()
+const { addressOf } = createRequire(import.meta.url)('../lib/web4-items/paths.cjs')
+const known = (() => { try { return JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8')).services || [] } catch { return [] } })()
 const unknown = []
 const ids = process.argv.slice(2).filter((a) => /^[a-z][a-z0-9-]{0,31}$/.test(a)).map((a) => {
   if (known.some((s) => s.id === a)) return a
@@ -75,7 +75,7 @@ for (const id of ids) {
   // 287: журнал развёртываний — откат берёт из него последнюю УСПЕШНУЮ версию элемента.
   let version = null
   try {
-    version = (JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8')).services || []).find((s) => s.id === id)?.version ?? null
+    version = (JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8')).services || []).find((s) => s.id === id)?.version ?? null
   } catch { /* реестр не прочитан — версия неизвестна */ }
   appendFileSync(join(ROOT, 'logs', 'deploy-history.jsonl'), JSON.stringify({ id, version, ok, at: new Date().toISOString() }) + '\n')
   // 344-3: развёрнутая версия уходит и в копию публичных страниц в Cloudflare (только у элемента со своим доменом).

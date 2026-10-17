@@ -10,10 +10,10 @@ import {
   type IngressRule,
 } from "@/lib/domain/cloudflare"
 import { listServices, serviceUrl } from "@/lib/microservices/registry"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
 import { startDomainResident } from "@/lib/domain/resident"
 import { applyDomainToAuth } from "@/lib/domain/auth-env"
-import { startStaticCopyAll } from "@/lib/agi-items/static-copy-start.cjs"
+import { startStaticCopyAll } from "@/lib/web4-items/static-copy-start.cjs"
 import { spawnSync } from "node:child_process"
 import { staleElements } from "@/lib/domain/stale-addresses.cjs"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"

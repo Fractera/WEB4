@@ -1,4 +1,4 @@
-// СВОЙ СЕРВЕР AGI.
+// СВОЙ СЕРВЕР WEB4.
 //
 // Почему он есть, хотя Next умеет запускаться сам: `next dev` и `next start` —
 // чужие команды, внутрь которых нам не попасть. Всё, что будет дальше в этом
@@ -41,8 +41,8 @@ const dev = process.env.NODE_ENV !== 'production'
 // Страница читает эту переменную через process.env — другого способа передать
 // значение из server.js внутрь приложения Next нет: это два разных мира, и
 // общее у них только окружение процесса.
-process.env.AGI_COMMIT = readCommit()
-process.env.AGI_STARTED_AT = new Date().toISOString()
+process.env.WEB4_COMMIT = readCommit()
+process.env.WEB4_STARTED_AT = new Date().toISOString()
 
 // 🔒 Порт выбирается ДО того, как поднят Next: его конструктор получает номер
 // один раз и потом о нём только рассказывает. Почему не 3000 и почему не
@@ -74,13 +74,13 @@ async function main() {
       port,
       hostname,
       pid: process.pid,
-      commit: process.env.AGI_COMMIT,
-      startedAt: process.env.AGI_STARTED_AT,
+      commit: process.env.WEB4_COMMIT,
+      startedAt: process.env.WEB4_STARTED_AT,
       mode: dev ? 'dev' : 'production',
     })
 
     console.log(
-      `AGI server · http://${hostname}:${port} · commit ${process.env.AGI_COMMIT} · ${dev ? 'dev' : 'production'}`,
+      `WEB4 server · http://${hostname}:${port} · commit ${process.env.WEB4_COMMIT} · ${dev ? 'dev' : 'production'}`,
     )
 
     // Уступка порта — событие, о котором человек обязан узнать сразу. Молчание
@@ -88,7 +88,7 @@ async function main() {
     // пустоту и считает, что сломались мы.
     if (moved) {
       console.log(
-        `⚠ порт по умолчанию был занят — AGI встал на ${port}. Адрес: http://${hostname}:${port}`,
+        `⚠ порт по умолчанию был занят — WEB4 встал на ${port}. Адрес: http://${hostname}:${port}`,
       )
     }
     if (asked) {
@@ -100,6 +100,6 @@ async function main() {
 main().catch((error) => {
   // Отказ при старте печатается человеческими словами и уходит в журнал pm2 —
   // молчаливый выход с ненулевым кодом выглядит как «pm2 сломался».
-  console.error(`AGI server не запустился: ${error.message}`)
+  console.error(`WEB4 server не запустился: ${error.message}`)
   process.exit(1)
 })

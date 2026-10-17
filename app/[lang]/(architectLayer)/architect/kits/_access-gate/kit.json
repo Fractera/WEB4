@@ -20,7 +20,7 @@
         {
           "heading": "Why one lock",
           "items": [
-            "The owner's word: the dialog is a reusable module — every AGI item uses this logic everywhere.",
+            "The owner's word: the dialog is a reusable module — every WEB4 item uses this logic everywhere.",
             "The site and the core hold the same file; the guard check:shell-kits compares the core's copy with the site's."
           ]
         },
@@ -50,7 +50,7 @@
         {
           "heading": "Почему один замок",
           "items": [
-            "Слово владельца: окно — переиспользуемый модуль, любой AGI ITEM всегда и везде использует эту логику.",
+            "Слово владельца: окно — переиспользуемый модуль, любой WEB4 ITEM всегда и везде использует эту логику.",
             "У сайта и ядра один и тот же файл; сторож check:shell-kits сверяет копию ядра с сайтом."
           ]
         },

@@ -1,7 +1,7 @@
 ---
 name: use-page-tree
 description: >
-  How a page is added in a Fractera AGI ITEM — as a FOLDER OF DATA read by one route template, never as a
+  How a page is added in a Fractera WEB4 ITEM — as a FOLDER OF DATA read by one route template, never as a
   new `page.tsx`. Load it before creating anything under `app/`, when the owner asks for "a new page",
   "a section", "an article", "a tab with N pages", "the same page in every language", and whenever a
   build is slow and you are about to look for the cause. The thing you cannot guess: every route file is

@@ -4,11 +4,11 @@
 //   npm run shell-kit:add -- <папка исходника службы> --from <папка сайта>
 //
 // 🔒 ИСТОЧНИК — САЙТ, А НЕ ЭТА ПАПКА. Вид шапки и подвала живёт в `components/shell/` сайта (элемент root) и
-// копируется в службу байт в байт; по умолчанию сайт — папка элемента `root` узла (`AGI-ITEMS/<kind>/root`).
+// копируется в службу байт в байт; по умолчанию сайт — папка элемента `root` узла (`WEB4-ITEMS/<kind>/root`).
 // Своей мастер-копии у ядра нет намеренно: две копии вида и дали «калейдоскоп» (слово владельца 2026-09-24).
 // Сторож `npm run check:shell-kits` сверяет копии с сайтом.
 //
-// 🔒 СТАВИТСЯ В ИСХОДНИК СЛУЖБЫ (её репозиторий или форк), а не в AGI-ITEMS/: папка элемента — клон по тегу.
+// 🔒 СТАВИТСЯ В ИСХОДНИК СЛУЖБЫ (её репозиторий или форк), а не в WEB4-ITEMS/: папка элемента — клон по тегу.
 // Примитивы shadcn и `lib/utils` копируются, только если их у службы НЕТ — свои службы не перезаписываются.
 
 import { cpSync, existsSync, readFileSync, rmSync, writeFileSync, mkdirSync } from 'node:fs'
@@ -24,10 +24,10 @@ const target = args.find((a, i) => !a.startsWith('--') && i !== fromIdx + 1)
 
 function siteDir() {
   if (fromArg) return resolve(fromArg)
-  const reg = JSON.parse(readFileSync(join(NODE, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8'))
+  const reg = JSON.parse(readFileSync(join(NODE, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8'))
   const root = (reg.services ?? []).find((s) => s.id === 'root')
   if (!root) return null
-  return join(NODE, 'AGI-ITEMS', root.kind === 'user' ? 'user' : 'core', 'root')
+  return join(NODE, 'WEB4-ITEMS', root.kind === 'user' ? 'user' : 'core', 'root')
 }
 
 if (!target || !existsSync(target)) {

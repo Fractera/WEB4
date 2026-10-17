@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { isEvmAddress, readWallet, removeWallet, saveWallet } from "@/lib/agi-items/node-wallet"
+import { isEvmAddress, readWallet, removeWallet, saveWallet } from "@/lib/web4-items/node-wallet"
 
 // КОШЕЛЁК УЗЛА (478-3): GET — подключён ли, POST `{ address }` — подключить (адрес EVM: 0x и 40 шестнадцатеричных знаков, иначе 422),
 // DELETE — отключить. Только архитектор: кошелёк — счёт всех элементов узла.

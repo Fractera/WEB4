@@ -1,9 +1,9 @@
-// @api list every AGI ITEM with its state and last commit
+// @api list every WEB4 ITEM with its state and last commit
 import { timingSafeEqual } from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { projectRows } from "@/lib/agi-items/dashboard-rows"
+import { projectRows } from "@/lib/web4-items/dashboard-rows"
 
 // ТАБЛИЦА «Dashboard → Проекты» (339). Страница предрендерена, поэтому состав узла, порты, коммиты и состояние спрашиваются
 // здесь, на запрос, — запечённые в HTML они врали бы с первой же правки.

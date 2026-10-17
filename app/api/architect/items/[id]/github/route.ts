@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { checkElementToken, connectElementGithub, elementDir, elementGithubState, forgetElementToken, saveElementToken } from "@/lib/agi-items/element-github"
+import { checkElementToken, connectElementGithub, elementDir, elementGithubState, forgetElementToken, saveElementToken } from "@/lib/web4-items/element-github"
 
 // СВЯЗЬ РОЖДЁННОГО ЭЛЕМЕНТА С GITHUB ВЛАДЕЛЬЦА (319-5). GET — состояние (репозиторий, аккаунт, 4 знака ключа, последняя
 // выгрузка, число незакоммиченных правок); POST `{ repo, token }` — проверить у GitHub и сохранить только при праве записи;

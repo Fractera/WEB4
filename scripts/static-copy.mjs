@@ -25,7 +25,7 @@
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync, appendFileSync, mkdirSync } from 'node:fs'
 import { join, relative, extname } from 'node:path'
-import paths from '../lib/agi-items/paths.cjs'
+import paths from '../lib/web4-items/paths.cjs'
 
 const ROOT = join(paths.ITEMS_DIR, '..')
 const id = process.argv[2]
@@ -46,7 +46,7 @@ function fail(reason, detail = '') { say(`ОТКАЗ: ${reason} ${detail}`); sav
 // замок: pid жив и `running` — второй проход не начинается (кнопка и подключение домена могут совпасть).
 if (id === '--all') {
   const { spawnSync } = await import('node:child_process')
-  const { addressOf } = await import('../lib/agi-items/address-file.mjs')
+  const { addressOf } = await import('../lib/web4-items/address-file.mjs')
   const ALL_LOG = join(ROOT, 'logs', 'static-copy-all.log')
   const JOB = join(ROOT, 'logs', 'static-copy-all.json')
   const note = (m) => { const l = `${new Date().toISOString()} ${m}`; console.log(l); try { appendFileSync(ALL_LOG, l + '\n') } catch { /* не главное */ } }
@@ -290,7 +290,7 @@ addTree(join(dir, 'public'), '')
 // ── 3. Страница «не в сети» ─────────────────────────────────────────────────────────────────────────────────────────────────
 // 390 (владелец 2026-10-04, D3: «ты какой-то причине вводишь ответ сразу на двух языках … используя существующие стандарт
 // мультиязычности»): страница «не в сети» — своя на каждый язык (`/__offline-<язык>.html`), Worker выбирает язык посетителя.
-// Слова — основа `en` и перевод `ru` (стандарт узла AGI: два языка); язык сайта без перевода получает английскую.
+// Слова — основа `en` и перевод `ru` (стандарт узла WEB4: два языка); язык сайта без перевода получает английскую.
 const OFFLINE_WORDS = {
   en: { title: 'The site owner is offline right now', text: `Public pages of ${host} stay open; this part needs the owner's computer and will work again when it is back online.`, home: 'Home page' },
   ru: { title: 'Хозяин сайта сейчас не в сети', text: `Публичные страницы ${host} открыты; этой части нужен компьютер хозяина, и она заработает, когда он снова будет в сети.`, home: 'Главная' },

@@ -5,8 +5,8 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { getService, serviceUrl } from "@/lib/microservices/registry"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { domainRecord } from "@/lib/agi-items/element-domain"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
+import { domainRecord } from "@/lib/web4-items/element-domain"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
 // АДРЕС ДЛЯ ПРОСМОТРА ЭЛЕМЕНТА (страница Preview, слово владельца 2026-09-24).
 //
 // 🔒 373-2 (владелец 2026-10-02): «задача привью … в том чтобы показывать то как домен работает прямо сейчас режиме локальной

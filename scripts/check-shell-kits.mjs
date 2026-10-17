@@ -12,8 +12,8 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 const ROOT = process.cwd()
-const reg = JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8'))
-const dirOf = (s) => join(ROOT, 'AGI-ITEMS', s.kind === 'user' ? 'user' : 'core', s.id)
+const reg = JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8'))
+const dirOf = (s) => join(ROOT, 'WEB4-ITEMS', s.kind === 'user' ? 'user' : 'core', s.id)
 const root = (reg.services ?? []).find((s) => s.id === 'root')
 const siteShell = root ? join(dirOf(root), 'components', 'shell') : null
 

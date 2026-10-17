@@ -1,7 +1,7 @@
 import { StarIcon } from 'lucide-react'
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Small } from '@/components/ui/typography'
-import type { AgiDraftsUi } from '../_i18n/agi-drafts.i18n'
+import type { Web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 
 // ГЛАВНАЯ ГРУППЫ ЧЕРНОВИКА — ДВЕ КАРТОЧКИ, КАК У КОРНЯ (314-1). Слово владельца: «одной страницы которая должна посмотреть как у
 // нас выглядит корень каждого субдомена который содержит внутри две карточки с портом и адресом». Вид — `ServicePort` Root
@@ -11,7 +11,7 @@ import type { AgiDraftsUi } from '../_i18n/agi-drafts.i18n'
 
 // 319-3: у РОДИВШЕГОСЯ элемента порт настоящий — из реестра узла; карточка порта становится «есть» (тон primary, звезда
 // закрашена), число — то, что назначил установщик. Адрес в интернете остаётся «ещё не», пока поддомен не подключён (319-4).
-export function DraftCards({ address, ui, port = null }: { address: string; ui: AgiDraftsUi; port?: number | null }) {
+export function DraftCards({ address, ui, port = null }: { address: string; ui: Web4DraftsUi; port?: number | null }) {
   const born = typeof port === "number"
   return (
     <div className="my-6 flex flex-col gap-3" data-draft-cards>

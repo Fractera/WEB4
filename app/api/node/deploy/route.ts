@@ -5,13 +5,13 @@ import { join } from "node:path"
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import paths from "@/lib/agi-items/paths.cjs"
+import paths from "@/lib/web4-items/paths.cjs"
 import rollback from "@/lib/deploy/previous-version.cjs"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"
 import previewLock from "@/lib/deploy/preview-lock.cjs"
 import liveLog from "@/lib/deploy/live-log.cjs"
-import { elementCodeState } from "@/lib/agi-items/element-code-state"
-import elementProps from "@/lib/agi-items/element-props.cjs"
+import { elementCodeState } from "@/lib/web4-items/element-code-state"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // ДАШБОРД РАЗВЁРТЫВАНИЙ — ДВЕРЬ (280-11b).
 //
@@ -106,7 +106,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       ok: true,
-      core: { commit: process.env.AGI_COMMIT ?? null, builtAt: process.env.NEXT_PUBLIC_BUILT_AT ?? null },
+      core: { commit: process.env.WEB4_COMMIT ?? null, builtAt: process.env.NEXT_PUBLIC_BUILT_AT ?? null },
       elements: elements(),
       // 337-1: осиротевшая запись (running, процесса нет) исправляется на «прервано» при этом же чтении.
       deployment: deployLock.readState(),

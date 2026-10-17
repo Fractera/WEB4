@@ -3,7 +3,7 @@
 // 🎯 Слово владельца 2026-09-27: «стартер Fractera item starter скачивался [из] репозитория Fractera, но при этом чтобы была
 // возможность пользователя … сохранить его обновлённую версию на своем гит хаб». Отсюда устройство:
 //   1. черновик `<id>` (кнопка «Создать микросервис», 314-1) — единственный вход: рождается только то, что человек завёл;
-//   2. шаблон берётся по ЗАКРЕПЛЁННОМУ тегу из `AGI-ITEMS-REGISTRY/item-template.json` в `AGI-ITEMS/user/<id>`;
+//   2. шаблон берётся по ЗАКРЕПЛЁННОМУ тегу из `WEB4-ITEMS-REGISTRY/item-template.json` в `WEB4-ITEMS/user/<id>`;
 //   3. история шаблона отрезается: у элемента своя история с первым коммитом «born from …» и НЕТ `origin` шаблона —
 //      это самостоятельный проект; в GitHub человека он уходит позже кнопкой (319-5);
 //   4. паспорт `OWN-SERVICE-PROPS.json` получает `id` элемента — все имена элемент читает оттуда;
@@ -21,11 +21,11 @@ import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { REGISTRY_FILE, itemDir, entryDir } = require('../lib/agi-items/paths.cjs')
+const { REGISTRY_FILE, itemDir, entryDir } = require('../lib/web4-items/paths.cjs')
 
 const ROOT = process.cwd()
-const DRAFTS_FILE = join(ROOT, 'data', 'agi-drafts.json')
-const TEMPLATE_FILE = join(ROOT, 'AGI-ITEMS-REGISTRY', 'item-template.json')
+const DRAFTS_FILE = join(ROOT, 'data', 'web4-drafts.json')
+const TEMPLATE_FILE = join(ROOT, 'WEB4-ITEMS-REGISTRY', 'item-template.json')
 const ID = /^[a-z][a-z0-9]{4,23}$/
 const t0 = Date.now()
 const say = (m) => console.log(m)
@@ -52,7 +52,7 @@ if (look !== 'project' && look !== 'own') fail(`облик «${look ?? ''}» —
 // 1. Черновик существует и ещё не родился.
 let drafts = []
 try { drafts = JSON.parse(readFileSync(DRAFTS_FILE, 'utf8')).drafts ?? [] } catch { /* нет файла — нет черновиков */ }
-if (!drafts.some((d) => d?.id === id)) fail(`черновика «${id}» нет — рождается только то, что заведено кнопкой «Создать AGI ITEM»`)
+if (!drafts.some((d) => d?.id === id)) fail(`черновика «${id}» нет — рождается только то, что заведено кнопкой «Создать WEB4 ITEM»`)
 
 const registry = JSON.parse(readFileSync(REGISTRY_FILE, 'utf8'))
 if (registry.services.some((s) => s.id === id)) fail(`«${id}» уже есть в реестре узла — второй раз не рождается`)
@@ -67,10 +67,10 @@ const repoAt = process.argv.indexOf('--repo')
 const repoUrl = repoAt > 0 ? process.argv[repoAt + 1] : null
 if (repoUrl && look !== 'own') fail('элемент из своего репозитория рождается только самостоятельным')
 if (repoUrl && !/^https:\/\/[a-z0-9.-]+\.[a-z]{2,}\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+?(\.git)?\/?$/.test(repoUrl)) fail(`адрес репозитория «${repoUrl}» — не https://хост/владелец/имя`)
-// 367-5: только ваш репозиторий — владелец совпадает с аккаунтом узла (`lib/agi-items/repo-owner.mjs`; та же проверка в двери).
+// 367-5: только ваш репозиторий — владелец совпадает с аккаунтом узла (`lib/web4-items/repo-owner.mjs`; та же проверка в двери).
 let repoOwned = null
 if (repoUrl) {
-  const { checkRepoOwner } = await import('../lib/agi-items/repo-owner.mjs')
+  const { checkRepoOwner } = await import('../lib/web4-items/repo-owner.mjs')
   repoOwned = checkRepoOwner(repoUrl, ROOT)
   if (!repoOwned.ok) fail(repoOwned.message)
 }
@@ -95,7 +95,7 @@ if (repoUrl) {
 
 // 4. Паспорт. 434-3 (владелец 2026-10-07: «делай перенос в шаблон»): шаблон v0.3.71 несёт паспорт ПАПКОЙ (417 —
 // `OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json`, описание — `shortDescription`); прежний файл в корне (`summary`) остаётся для
-// старых тегов и импортированных проектов. Читатель обеих раскладок — `lib/agi-items/element-props.cjs`.
+// старых тегов и импортированных проектов. Читатель обеих раскладок — `lib/web4-items/element-props.cjs`.
 const folderPassport = join(dir, 'OWN-SERVICE-PROPS', 'OWN-SERVICE-PROPS.json')
 const propsFile = existsSync(folderPassport) ? folderPassport : join(dir, 'OWN-SERVICE-PROPS.json')
 if (!existsSync(propsFile)) fail('в шаблоне нет паспорта (OWN-SERVICE-PROPS/ или OWN-SERVICE-PROPS.json) — элементу не у кого спросить своё имя', dir)
@@ -104,7 +104,7 @@ props.id = id
 props.name = id
 // 325-1: СВОЁ ОПИСАНИЕ, А НЕ ШАБЛОННОЕ. ✗ Замерено: рождённый `as8kp` описывал себя словами шаблона («The template of a node
 // element…»). Первичная запись говорит, кто это и откуда; что элемент умеет, пишет его агент (Настройки → Описание, 325-2).
-const bornWords = `AGI element ${id}, born from ${origin.from} ${origin.version} on ${new Date().toISOString().slice(0, 10)}. Its capabilities are written by its agent from Settings → Capabilities description.`
+const bornWords = `WEB4 element ${id}, born from ${origin.from} ${origin.version} on ${new Date().toISOString().slice(0, 10)}. Its capabilities are written by its agent from Settings → Capabilities description.`
 if (propsFile === folderPassport) props.shortDescription = bornWords
 else props.summary = bornWords
 writeFileSync(propsFile, JSON.stringify(props, null, 2) + '\n', 'utf8')
@@ -206,7 +206,7 @@ const IS_WIN = process.platform === 'win32'
 // чистки элемент получал `__NEXT_PROCESSED_ENV` ядра, не читал свой `.env.local` и не знал домена узла — ✗ 2026-10-11: gyr1i
 // (рождён 2026-10-05) вёл «Войти» на несуществующие `auth.lagrix.dev` и `auth.gyr1i.throughsongs.com`. pm2 хранит окружение
 // первого запуска, поэтому ошибка рождения живёт до первого чистого `delete` + `start`.
-const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('AGI_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
+const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
 const pm2 = (args) => spawnSync(IS_WIN ? 'pm2.cmd' : 'pm2', args, { cwd: ROOT, encoding: 'utf8', shell: IS_WIN, windowsHide: true, env: cleanEnv })
 for (const name of [`fractera-svc-${id}`, `fractera-svc-${id}-watch`]) {
   const r = pm2(['start', 'ecosystem.config.cjs', '--only', name])
@@ -221,7 +221,7 @@ stage('запущен в pm2, жду ответа элемента')
 
 // Ждём ответ по ФАКТУ, а не паузой (закон «после pm2 reload ждать порт по факту»).
 // 434-3: путь здоровья — из договора узла при паспорте папкой (NODE-CONTRACT.json), из корневого файла при старой раскладке.
-const health = require('../lib/agi-items/element-props.cjs').readElementProps(dir)?.health?.path ?? '/'
+const health = require('../lib/web4-items/element-props.cjs').readElementProps(dir)?.health?.path ?? '/'
 let answered = 0
 for (let i = 0; i < 60 && !answered; i++) {
   try {

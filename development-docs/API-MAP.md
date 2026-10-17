@@ -13,15 +13,15 @@
 |---|---|---|---|
 | `/api/agents/done` | POST | woken element agent reports work done or closes its terminal | — |
 | `/api/agents/person-lang` | POST | element agent reports the language its person now writes in | — |
-| `/api/agents/sessions` | GET, POST | list and stop the live Claude Code terminals of born AGI elements | — |
+| `/api/agents/sessions` | GET, POST | list and stop the live Claude Code terminals of born WEB4 elements | — |
 | `/api/agents/wake` | POST | wake the Claude Code agent of a node element without a browser | — |
 | `/api/architect/design-config` | GET, POST | read and change the site element's design settings from the core | — |
 | `/api/architect/drafts` | GET, POST | create a new microservice draft with its own architect page group | — |
 | `/api/architect/drafts/[id]` | DELETE | delete a microservice draft after its address is typed back | — |
 | `/api/architect/drafts/[id]/birth` | GET, POST | start a draft's birth into an element and report its progress | — |
 | `/api/architect/environment` | GET, POST | read which environment variables are set and save the OpenAI key | — |
-| `/api/architect/items/[id]` | GET, DELETE | delete a born AGI element after its address is typed back | — |
-| `/api/architect/items/[id]/address` | GET, POST | check and set the core address of a born AGI element | — |
+| `/api/architect/items/[id]` | GET, DELETE | delete a born WEB4 element after its address is typed back | — |
+| `/api/architect/items/[id]/address` | GET, POST | check and set the core address of a born WEB4 element | — |
 | `/api/architect/items/[id]/describe` | POST | take the agent-written element description into the core registry | — |
 | `/api/architect/items/[id]/domain` | GET, POST, PATCH, DELETE | check or attach an own second domain for a born element root | — |
 | `/api/architect/items/[id]/github` | GET, POST, DELETE | connect a born element to its owner's GitHub repository | — |
@@ -59,7 +59,7 @@
 | `/api/node/origin` | GET | tell how far this node's fork is behind the original | — |
 | `/api/node/place` | GET, POST | read or set where this node stands | — |
 | `/api/node/preview-url` | GET | tell the address where an element of this node can be previewed | — |
-| `/api/node/projects` | GET | list every AGI ITEM with its state and last commit | — |
+| `/api/node/projects` | GET | list every WEB4 ITEM with its state and last commit | — |
 | `/api/node/reach` | GET, POST | measure and connect a service's address on the node's own domain | — |
 | `/api/node/review-inbox` | POST | element agent leaves a self-review finding about something outside it | — |
 | `/api/node/state` | GET | report how this node is reachable and whether it is walled off | — |

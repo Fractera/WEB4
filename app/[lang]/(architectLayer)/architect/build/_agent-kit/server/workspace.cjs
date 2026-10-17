@@ -9,14 +9,14 @@
 // одна сессия Claude Code и один Telegram-бот. 🪦 До 269 здесь стояло `AGENT_SERVICE = 'auth'`.
 //
 // 🔒 ДВЕ РАБОЧИЕ ПАПКИ, И ВЫБОР МЕЖДУ НИМИ — ДАННЫЕ, А НЕ ВЕТКА ПО ИМЕНИ (275):
-//   `agi-item` — папка элемента `AGI-ITEMS/<kind>/<id>`, как было: агент службы заперт её деревом;
+//   `web4-item` — папка элемента `WEB4-ITEMS/<kind>/<id>`, как было: агент службы заперт её деревом;
 //   `node`     — корень узла: так живёт агент САМОГО узла (вкладка «Строительство»), потому что его
 //                предмет — код узла, и `CLAUDE.md` узла лежит в корне.
 // Какая из двух — сказано в манифесте установки `architect/<группа>/agent-kit.json`, который пишет
 // установщик. 🛑 Имени конкретной группы здесь нет и быть не должно: комплект переносим.
 //
 // 🔒 ИМЯ ПРОВЕРЯЕТСЯ ПО МАНИФЕСТУ, РЕЕСТРУ И ДИСКУ: службы, которой нет в
-// `AGI-ITEMS-REGISTRY/agi-items.json` или в `AGI-ITEMS/<kind>/<id>`, не существует — мост отказывает
+// `WEB4-ITEMS-REGISTRY/web4-items.json` или в `WEB4-ITEMS/<kind>/<id>`, не существует — мост отказывает
 // словами, а не рождает агента в чужой папке. Имя приходит из браузера, поэтому и форма имени
 // проверяется: путь из него собирается.
 
@@ -29,11 +29,11 @@ const ROOT = process.cwd()
 const ID_SHAPE = /^[a-z][a-z0-9-]{0,39}$/
 
 // 🛑 ВТОРАЯ КОПИЯ ЗНАНИЯ О ПУТИ, И ОНА НАМЕРЕННАЯ: копия комплекта уезжает в папку службы целиком и не
-// имеет права зависеть от `lib/agi-items/paths.cjs` узла. Расхождение ловит `npm run check:agent-kits`.
+// имеет права зависеть от `lib/web4-items/paths.cjs` узла. Расхождение ловит `npm run check:agent-kits`.
 // Узел 343: папка следует адресу элемента (`data/services/<id>/address.json`); не перенесена — папка по id.
 const LABEL = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/
 const itemDir = (id, kind) => {
-  const base = path.join(ROOT, 'AGI-ITEMS', kind === 'user' ? 'user' : 'core')
+  const base = path.join(ROOT, 'WEB4-ITEMS', kind === 'user' ? 'user' : 'core')
   let a = null
   try { a = JSON.parse(readFileSync(path.join(ROOT, 'data', 'services', id, 'address.json'), 'utf8')).address } catch { /* адреса нет */ }
   if (typeof a === 'string' && LABEL.test(a) && a !== id && existsSync(path.join(base, a))) return path.join(base, a)
@@ -43,7 +43,7 @@ const ARCHITECT = path.join(ROOT, 'app', '[lang]', '(architectLayer)', 'architec
 
 function registered() {
   try {
-    const reg = JSON.parse(readFileSync(path.join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8'))
+    const reg = JSON.parse(readFileSync(path.join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8'))
     return Array.isArray(reg.services) ? reg.services.filter((s) => s && typeof s.id === 'string') : []
   } catch {
     return []
@@ -74,7 +74,7 @@ function serviceDir(service) {
 }
 
 /**
- * Рождённый ли это AGI элемент (узел 326): запись реестра `kind: user` с `born` и папка на диске. Только таких обслуживает
+ * Рождённый ли это WEB4 элемент (узел 326): запись реестра `kind: user` с `born` и папка на диске. Только таких обслуживает
  * ОБЩАЯ копия комплекта (`architect/[item]`) — встроенные службы узла через неё агента не получают.
  */
 function isBornItem(service) {

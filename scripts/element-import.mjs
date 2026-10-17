@@ -1,7 +1,7 @@
-// ИМПОРТ ПРОЕКТА НА МЕСТО AGI ITEM (шаг 374-6). `node scripts/element-import.mjs <id> <owner/name>` — зовёт дверь ядра через
+// ИМПОРТ ПРОЕКТА НА МЕСТО WEB4 ITEM (шаг 374-6). `node scripts/element-import.mjs <id> <owner/name>` — зовёт дверь ядра через
 // `spawn-free.mjs` (работа длится минуты: архив, скачивание, сборка; пересборка ядра не должна её убить).
 //
-// Слово владельца 2026-10-02: «импортировать существующей проект на место того AGI ITEM который существует сейчас. Например
+// Слово владельца 2026-10-02: «импортировать существующей проект на место того WEB4 ITEM который существует сейчас. Например
 // пользователь пытался сделать красивый сайт … решил купить. Приехал новый встал на место старого»; собственный ключ элемента —
 // «возможность подключить сюда другой источник и его ключ и начать работать с ним»; старая история — «y» (остаётся архивом в
 // прежнем репозитории).
@@ -11,15 +11,15 @@
 //      прежнего репозитория — отказ: иначе история пропала бы, а решение владельца — сохранить её.
 //   2. Новый проект скачивается целиком в соседнюю папку ключом элемента (его кладёт дверь до запуска).
 //   3. Чужой проект без паспорта получает паспорт, запускатель и файлы агента тем же кирпичом, что рождение из репозитория (367).
-//   4. Служба останавливается, папки меняются местами (прежняя — в `AGI-ITEMS/.replaced/`), Windows держит файлы живого процесса.
+//   4. Служба останавливается, папки меняются местами (прежняя — в `WEB4-ITEMS/.replaced/`), Windows держит файлы живого процесса.
 //   5. Установщик `--only <id>` собирает и пишет окружение; служба поднимается; id, порт, адрес и домен — прежние.
 // Ход — `data/services/<id>/import.json`.
 
 import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
-import paths from '../lib/agi-items/paths.cjs'
-import { syncRegistryMap } from '../lib/agi-items/registry-map.mjs'
+import paths from '../lib/web4-items/paths.cjs'
+import { syncRegistryMap } from '../lib/web4-items/registry-map.mjs'
 
 const ROOT = process.cwd()
 const IS_WIN = process.platform === 'win32'
@@ -49,7 +49,7 @@ function readToken(file) {
 }
 // 🛑 Чистое окружение (351): импорт зовёт дверь ядра (сервер Next) — без чистки элемент получил бы `__NEXT_PROCESSED_ENV` ядра и не
 // прочитал бы свой `.env.local`. То же для установщика.
-const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('AGI_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
+const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
 const pm2 = (args) => spawnSync(IS_WIN ? 'pm2.cmd' : 'pm2', args, { cwd: ROOT, encoding: 'utf8', shell: IS_WIN, windowsHide: true, env: cleanEnv })
 
 if (!id || !/^[a-z][a-z0-9-]{0,39}$/.test(id) || !target || !/^[A-Za-z0-9-]{1,39}\/[A-Za-z0-9._-]{1,100}$/.test(target)) {
@@ -103,7 +103,7 @@ git(['remote', 'set-url', 'origin', `https://github.com/${target}.git`], tmp)
 if (!existsSync(join(tmp, 'OWN-SERVICE-PROPS.json'))) {
   const { prepareRepoElement } = await import('./repo-element.mjs')
   let template = null
-  try { template = JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'item-template.json'), 'utf8')) } catch { /* шаблона нет */ }
+  try { template = JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'item-template.json'), 'utf8')) } catch { /* шаблона нет */ }
   const r = prepareRepoElement({ dir: tmp, id, template, root: ROOT, git: (args, cwd) => git(args, cwd) })
   if (!r.ok) fail(`проект не распознан: ${r.reason}`)
 }
@@ -149,6 +149,6 @@ const inst = spawnSync(process.execPath, [join(ROOT, 'scripts', 'services-instal
 const ok = /===SERVICES_INSTALL_OK===/.test(`${inst.stdout ?? ''}`)
 for (const n of names) pm2(['start', 'ecosystem.config.cjs', '--only', n])
 pm2(['save'])
-if (!ok) fail('новый проект не собрался — прежняя версия лежит в AGI-ITEMS/.replaced и в прежнем репозитории; журнал — в выводе установщика')
+if (!ok) fail('новый проект не собрался — прежняя версия лежит в WEB4-ITEMS/.replaced и в прежнем репозитории; журнал — в выводе установщика')
 save('done', { previous: state.repo, replacedFolder: trash, detached: detach })
 console.log(`===IMPORT_OK=== ${id} ← ${target} (прежняя история — ${state.repo})${detach ? ' — отвязан от источника' : ''}`)

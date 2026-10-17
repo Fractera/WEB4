@@ -36,7 +36,7 @@ export function githubWidget(lang: string): ReactNode {
         </Link>
         <Small>{words.connectHint}</Small>
       </div>} />
-      {/* 374-2/374-3: репозитории всех AGI ITEMS — создаёт узел по ключу, отправка кнопкой. */}
+      {/* 374-2/374-3: репозитории всех WEB4 ITEMS — создаёт узел по ключу, отправка кнопкой. */}
       <ElementRepos words={elementReposWords(lang)} lang={lang} />
     </div>
   )

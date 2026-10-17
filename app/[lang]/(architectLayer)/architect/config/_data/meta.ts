@@ -2,7 +2,7 @@ import type { WorkspacePageMeta } from '@/lib/collection/types'
 
 export const meta: WorkspacePageMeta = {
   slug: 'config',
-  // Элемент узла CONFIG (AGI-ITEMS/core/config) — клон вкладки «Данные», в меню сразу под ней.
+  // Элемент узла CONFIG (WEB4-ITEMS/core/config) — клон вкладки «Данные», в меню сразу под ней.
   order: 24.5,
   icon: 'sliders',
 }

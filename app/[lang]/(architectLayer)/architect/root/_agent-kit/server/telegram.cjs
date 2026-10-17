@@ -198,7 +198,7 @@ function githubRule(service) {
     if (JSON.parse(readFileSync(manifestFile, 'utf8')).workspace === 'node') return []
   } catch { /* общая копия [item] или служба без манифеста — элемент */ }
   const script = path.join(process.cwd(), 'scripts', 'element-github-push.mjs')
-  return ['--append-system-prompt', `GitHub rule of this AGI ITEM (node step 374). When a task comes through the Telegram channel, finish it, commit your changes and immediately send them to GitHub by running: node "${script}" ${service} — then tell the person the line it printed (===GITHUB_PUSH_OK=== or the reason). For a task typed in this terminal, commit as your instructions say and send to GitHub only when the person asks — with the same command.`]
+  return ['--append-system-prompt', `GitHub rule of this WEB4 ITEM (node step 374). When a task comes through the Telegram channel, finish it, commit your changes and immediately send them to GitHub by running: node "${script}" ${service} — then tell the person the line it printed (===GITHUB_PUSH_OK=== or the reason). For a task typed in this terminal, commit as your instructions say and send to GitHub only when the person asks — with the same command.`]
 }
 
 // ── СИСТЕМНОЕ СООБЩЕНИЕ О СОСТОЯНИИ ───────────────────────────────────────────
@@ -238,7 +238,7 @@ async function statusMessage(service) {
 
 // ── УЗЕЛ ЧИТАЕТ БОТА, ПОКА ТЕРМИНАЛ ВЫКЛЮЧЕН ─────────────────────────────────
 
-const idleKey = (service) => `__agiTelegramIdle:${service}`
+const idleKey = (service) => `__web4TelegramIdle:${service}`
 
 async function idleTick(service) {
   const token = storedToken(service)

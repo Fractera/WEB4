@@ -5,7 +5,7 @@ import { join } from "node:path"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
+import { isBornElement } from "@/lib/web4-items/element-delete"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"
 import liveLog from "@/lib/deploy/live-log.cjs"
 

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { AppDialog } from "@/components/dialog/app-dialog.client"
 import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
-import type { AgiDraftsUi } from "../_i18n/agi-drafts.i18n"
+import type { Web4DraftsUi } from "../_i18n/web4-drafts.i18n"
 import { announceGithubState } from "@/components/node-state/github-token-alarm.client"
 
 // «РОДИТЬ ЭЛЕМЕНТ» (узел, шаг 319-3; 367 — вопрос об облике). Кнопка → окно подтверждения (что произойдёт, сколько займёт и
@@ -21,14 +21,14 @@ import { announceGithubState } from "@/components/node-state/github-token-alarm.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 const EVERY_MS = 2000
-// Та же форма, что у двери (`isRepoUrl` в lib/agi-items/birth.ts): окно подсказывает, решает дверь.
+// Та же форма, что у двери (`isRepoUrl` в lib/web4-items/birth.ts): окно подсказывает, решает дверь.
 const REPO_URL = /^https:\/\/[a-z0-9.-]+\.[a-z]{2,}\/[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+?(\.git)?\/?$/
 
 type State = { state: "idle" | "running" | "done" | "failed"; lines: string[]; reason?: string; port?: number }
 
 // `born` — элемент уже в реестре узла (рождение дошло до записи и упало позже): кнопки нет, подсказка — повтор установки.
 // Иначе упавшее рождение ничего не записало, и подсказка — нажать кнопку снова.
-export function BirthButton({ id, ui, dialogUi, born = false }: { id: string; ui: AgiDraftsUi; dialogUi: AppDialogUi; born?: boolean }) {
+export function BirthButton({ id, ui, dialogUi, born = false }: { id: string; ui: Web4DraftsUi; dialogUi: AppDialogUi; born?: boolean }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [starting, setStarting] = useState(false)

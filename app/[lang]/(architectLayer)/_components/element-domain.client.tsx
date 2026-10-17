@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { ElementSettingsUi } from "../_i18n/element-settings.i18n"
-import type { ElementDomainRecord, Primary } from "@/lib/agi-items/element-domain"
+import type { ElementDomainRecord, Primary } from "@/lib/web4-items/element-domain"
 
 // «ГЛАВНОЕ ЗЕРКАЛО» — ВЫБОР ИЗ ДОМЕНОВ УЗЛА (324-3). Слово владельца 2026-09-27: «вместо того чтобы вводить свой домен я тебя
 // просил сделать выпадающий список и указать какие домены уже прикреплены а какие ещё свободны и какие я могу привязать к

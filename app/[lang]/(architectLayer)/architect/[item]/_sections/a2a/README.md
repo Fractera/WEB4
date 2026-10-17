@@ -5,7 +5,7 @@
 > addresses redirect (`MOVED_PAGES`).
 
 > The section has no folder of its own: every element page is drawn by one route, `[item]/[[...page]]/page.tsx`, from the menu in
-> `lib/agi-items/item-tree.ts` (section slug `connectors`). This folder is private (`_`), so it never becomes a route; it holds
+> `lib/web4-items/item-tree.ts` (section slug `connectors`). This folder is private (`_`), so it never becomes a route; it holds
 > only this description.
 
 ## What A2A means here (owner 2026-10-09, step 436)

@@ -23,7 +23,7 @@ function designBase(): string | null {
   const env = process.env.DESIGN_SERVICE_URL?.trim().replace(/\/+$/, "")
   if (env) return env
   try {
-    const reg = JSON.parse(readFileSync(join(process.cwd(), "AGI-ITEMS-REGISTRY", "agi-items.json"), "utf8")) as { services?: { id?: string; port?: number }[] }
+    const reg = JSON.parse(readFileSync(join(process.cwd(), "WEB4-ITEMS-REGISTRY", "web4-items.json"), "utf8")) as { services?: { id?: string; port?: number }[] }
     const port = reg.services?.find((s) => s.id === "design")?.port
     return typeof port === "number" && Number.isInteger(port) ? `http://127.0.0.1:${port}` : null
   } catch {

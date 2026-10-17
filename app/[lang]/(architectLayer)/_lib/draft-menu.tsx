@@ -1,11 +1,11 @@
 import "server-only"
 import type { WorkspaceItem } from '@/lib/content/blocks/types'
-import { listDrafts } from '@/lib/agi-items/drafts'
-import { addressOf } from '@/lib/agi-items/element-address'
-import { ITEM_TREE, TREE_GROUPS, treeLang, treeVisible, type TreePage } from '@/lib/agi-items/item-tree'
+import { listDrafts } from '@/lib/web4-items/drafts'
+import { addressOf } from '@/lib/web4-items/element-address'
+import { ITEM_TREE, TREE_GROUPS, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { elementMessengers, elementPassport, hasCatalog } from '@/lib/a2a/element-passport'
-import { hasDoc } from '@/lib/agi-items/element-docs'
-import { agiDraftsUi } from '../_i18n/agi-drafts.i18n'
+import { hasDoc } from '@/lib/web4-items/element-docs'
+import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 import { CreateDraftButton } from '../_components/create-draft-button.client'
 import { ARCHITECT_HOME } from './architect-menu'
 
@@ -19,7 +19,7 @@ import { ARCHITECT_HOME } from './architect-menu'
 
 const ANCHOR = 'design'
 // 327 (слово владельца 2026-09-27): «после вкладки ядро добавим горизонтальный сепаратор, под которым слева в бордюр напишем более
-// мелким шрифтом нативные AGI ITEMS. После вкладки дизайн добавим сепаратор … кастомные AGI ITEMS. Задача визуально разделить
+// мелким шрифтом нативные WEB4 ITEMS. После вкладки дизайн добавим сепаратор … кастомные WEB4 ITEMS. Задача визуально разделить
 // меню на зоны». Якорь первой зоны — пункт «Ядро» (`build`); вторая встаёт за «Дизайном», над кнопкой создания.
 const CORE = 'build'
 
@@ -37,7 +37,7 @@ function zone(label: string): WorkspaceItem {
 
 /** Меню слоя с кнопкой и группами черновиков, вставленными за «Дизайном». */
 export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: string): WorkspaceItem[] {
-  const ui = agiDraftsUi(lang)
+  const ui = web4DraftsUi(lang)
   const l = treeLang(lang)
   const at = (path: string) => `/${lang}${path}`
 

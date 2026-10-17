@@ -18,7 +18,7 @@
 // 🔒 НИЧЕГО НЕ ПИШЕМ: только запросы на чтение. Коммит и пуш — отдельное решение человека.
 
 const API = 'https://api.github.com'
-const UA = 'fractera-agi-node'
+const UA = 'fractera-web4-node'
 
 async function call(token, url) {
   try {

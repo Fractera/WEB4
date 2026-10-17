@@ -4,7 +4,7 @@
 //   npm run agent-kit:add -- <группа> --node             установить самому узлу (агент живёт в корне)
 //   npm run agent-kit:add -- <группа> --page <шаблон>=<имя>[:<порядок>]   назвать страницу по-своему
 //   npm run agent-kit:add -- <группа> --force            переустановить поверх
-//   npm run agent-kit:add -- [item] --born               ОДНА общая копия для всех рождённых AGI элементов (326):
+//   npm run agent-kit:add -- [item] --born               ОДНА общая копия для всех рождённых WEB4 элементов (326):
 //                                                        `architect/[item]/_agent-kit` + двери с именем элемента из адреса;
 //                                                        страниц не ставит — их рисует дерево элемента `[[...page]]`
 //   npm run agent-kit:update -- <группа>                 повторить установку с ТЕМИ ЖЕ параметрами
@@ -26,7 +26,7 @@
 //   agent-api/<дверь>/route.ts  ← из `api/<дверь>/route.ts.tpl`
 //
 // 🛑 ДВА РОДА РАБОЧЕЙ ПАПКИ, И ОНИ ПРОВЕРЯЮТСЯ ПО-РАЗНОМУ:
-//   служба — обязана стоять в `AGI-ITEMS-REGISTRY/agi-items.json` и лежать папкой `AGI-ITEMS/<kind>/<id>`;
+//   служба — обязана стоять в `WEB4-ITEMS-REGISTRY/web4-items.json` и лежать папкой `WEB4-ITEMS/<kind>/<id>`;
 //   узел   — `--node`: агент рождается в корне узла, реестр не спрашивается.
 // И в обоих случаях у группы должна существовать своя группа страниц `architect/<группа>/_data/index.ts`:
 // комплект кладёт себя В неё, а не придумывает группу молча.
@@ -101,9 +101,9 @@ function pagesFromArgs() {
 }
 
 function stamp(text, page) {
-  // 326: у общей копии имени службы нет — в коде метка `__BORN__` (дверь возьмёт имя из адреса), в словах — «born AGI element».
+  // 326: у общей копии имени службы нет — в коде метка `__BORN__` (дверь возьмёт имя из адреса), в словах — «born WEB4 element».
   let out = asBorn
-    ? text.split('"__SERVICE__"').join('"__BORN__"').split('__SERVICE__').join('born AGI element')
+    ? text.split('"__SERVICE__"').join('"__BORN__"').split('__SERVICE__').join('born WEB4 element')
     : text.split('__SERVICE__').join(service)
   if (page) out = out.split('__SLUG__').join(page.slug).split('__ORDER__').join(String(page.order))
   return out
@@ -133,14 +133,14 @@ const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath
 // 🔒 `--update` ПОВТОРЯЕТ ПРЕЖНЮЮ УСТАНОВКУ, А НЕ СТАВИТ ЗАНОВО ПО УМОЛЧАНИЯМ. Иначе обновление мастера
 // молча переименовало бы страницы узла обратно в `claude-code` и сломало адреса, которые уже раздали.
 const namedPages = args.includes('--page')
-const workspace = asBorn ? 'born-items' : asNode || (update && previous?.workspace === 'node') ? 'node' : 'agi-item'
+const workspace = asBorn ? 'born-items' : asNode || (update && previous?.workspace === 'node') ? 'node' : 'web4-item'
 const pages = asBorn ? [] : update && !namedPages && Array.isArray(previous?.pages) && previous.pages.length ? previous.pages : pagesFromArgs()
 
-if (workspace === 'agi-item') {
-  const reg = JSON.parse(readFileSync(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'), 'utf8'))
+if (workspace === 'web4-item') {
+  const reg = JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8'))
   const entry = reg.services?.find((s) => s?.id === service)
-  if (!entry) fail(`службы «${service}» нет в AGI-ITEMS-REGISTRY/agi-items.json (агенту самого узла нужен флаг --node)`)
-  const itemDir = join(ROOT, 'AGI-ITEMS', entry.kind === 'user' ? 'user' : 'core', service)
+  if (!entry) fail(`службы «${service}» нет в WEB4-ITEMS-REGISTRY/web4-items.json (агенту самого узла нужен флаг --node)`)
+  const itemDir = join(ROOT, 'WEB4-ITEMS', entry.kind === 'user' ? 'user' : 'core', service)
   if (!existsSync(itemDir)) fail(`нет папки ${itemDir} — агенту негде жить`)
 }
 
@@ -179,7 +179,7 @@ writeFileSync(
   )}\n`,
 )
 
-const where = workspace === 'node' ? 'корень узла' : workspace === 'born-items' ? 'AGI-ITEMS/user/<id> каждого рождённого элемента' : `AGI-ITEMS/<kind>/${service}`
+const where = workspace === 'node' ? 'корень узла' : workspace === 'born-items' ? 'WEB4-ITEMS/user/<id> каждого рождённого элемента' : `WEB4-ITEMS/<kind>/${service}`
 console.log(`agent-kit: architect/${service}/ — _agent-kit (версия ${version}), страницы ${pages.map((p) => p.slug).join(', ')}, agent-api/{${DOORS.join(',')}}`)
 console.log(`agent-kit: рабочая папка агента — ${where}`)
 console.log(`===AGENT_KIT_OK=== группа «${service}» ${update ? 'обновлена' : 'получила комплект'}. Пересоберите узел: npm run serve:rebuild`)

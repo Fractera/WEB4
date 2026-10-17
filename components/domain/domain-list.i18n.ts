@@ -33,7 +33,7 @@ export type DomainListWords = {
 
 const DICT: Record<string, DomainListWords> = {
   en: {
-    intro: "Every AGI element of this project opens on a subdomain of the main domain. Any of them can also become a standalone resource on a domain of its own: add the domain here, then connect it on the element's page — Settings → Main mirror.",
+    intro: "Every WEB4 element of this project opens on a subdomain of the main domain. Any of them can also become a standalone resource on a domain of its own: add the domain here, then connect it on the element's page — Settings → Main mirror.",
     primaryTitle: "Main domain",
     primaryNone: "not connected yet",
     primaryEmpty: "The node has no main domain yet. Add any domain below: the node takes it through its steps, and when the zone is active you make it the node's main domain right there.",
@@ -142,7 +142,7 @@ const DICT: Record<string, DomainListWords> = {
     },
   },
   ru: {
-    intro: "Каждый AGI элемент этого проекта открывается на поддомене основного домена. Любой из них можно сделать и самостоятельным ресурсом на собственном домене: добавьте домен здесь, а затем подключите его на странице элемента — «Настройки» → «Главное зеркало».",
+    intro: "Каждый WEB4 элемент этого проекта открывается на поддомене основного домена. Любой из них можно сделать и самостоятельным ресурсом на собственном домене: добавьте домен здесь, а затем подключите его на странице элемента — «Настройки» → «Главное зеркало».",
     primaryTitle: "Основной домен",
     primaryNone: "ещё не подключён",
     primaryEmpty: "У узла пока нет основного домена. Добавьте любой домен ниже: узел проведёт его по ступеням, и когда зона станет активной, там же сделайте его основным доменом узла.",

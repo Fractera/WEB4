@@ -8,7 +8,7 @@ This folder is the **master**: the only source of the kit. Services get full cop
 | Page | Address | What it does |
 |---|---|---|
 | Claude Code subscription | `/{lang}/architect/<service>/claude-code` | sign-in state of `claude` on this machine and sign-in in place. **One per computer**: every service shows the same state |
-| Terminal | `/{lang}/architect/<service>/terminal` | a live Claude Code in `AGI-ITEMS/<kind>/<service>/`. **Started and stopped by this island only** — the page, or the same island in the Preview drawer (336: `initialPaste` puts a task into the paste window, `keyHref` points voice to the OpenAI key field; the paste window is the tool `_tools/terminal-paste`) |
+| Terminal | `/{lang}/architect/<service>/terminal` | a live Claude Code in `WEB4-ITEMS/<kind>/<service>/`. **Started and stopped by this island only** — the page, or the same island in the Preview drawer (336: `initialPaste` puts a task into the paste window, `keyHref` points voice to the OpenAI key field; the paste window is the tool `_tools/terminal-paste`) |
 | Telegram bot | `/{lang}/architect/<service>/telegram` | BotFather → token → admission by link → a state card. No start or stop buttons here |
 
 **One service = one Claude Code session = one Telegram bot.** When the service bot is connected, the
@@ -32,7 +32,7 @@ architect/kits/_agent-kit/           MASTER — never edit a service copy by han
   install.mjs · README.md
 
 architect/<group>/                   A COPY, owned by the group
-  agent-kit.json                     install parameters: service id, workspace (agi-item | node),
+  agent-kit.json                     install parameters: service id, workspace (web4-item | node),
                                      master fingerprint, page names and order. Written by the installer,
                                      read by workspace.cjs and by check.mjs — there is no second list
   _agent-kit/                        copy of core/
@@ -57,12 +57,12 @@ process, while there are as many kit copies as services. The mount knows no serv
 
 ## Before installing — check all of these
 
-1. The service is in `AGI-ITEMS-REGISTRY/agi-items.json` (`"id": "<service>"`, `"kind": "core"|"user"`) and
-   the folder `AGI-ITEMS/<kind>/<service>/` exists. The agent is born in that folder — **the folder is the agent's identity** (`CLAUDE.md`,
+1. The service is in `WEB4-ITEMS-REGISTRY/web4-items.json` (`"id": "<service>"`, `"kind": "core"|"user"`) and
+   the folder `WEB4-ITEMS/<kind>/<service>/` exists. The agent is born in that folder — **the folder is the agent's identity** (`CLAUDE.md`,
    settings and tools are read from there).
    **The node's own agent skips this check entirely:** install it with `--node`, and the agent is born in
    the node root, because its subject is the node's own code. What such an agent may see inside that root
-   is the node's business, not the kit's: `.claude/settings.json` of the node denies `AGI-ITEMS/**` so the
+   is the node's business, not the kit's: `.claude/settings.json` of the node denies `WEB4-ITEMS/**` so the
    node agent does not reach into the services. That is a rule of Claude Code, not an OS sandbox.
 2. The service has its own page group `architect/<service>/` (`_data/index.ts`). The installer puts the
    kit INTO it and refuses to invent a group.
@@ -80,7 +80,7 @@ process, while there are as many kit copies as services. The mount knows no serv
 ```
 npm run agent-kit:add -- <group>                          install into a service
 npm run agent-kit:add -- <group> --node                   install for the node itself (agent in the node root)
-npm run agent-kit:add -- [item] --born                    ONE shared copy for every born AGI element (see below)
+npm run agent-kit:add -- [item] --born                    ONE shared copy for every born WEB4 element (see below)
 npm run agent-kit:add -- <group> --page <tpl>=<name>[:<order>]   name a page your own way (repeatable)
 npm run agent-kit:add -- <group> --force                  reinstall over an existing copy
 npm run agent-kit:update -- <group>                       copy the current master into an installed group
@@ -115,7 +115,7 @@ of its own.
 3. Negative control: a second service started at the same time has its own `pid` and folder, and
    stopping one does not touch the other.
 
-## Born AGI elements — one shared copy (node step 326)
+## Born WEB4 elements — one shared copy (node step 326)
 
 A born element (registry `kind: user` + `born`, step 319) has no page group of its own: all its pages are ONE dynamic page
 `architect/[item]/[[...page]]`. A usual install would create `architect/<id>/`, and a folder with an exact name beats the
@@ -131,7 +131,7 @@ one copy:
   a person saves the bot token (channel door).
 - Update after a master change: `npm run agent-kit:update -- [item]` (the group name alone selects born mode).
 
-Proven (326): `/ru/as8kp/agent-api/session` → `running:false`, `agentDir` = `AGI-ITEMS/user/as8kp`; start → `running:true`,
+Proven (326): `/ru/as8kp/agent-api/session` → `running:false`, `agentDir` = `WEB4-ITEMS/user/as8kp`; start → `running:true`,
 `cwd` = that folder; `as8kp` and `dso94` at once — different pids, stopping one leaves the other; `/pty/nope` and a draft — refused.
 
 ## First run in a new service

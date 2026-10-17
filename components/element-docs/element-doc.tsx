@@ -1,7 +1,7 @@
 import ReactMarkdown from "react-markdown"
 import remarkGfm from "remark-gfm"
 import { H2, H3, H4, P } from "@/components/ui/typography"
-import type { DocFile } from "@/lib/agi-items/element-docs"
+import type { DocFile } from "@/lib/web4-items/element-docs"
 
 // ONE DOCUMENT OF AN ELEMENT AS A PAGE (step 412-2): the element's Markdown file shown as it is, on the core's text scale.
 // A folder document (steps) shows each file under its own name; an empty folder says so. JSON (the passport) is shown as code.

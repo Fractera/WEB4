@@ -1,9 +1,9 @@
 import "server-only"
 import { mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { dirname, join } from "node:path"
-import { isDnsLabel } from "@/lib/agi-items/dns-label.mjs"
+import { isDnsLabel } from "@/lib/web4-items/dns-label.mjs"
 import { accountOfZone, activationCheck, createZone, getIngress, listAccounts, verifyToken, workersAccess, zoneByName } from "@/lib/domain/cloudflare"
-import { envValue } from "@/lib/agi-items/element-delete"
+import { envValue } from "@/lib/web4-items/element-delete"
 
 // ДОМЕНЫ УЗЛА — СПИСОК, А НЕ ОДИН (шаг 324-1). Слово владельца 2026-09-27: «нужно все то что сделано там превратить в карточке
 // аккордеона … первую карточку может быть открыты карточка первого домена а кроме этого здесь надо позволить подключать больше

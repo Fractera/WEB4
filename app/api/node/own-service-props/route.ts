@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
-import { idOfAddress } from "@/lib/agi-items/element-address"
+import { idOfAddress } from "@/lib/web4-items/element-address"
 import { serviceUrl } from "@/lib/microservices/registry"
 
 // ПАСПОРТ ЭЛЕМЕНТА ГЛАЗАМИ ЯДРА (417). Владелец 2026-10-06: паспорт — главная дверь элемента, «это же Джейсон будет возвращаться в

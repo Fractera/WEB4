@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { isBornElement } from "@/lib/agi-items/element-delete"
+import { isBornElement } from "@/lib/web4-items/element-delete"
 import { EDITABLE, type EditableName, setNames, writeVar } from "@/lib/env-file"
 
 // ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ (336-1). `?target=core` или id рождённого элемента.

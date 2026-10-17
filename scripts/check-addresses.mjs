@@ -5,7 +5,7 @@
 // canonical и hreflang главной ведут туда; прочие адреса того же сайта отвечают 301/308 на главный. ✗ 394: элемент на
 // `roman.<зона>` полгода называл себя адресом корня, и ни один прибор этого не видел.
 //
-// Главный адрес — то же правило, что `domainRecord` (`lib/agi-items/element-domain.ts`, 324-5) и дверь preview-url (393):
+// Главный адрес — то же правило, что `domainRecord` (`lib/web4-items/element-domain.ts`, 324-5) и дверь preview-url (393):
 // `domain.json` → `primary` решает, домен или поддомен; без него — поддомен `<адрес>.<зона>`; корень — `hostname ?? zone`.
 // Сайты — элементы группы `user`; службы ядра (auth, data, config, design) — служебные адреса, не страницы для поиска.
 //
@@ -19,7 +19,7 @@
 import { readFileSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { addressOf } from '../lib/agi-items/address-file.mjs'
+import { addressOf } from '../lib/web4-items/address-file.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const readJson = (f) => { try { return JSON.parse(readFileSync(f, 'utf8')) } catch { return null } }
@@ -39,7 +39,7 @@ if (!node?.zone) {
 }
 const zone = node.zone
 
-const services = readJson(join(ROOT, 'AGI-ITEMS-REGISTRY', 'agi-items.json'))?.services ?? []
+const services = readJson(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'))?.services ?? []
 const sites = services.filter((s) => s.kind === 'user' && (only.length === 0 || only.includes(s.id)))
 
 /** Главный адрес и прочие адреса сайта — правило `domainRecord`. */

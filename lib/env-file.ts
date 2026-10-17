@@ -1,7 +1,7 @@
 import "server-only"
 import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
-import paths from "@/lib/agi-items/paths.cjs"
+import paths from "@/lib/web4-items/paths.cjs"
 import { getService } from "@/lib/microservices/registry"
 
 // ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ ЯДРА И ЭЛЕМЕНТА (шаг 336-1). Слово владельца 2026-09-29: «разработать вкладку переменных окружений

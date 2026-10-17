@@ -3,8 +3,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { addDomain, checkDomain, createDomainZone, domainHolder, extraDomains, nodeKeyState, primaryDomain, removeDomain } from "@/lib/domain/node-domains"
-import { detachDomain } from "@/lib/agi-items/element-domain"
-import { addressOf } from "@/lib/agi-items/address-file.mjs"
+import { detachDomain } from "@/lib/web4-items/element-domain"
+import { addressOf } from "@/lib/web4-items/address-file.mjs"
 
 // ДОМЕНЫ УЗЛА (324-1): «Хостинг → Домен» списком. GET — основной (из лестницы 259) и дополнительные с тем, к какому элементу
 // каждый подключён; POST `{ name }` — добавить, POST `{ name, action: "create-zone" }` — узел создаёт зону сам (конвейер);

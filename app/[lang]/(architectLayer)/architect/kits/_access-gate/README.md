@@ -6,7 +6,7 @@ for a person.
 ## What it gives
 
 The dialog over a closed group of pages of any node element. The owner's word (2026-09-24): «this dialog is a universal
-reusable module … any AGI ITEM always and everywhere uses this logic». It shows the roles the group needs and three
+reusable module … any WEB4 ITEM always and everywhere uses this logic». It shows the roles the group needs and three
 buttons:
 
 - **«I have access — sign in»** — to the node's one sign-in service (`signInRedirectUrl`), asking for the role the page

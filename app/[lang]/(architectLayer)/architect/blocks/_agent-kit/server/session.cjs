@@ -12,7 +12,7 @@
 // 🛑 ПЕРЕЗАПУСК УЗЛА (пересборка, `pm2 restart`) УБИВАЕТ СЕССИИ — процессы `claude` дочерние. Это цена
 // держателя внутри сервера сайта, и страница говорит о ней словами, а не прячет.
 
-const KEY = '__agiTerminalSessions'
+const KEY = '__web4TerminalSessions'
 const BUFFER_BYTES = 256 * 1024
 
 function box() {

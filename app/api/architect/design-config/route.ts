@@ -5,8 +5,8 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
 import { serviceUrl } from "@/lib/microservices/registry"
-import paths from "@/lib/agi-items/paths.cjs"
-import elementProps from "@/lib/agi-items/element-props.cjs"
+import paths from "@/lib/web4-items/paths.cjs"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // ОФОРМЛЕНИЕ САЙТА ИЗ ЯДРА (280-6).
 //

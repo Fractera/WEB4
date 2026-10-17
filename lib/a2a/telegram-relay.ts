@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
-import { nodeZone } from "@/lib/agi-items/drafts"
+import { nodeZone } from "@/lib/web4-items/drafts"
 import { humanAnswerOf, humanQuestionOf, isTextQuestion, type Lang } from "@/lib/a2a/call-text"
 import { clearlyIn, translateTo } from "@/lib/a2a/translate"
 
@@ -153,7 +153,7 @@ async function send(token: string, chat: string, m: { caption: string; file: str
 // была таймером, а не порядком. Рассылка отмечает себя здесь по каждой службе-участнику; `done` ждёт её окончания и только потом
 // спрашивает. Реестр — в `globalThis`: комплект агента живёт в том же процессе ядра, но собирается отдельно.
 type Pending = Map<string, Promise<unknown>>
-const pending = ((globalThis as { __agiRelayPending?: Pending }).__agiRelayPending ??= new Map())
+const pending = ((globalThis as { __web4RelayPending?: Pending }).__web4RelayPending ??= new Map())
 
 /** Разослать вызов: боты вызывающего, принимающего и ядра — у кого подключён; одна пара (бот, чат) — один раз. */
 export function relayCall(call: RelayCall): Promise<{ sent: number; skipped: string[] }> {

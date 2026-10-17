@@ -1,9 +1,9 @@
 import "server-only"
 import { readFileSync } from "node:fs"
 import { join } from "node:path"
-import { elementDir } from "@/lib/agi-items/element-github"
+import { elementDir } from "@/lib/web4-items/element-github"
 import { extensionOf, passportProblems, publishedCard, registryEntryOf } from "@/lib/a2a/passport.mjs"
-import elementProps from "@/lib/agi-items/element-props.cjs"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // ПАСПОРТ ЭЛЕМЕНТА ДЛЯ СТРАНИЦ ЯДРА (шаги 406-3, 406-4): визитка A2A Google v1.0 (`a2a.card`) + расширение Fractera.
 // Страницы левого меню элемента показывают его разделы, своей копии не держат.
