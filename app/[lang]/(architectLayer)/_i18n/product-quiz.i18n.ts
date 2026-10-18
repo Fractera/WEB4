@@ -31,6 +31,17 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     emptyText:
       "A product described before its code needs far less rebuilding later. It takes about fifteen minutes of conversation: who uses the element, what each of them does, which rules hold. After that every new wish first shows what it touches.",
     start: "Start deep planning",
+    legend: { done: "done", "in-progress": "in progress", planned: "planned", none: "no steps yet" },
+    work: {
+      done: "Done",
+      "in-progress": "In progress: step {step}",
+      planned: "Planned: step {step}",
+      none: "No steps yet",
+    },
+    stepState: { planned: "planned", "in-progress": "in progress", done: "done" },
+    stepsTitle: "Development steps of this item",
+    noSteps: "No step of the element serves this item yet.",
+    commit: "commit {commit}",
   },
   ru: {
     loading: "Читаю продуктовый квиз…",
@@ -59,6 +70,17 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     emptyText:
       "Продукт, описанный до кода, потом почти не приходится переделывать. Нужно минут пятнадцать разговора: кто пользуется элементом, что делает каждый и какие правила действуют. После этого каждое новое пожелание сначала показывает, что оно затронет.",
     start: "Начать глубокое планирование",
+    legend: { done: "завершено", "in-progress": "в работе", planned: "запланировано", none: "шагов ещё нет" },
+    work: {
+      done: "Завершено",
+      "in-progress": "В работе: шаг {step}",
+      planned: "Запланировано: шаг {step}",
+      none: "Шагов ещё нет",
+    },
+    stepState: { planned: "запланирован", "in-progress": "в работе", done: "завершён" },
+    stepsTitle: "Шаги разработки этого пункта",
+    noSteps: "Ни один шаг элемента пока не служит этому пункту.",
+    commit: "коммит {commit}",
   },
 }
 
