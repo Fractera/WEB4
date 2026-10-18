@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
+import { DocItems, DocLinks } from "@/components/lagrix/doc-items"
 import type { NodeWalletWords } from "./node-wallet.i18n"
 
 // КОШЕЛЁК УЗЛА — ОДИН ОСТРОВОК НА ЧЕТЫРЕ МЕСТА (530-1). Владелец 2026-10-18: «кладка с кошельком на уровне ядра будет продублировано её
@@ -63,27 +64,28 @@ export function NodeWalletBody({ words, initial }: { words: NodeWalletWords; ini
           <Button variant="outline" size="sm" disabled={busy} onClick={() => send("DELETE")}>{words.disconnect}</Button>
         </div>
       ) : (
-        <>
-          <form className="flex flex-wrap items-center gap-3" onSubmit={(e) => { e.preventDefault(); send("POST") }}>
-            <Input className="max-w-md font-mono" value={address} onChange={(e) => setAddress(e.target.value)} placeholder={words.placeholder} aria-label={words.placeholder} spellCheck={false} />
-            <Button type="submit" disabled={busy || !address.trim()}>{words.connect}</Button>
-          </form>
-          <Accordion type="single" collapsible className="flex flex-col gap-4">
-            <AccordionItem value="wallet-before" className="rounded-lg border border-destructive/40 bg-destructive/5 px-4" data-wallet-before>
-              <AccordionTrigger className="text-destructive">{words.beforeTitle}</AccordionTrigger>
-              <AccordionContent>
-                <ul className="list-disc space-y-1 pl-5 text-foreground">{words.before.map((x) => <li key={x}>{x}</li>)}</ul>
-              </AccordionContent>
-            </AccordionItem>
-            <AccordionItem value="wallet-after" className="rounded-lg border border-primary/30 bg-primary/5 px-4" data-wallet-after>
-              <AccordionTrigger className="text-primary">{words.afterTitle}</AccordionTrigger>
-              <AccordionContent>
-                <ul className="list-disc space-y-1 pl-5 text-foreground">{words.after.map((x) => <li key={x}>{x}</li>)}</ul>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        </>
+        <form className="flex flex-wrap items-center gap-3" onSubmit={(e) => { e.preventDefault(); send("POST") }}>
+          <Input className="max-w-md font-mono" value={address} onChange={(e) => setAddress(e.target.value)} placeholder={words.placeholder} aria-label={words.placeholder} spellCheck={false} />
+          <Button type="submit" disabled={busy || !address.trim()}>{words.connect}</Button>
+        </form>
       )}
+      {/* 533: что поступает и что платится — при любом состоянии; «без кошелька» — только пока его нет. */}
+      <Accordion type="single" collapsible defaultValue="wallet-income" className="flex flex-col gap-4">
+        {!wallet && (
+          <AccordionItem value="wallet-before" className="rounded-lg border border-destructive/40 bg-destructive/5 px-4" data-wallet-before>
+            <AccordionTrigger className="text-destructive">{words.beforeTitle}</AccordionTrigger>
+            <AccordionContent><DocItems lang={words.lang} items={words.before} /></AccordionContent>
+          </AccordionItem>
+        )}
+        <AccordionItem value="wallet-income" className="rounded-lg border border-primary/30 bg-primary/5 px-4" data-wallet-income>
+          <AccordionTrigger className="text-primary">{words.incomeTitle}</AccordionTrigger>
+          <AccordionContent><DocItems lang={words.lang} items={words.income} /></AccordionContent>
+        </AccordionItem>
+        <AccordionItem value="wallet-costs" className="rounded-lg border px-4" data-wallet-costs>
+          <AccordionTrigger>{words.costsTitle}</AccordionTrigger>
+          <AccordionContent><DocItems lang={words.lang} items={words.costs} /></AccordionContent>
+        </AccordionItem>
+      </Accordion>
       {error && <p className="text-sm text-destructive" role="alert">{error}</p>}
     </div>
   )
@@ -95,7 +97,7 @@ export function NodeWalletCard({ words, note }: { words: NodeWalletWords; note?:
     <Card className="my-4 max-w-3xl" data-node-wallet-card>
       <CardHeader>
         <CardTitle className="text-xl font-semibold">{words.title}</CardTitle>
-        <CardDescription>{words.lead}</CardDescription>
+        <CardDescription>{words.lead} <DocLinks lang={words.lang} docs={words.leadDocs} /></CardDescription>
         {note && <CardDescription className="text-foreground">{note}</CardDescription>}
       </CardHeader>
       <CardContent>

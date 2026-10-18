@@ -3,7 +3,9 @@ import type { DocItem, LagrixDoc } from "@/lib/lagrix-docs"
 // СЛОВА РАЗДЕЛА «СУПЕР УЗЕЛ» (530-3, 531). Каждое утверждение о сети — со ссылкой на документ Lagrix (слово владельца 2026-10-18).
 // Цифры — по журналу 000: комиссия до 5 % сетевой части (запись 25); при элементе, полученном по F2F, 20 % комиссии — автору, то есть 4 %
 // сделки в котёл и 1 % автору; при своём элементе — все 5 % в котёл (запись 51); поиск $0,01 (39), доставка $0,001 (52), метка — $100 на
-// девять голосов (49); денежных штрафов нет — залог снят вместе с монетой (42), доказавший нарушение получает награду из комиссий (док. 06).
+// девять голосов (49); доля супер-узла, не прошедшего минимум, и доля основателя (41) остаются в котле прошедших (05 §5.6, 09 §9.3) —
+// это перераспределение, которое владелец 2026-10-18 назвал среди выплат; доказавший нарушение получает награду из комиссий (док. 06).
+// Оба случая записи 51 называются вместе — ответ владельца 2026-10-18 на вопрос о 4 % и 5 %: «Оставить запись 51».
 // `en` основа, `ru` перевод.
 
 export type HardwareRow = "cpus" | "aes" | "ram" | "disk" | "nvme" | "bandwidth" | "ipv4" | "ipv6"
@@ -78,12 +80,13 @@ const UI: Record<"en" | "ru", SuperNodeWords> = {
     incomeTitle: "What a super-node is paid for",
     income: [
       D("The deal fee — the main part. Every deal in the network pays a fee of up to 5% of its network part. The fees of all deals of a period are pooled and divided equally among the super-nodes that passed the quality minimum: 4% of a deal when the provider worked with an element received over F2F (1% goes to the element's author), the whole 5% when the element is the provider's own.", "05-fees-and-reputation", "09-fee-distribution", "26-developer-share"),
+      D("Redistribution: a super-node that fails the quality minimum in a period — downtime, failed checks — gets no share of that period's pool; the pool is divided only among those who passed, so their shares grow. The founder's share stays in the pool of the others in the same way until ten super-nodes pass the minimum.", "05-fees-and-reputation", "09-fee-distribution"),
       D("Search, the connection of a customer to providers: $0.01 for every result list this super-node built.", "17-discovery-ranking-feedback"),
       D("Message delivery: $0.001 — a tenth of a cent — for every H2H message it delivered.", "17-discovery-ranking-feedback"),
       D("A vote on the Official mark: about $11 a vote — the $100 application fee is divided among the nine panel members who voted.", "24-official-agents"),
       D("Proof of a violation by another super-node: a reward in USDC from the fees.", "06-super-nodes-downtime-and-violations"),
     ],
-    incomeNote: D("Everything is paid in USDC. How much is not known in advance and not guaranteed: it depends on the deals of the network and on how many super-nodes pass the minimum. There are no money fines on super-nodes to redistribute: a proven violation is a permanent mark, and a false report costs its author the amount locked with it.", "05-fees-and-reputation", "06-super-nodes-downtime-and-violations"),
+    incomeNote: D("Everything is paid in USDC. How much is not known in advance and not guaranteed: it depends on the deals of the network and on how many super-nodes pass the minimum.", "05-fees-and-reputation", "09-fee-distribution"),
     statusLink: "Status and application",
     docsTitle: "Lagrix documents",
     howTitle: "How an application works",
@@ -215,12 +218,13 @@ const UI: Record<"en" | "ru", SuperNodeWords> = {
     incomeTitle: "За что платят супер-узлу",
     income: [
       D("Комиссия сделок — главная часть. Каждая сделка в сети платит комиссию до 5 % своей сетевой части. Комиссии всех сделок периода собираются в котёл и делятся поровну между супер-узлами, прошедшими минимум качества: 4 % сделки, если исполнитель работал элементом, полученным по F2F (1 % — автору элемента), и все 5 %, если элемент свой.", "05-fees-and-reputation", "09-fee-distribution", "26-developer-share"),
+      D("Перераспределение: супер-узел, не прошедший минимум качества за период (простой, проваленные проверки), не получает доли котла этого периода — котёл делится только между прошедшими, и их доли растут. Так же в котле остальных остаётся доля основателя, пока минимум не прошли десять супер-узлов.", "05-fees-and-reputation", "09-fee-distribution"),
       D("Поиск — подключение заказчика к исполнителям: $0,01 за каждую выдачу, которую построил этот супер-узел.", "17-discovery-ranking-feedback"),
       D("Доставка сообщений: $0,001 — десятая часть цента — за каждое доставленное сообщение H2H.", "17-discovery-ranking-feedback"),
       D("Голос о метке «Официальный»: около $11 за голос — плата $100 за заявку делится между девятью проголосовавшими.", "24-official-agents"),
       D("Доказательство нарушения другого супер-узла: награда в USDC из комиссий.", "06-super-nodes-downtime-and-violations"),
     ],
-    incomeNote: D("Всё платится в USDC. Сколько — заранее не известно и не гарантировано: зависит от сделок сети и от того, сколько супер-узлов пройдёт минимум. Денежных штрафов с супер-узлов, которые перераспределялись бы, нет: доказанное нарушение — постоянная отметка, а ложная жалоба стоит её автору заблокированной суммы.", "05-fees-and-reputation", "06-super-nodes-downtime-and-violations"),
+    incomeNote: D("Всё платится в USDC. Сколько — заранее не известно и не гарантировано: зависит от сделок сети и от того, сколько супер-узлов пройдёт минимум.", "05-fees-and-reputation", "09-fee-distribution"),
     statusLink: "Статус и заявка",
     docsTitle: "Документы Lagrix",
     howTitle: "Как работает заявка",
