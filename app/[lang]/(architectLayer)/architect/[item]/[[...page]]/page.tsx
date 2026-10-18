@@ -58,6 +58,8 @@ import { elementDocsUi, elementOrdersUi, passportDoorUi } from '../../../_i18n/e
 import { ElementOrdersIsland } from '@/components/element-docs/element-orders.client'
 import { LagrixRating } from '@/components/element-docs/lagrix-rating'
 import { lagrixRatingUi } from '../../../_i18n/lagrix-rating.i18n'
+import { ElementMessengerSettings } from '../../../_components/element-messenger-settings.client'
+import { messengerSettingsUi } from '../../../_i18n/element-messenger-settings.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -403,6 +405,10 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     : key === 'workflow/a2a-orders/deals'
       ? <p className="my-4 max-w-3xl text-sm text-muted-foreground" data-orders-empty>{ui.ordersEmpty}</p>
       : null
+  // 528-2 (владелец 2026-10-18): «Messenger → Настройки» — тариф первого контакта и правила агента; хранятся в паспорте элемента.
+  const messengerSettings = key === 'messenger/settings'
+    ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
+    : null
   // 436-3 (владелец 2026-10-09): рейтинг элемента в Lagrix; 528-1 — на главной «Рабочего процесса», куда переехал A2A.
   const lagrix = key === 'workflow' ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
   // 435-3: «Каталог» показывает и элементы узла — из того же реестра, по которому элементы ищут соседей (`nodeEntries`);
@@ -426,7 +432,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )
