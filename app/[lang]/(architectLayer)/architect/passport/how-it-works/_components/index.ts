@@ -23,6 +23,10 @@ export function content(lang: string): Block[] {
       ...(i === 0
         ? [{ kind: 'callout', title: w.lagrixCard.title, text: w.lagrixCard.text, action: { href: `https://lagrix.dev/${lang === 'ru' ? 'ru' : 'en'}`, label: w.lagrixCard.action, external: true } } as Block]
         : []),
+      // 535-4 (владелец 2026-10-18): в конце второго раздела — карточка «ИИ — сердце узла» с кнопкой на активацию Claude Code.
+      ...(i === 1
+        ? [{ kind: 'callout', title: w.aiCard.title, text: w.aiCard.text, action: { href: `/${lang}/build/subscription`, label: w.aiCard.action } } as Block]
+        : []),
     ]),
   ]
 }
