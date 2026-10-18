@@ -5,8 +5,9 @@ import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { H2, H3, P, Small } from "@/components/ui/typography"
-import type { ProductQuiz, QuizItem } from "@/lib/web4-items/product-quiz"
+import type { ProductQuiz, QuizItem, QuizStepState, QuizWork } from "@/lib/web4-items/product-quiz"
 
 // ISLAND OF THE PRODUCT QUIZ (node step 536-1). The person, 2026-10-18: «А вверху инструкция если хотите что-то добавить перейдите
 // (ссылка на терминал) (ссылка на Telegram если он есть) и скажите что вы хотите продолжить развитие продуктового квизы».
@@ -47,6 +48,67 @@ export type ProductQuizWords = {
   emptyTitle: string
   emptyText: string
   start: string
+  /** 536-2: the legend under the instruction and the words of the dot. */
+  legend: Record<QuizWork, string>
+  /** What the dot says in words (its label and the head of the hover). «{step}» is replaced by the step numbers. */
+  work: Record<QuizWork, string>
+  stepState: Record<QuizStepState, string>
+  stepsTitle: string
+  noSteps: string
+  /** «{commit}» is replaced. */
+  commit: string
+}
+
+// 🔒 Colours are the core theme's tokens, light and dark: done — success, in progress — warning, planned — tone-reach, none — an empty
+// ring. The colour is never the only carrier: the dot has its words as the label and in the hover.
+const DOT: Record<QuizWork, string> = {
+  done: "bg-success",
+  "in-progress": "bg-warning",
+  planned: "bg-tone-reach",
+  none: "border border-muted-foreground bg-transparent",
+}
+
+function Dot({ work }: { work: QuizWork }) {
+  return <span className={`inline-block size-2.5 shrink-0 rounded-full ${DOT[work]}`} aria-hidden />
+}
+
+function ItemWork({ it, words }: { it: QuizItem; words: ProductQuizWords }) {
+  const [open, setOpen] = useState(false)
+  const numbers = it.steps.filter((s) => s.state === it.work).map((s) => s.number).join(", ")
+  const label = fill(words.work[it.work], { step: numbers })
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger
+        className="inline-flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
+        aria-label={label}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        data-quiz-dot={it.work}
+      >
+        <Dot work={it.work} />
+      </PopoverTrigger>
+      <PopoverContent align="start" className="flex w-80 flex-col gap-2" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} data-quiz-steps={it.id}>
+        <Small className="font-medium">{label}</Small>
+        {it.steps.length > 0 ? (
+          <>
+            <Small className="text-muted-foreground">{words.stepsTitle}</Small>
+            <ul className="flex flex-col gap-1">
+              {it.steps.map((s) => (
+                <li key={`${s.number}-${s.state}`} className="flex items-start gap-2" data-quiz-step={s.number}>
+                  <span className="pt-1"><Dot work={s.state} /></span>
+                  <Small>
+                    <span className="font-mono">{s.number}</span> · {s.title} · {words.stepState[s.state]}
+                    {s.commit ? ` · ${fill(words.commit, { commit: s.commit })}` : ""}
+                  </Small>
+                </li>
+              ))}
+            </ul>
+          </>
+        ) : !it.builtBefore && <Small className="text-muted-foreground">{words.noSteps}</Small>}
+        {it.builtBefore && <Small className="text-muted-foreground">{fill(words.builtBefore, { where: it.builtBefore })}</Small>}
+      </PopoverContent>
+    </Popover>
+  )
 }
 
 type Read = { quiz: ProductQuiz | null; problems: string[] }
@@ -135,6 +197,11 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
             {" · "}
             {fill(words.language, { lang: quiz.language })}
           </Small>
+          <ul className="flex flex-wrap gap-x-4 gap-y-1" data-quiz-legend>
+            {(["done", "in-progress", "planned", "none"] as const).map((w) => (
+              <li key={w} className="flex items-center gap-1.5"><Dot work={w} /><Small className="text-muted-foreground">{words.legend[w]}</Small></li>
+            ))}
+          </ul>
         </CardContent>
       </Card>
 
@@ -177,6 +244,7 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
             {m.items.map((it) => (
               <li key={it.id} id={anchor(it.id)} className="flex flex-col gap-1.5 border-b border-border py-3 last:border-b-0" data-quiz-item={it.id}>
                 <div className="flex flex-wrap items-center gap-2">
+                  <ItemWork it={it} words={words} />
                   <span className="font-mono text-[length:var(--fs-small)] text-muted-foreground">{it.id}</span>
                   <H3 variant="ui">{it.title}</H3>
                   <Badge variant="outline">{words.kinds[it.kind]}</Badge>
