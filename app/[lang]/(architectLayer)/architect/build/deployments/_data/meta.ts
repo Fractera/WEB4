@@ -2,5 +2,5 @@ import type { WorkspacePageMeta } from '@/lib/collection/types'
 
 export const meta: WorkspacePageMeta = {
   slug: 'deployments',
-  order: 36,
+  order: 25,
 }

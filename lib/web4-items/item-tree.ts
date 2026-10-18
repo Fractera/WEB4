@@ -165,7 +165,7 @@ export const ITEM_TREE: TreePage[] = [
           },
           {
             slug: "telegram",
-            words: w("Telegram bot", "Talking to people through Telegram.", "Telegram бот", "Общение с людьми через Telegram."),
+            words: w("Telegram bot", "Talking to people through Telegram.", "Telegram-бот", "Общение с людьми через Telegram."),
             about: {
               en: ["How Telegram serves conversations between people is still being decided."],
               ru: ["Как Telegram будет служить разговорам людей — ещё решается."],
@@ -197,7 +197,7 @@ export const ITEM_TREE: TreePage[] = [
               ru: ["Этот чат заменит Telegram тем, кто не хочет им пользоваться: вы пишете агенту элемента прямо на этой странице. Он программируется следующими шагами."],
             },
           },
-          { slug: "telegram", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram бот", "Бот, который говорит с той же сессией агента.") },
+          { slug: "telegram", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram-бот", "Бот, который говорит с той же сессией агента.") },
           dashboard("Who you talk to through this element's agent, in short.", "С кем вы общаетесь через агента этого элемента — коротко."),
         ],
       },
@@ -276,7 +276,7 @@ export const ITEM_TREE: TreePage[] = [
       // под кнопкой терминал».
       { slug: "deployments", words: w("Preview & Deploy", "See a new version before visitors do, deploy it, or go back to a working one.", "Предпросмотр и развёртывание", "Посмотреть новую версию до посетителей, развернуть её или вернуться к работающей.") },
       // 472: у элемента с H2A бот переехал в H2A (`MOVED_WITH`); здесь он остаётся для элементов без H2A.
-      { slug: "telegram", unless: "h2a", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram бот", "Бот, который говорит с той же сессией агента.") },
+      { slug: "telegram", unless: "h2a", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram-бот", "Бот, который говорит с той же сессией агента.") },
       { slug: "environment", words: w("Environment variables", "Keys and settings the element reads at start.", "Переменные окружения", "Ключи и настройки, которые элемент читает при старте.") },
       // 451-2 (владелец 2026-10-11): i2i — элементы узла договариваются о connector через API; f2f — обмен элементами через Lagrix.
       // 452 (владелец 2026-10-11: «коротко понятно ты ввёл человека в курс дела»): главная подраздела вводит в курс дела.
@@ -361,7 +361,7 @@ export const ITEM_TREE: TreePage[] = [
           // элементе»): полный набор документов элемента — пункты появляются, потому что файлы есть с рождения.
           { slug: "glossary", doc: { file: "development-docs/glossary.md" }, words: w("Glossary", "One meaning per word, with the person's words next to each term.", "Глоссарий", "Одно значение у каждого слова, рядом — как его говорит человек.") },
           { slug: "pre-steps", doc: { file: "development-docs/pre-steps", folder: true }, words: w("Intake", "Building requests not started at once, recorded verbatim.", "Приёмная заявок", "Заявки на строительство, не начатые сразу, — дословно.") },
-          { slug: "backlog", doc: { file: "development-docs/backlog.md" }, words: w("Backlog", "Built but not explained, built halfway, or promised.", "Backlog", "Построенное, но не объяснённое, недостроенное или обещанное.") },
+          { slug: "backlog", doc: { file: "development-docs/backlog.md" }, words: w("Backlog", "Built but not explained, built halfway, or promised.", "Бэклог", "Построенное, но не объяснённое, недостроенное или обещанное.") },
           { slug: "cancelled", doc: { file: "development-docs/cancelled.md" }, words: w("Cancelled", "What was dropped, by whose word, and what replaced it.", "Отменённое", "Что отменено, чьим словом и что пришло взамен.") },
           { slug: "anti-patterns", doc: { file: "development-docs/anti-patterns.md" }, words: w("Anti-patterns", "Dead ends already paid for.", "Антипаттерны", "Тупики, за которые уже заплачено.") },
           { slug: "reports", doc: { file: "development-docs/reports", folder: true }, words: w("Reports", "One failure explained, or one finished capability described.", "Отчёты", "Разбор одного отказа или описание готовой способности.") },
@@ -402,6 +402,16 @@ export const ITEM_TREE: TreePage[] = [
 
 export type TreeLang = "en" | "ru"
 export const treeLang = (lang: string): TreeLang => (lang === "ru" ? "ru" : "en")
+
+/**
+ * 528-6: слова страницы дерева по пути `messenger/h2h/native` — тем же словом её называет «Главный агент» ядра (его папки
+ * `architect/build/…` берут заголовок отсюда, а не держат вторую копию). Пути нет — ошибка сборки, а не пустая подпись.
+ */
+export function treeWords(path: string, lang: TreeLang): TreeWords {
+  const trail = findTreePath(path.split("/"))
+  if (!trail) throw new Error(`item-tree: нет страницы ${path}`)
+  return trail[trail.length - 1].words[lang]
+}
 
 /** Цепочка страниц дерева по пути (раздел → подраздел → страница); нет такой — `null`. */
 export function findTreePath(path: string[]): TreePage[] | null {

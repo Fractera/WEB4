@@ -99,9 +99,9 @@ export function ElementMessengerSettings({ item, lang, ui }: { item: string; lan
         <p className="text-sm text-muted-foreground" data-first-contact-state={enabled ? "on" : "off"}>
           {enabled ? ui.feeOn.replace("{usd}", Number.isFinite(amount) ? money.format(amount) : usd) : ui.feeOff}
         </p>
-        <Field className="max-w-48">
+        <Field>
           <FieldLabel htmlFor="first-contact-usd">{ui.amountLabel}</FieldLabel>
-          <Input id="first-contact-usd" inputMode="decimal" value={usd} onChange={(e) => setUsd(e.target.value)} data-first-contact-usd />
+          <Input id="first-contact-usd" className="max-w-48" inputMode="decimal" value={usd} onChange={(e) => setUsd(e.target.value)} data-first-contact-usd />
           <FieldDescription>{ui.amountHint}</FieldDescription>
         </Field>
         <Accordion type="single" collapsible className="rounded-md border border-border px-3">

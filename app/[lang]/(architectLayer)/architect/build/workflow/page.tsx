@@ -1,24 +1,13 @@
-import { CollectionIndex } from '../../../_lib/collection-index'
+import { MainAgentPage } from '../../../_lib/main-agent-page'
 import { collectionMetadata } from '../../../_lib/collection-metadata'
-import { MainAgentElements } from '../../../_components/main-agent-elements'
 import { data } from './_data'
-import { content } from './_components'
-import { PAGES } from './_list.generated'
 
-// РАЗДЕЛ «Рабочий процесс» «Главного агента» — `/{lang}/architect/build/workflow` (528-3). Владелец 2026-10-18: у главного агента «такую же
-// точно схему как … для элемента», с глобальными сводными страницами. Подразделы — папками рядом; ниже — эта же страница у элементов.
+// «Главный агент» → `/{lang}/architect/build/workflow` (528-3, 528-6): меню главного агента повторяет меню элемента. Страница рисуется
+// общей оболочкой: заголовок и строка о назначении, пункты под ней в меню (`main-agent-scheme.ts`) и, где это та же страница
+// элемента, — она у root и каждого кастомного элемента.
 export const generateMetadata = collectionMetadata(data, '/architect/build')
 
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
-  return (
-    <CollectionIndex
-      lang={lang}
-      dir="/architect/build/workflow"
-      page={data}
-      pages={PAGES}
-      content={content(lang)}
-      widget={<MainAgentElements lang={lang} path="workflow" />}
-    />
-  )
+  return <MainAgentPage lang={lang} rel="workflow" page={data} />
 }
