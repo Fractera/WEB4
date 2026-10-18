@@ -66,8 +66,8 @@ const UI: Record<"en" | "ru", PaymentsWords> = {
         "Accepting payments is code of the site: ask the element's agent to build checkout with these keys.",
       ],
     },
-    web3ElementNote: "One wallet serves the whole node (Lagrix document 19): this element has no wallet of its own, and every payment it earns is recorded for it.",
-    web3CoreNote: "The same wallet is set in «Passport → Main wallet»: one wallet for the node and all its elements.",
+    web3ElementNote: "By default the element works with the node wallet, as with the GitHub token and the OpenAI key; its own wallet takes precedence, and once it is removed the element works with the node wallet again.",
+    web3CoreNote: "The same wallet is set in «Passport → Main wallet»: the node's wallet, which every element works with unless it has its own.",
     notBorn: "The element is not born yet: it has no folder to keep keys in.",
   },
   ru: {
@@ -108,8 +108,8 @@ const UI: Record<"en" | "ru", PaymentsWords> = {
         "Приём оплаты — код сайта: попросите агента элемента построить оплату с этими ключами.",
       ],
     },
-    web3ElementNote: "Кошелёк один на весь узел (документ Lagrix 19): своего у элемента нет, а каждый заработанный им платёж записывается за ним.",
-    web3CoreNote: "Тот же кошелёк настраивается в «Паспорт → Главный кошелёк»: один на узел и все его элементы.",
+    web3ElementNote: "По умолчанию элемент работает кошельком узла — так же, как токеном GitHub и ключом OpenAI; свой кошелёк элемента сильнее, а удалив его, элемент снова работает кошельком узла.",
+    web3CoreNote: "Тот же кошелёк настраивается в «Паспорт → Главный кошелёк»: кошелёк узла, которым работает каждый элемент, если у него нет своего.",
     notBorn: "Элемент ещё не родился: у него нет папки, где хранить ключи.",
   },
 }

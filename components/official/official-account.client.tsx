@@ -8,6 +8,7 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { DocItems } from "@/components/lagrix/doc-items"
 import type { OfficialWords } from "./official.i18n"
 
 // «ПАСПОРТ → ОФИЦИАЛЬНЫЙ АККАУНТ» (530-2): что такое метка (документ Lagrix 24), заявка на узле — имя, чем известен, ≥ 3 источника.
@@ -73,7 +74,7 @@ export function OfficialAccount({ lang, words }: { lang: string; words: Official
         <AccordionItem value="what" className="border-b-0">
           <AccordionTrigger>{words.whatTitle}</AccordionTrigger>
           <AccordionContent>
-            <div className="flex flex-col gap-2 text-sm leading-relaxed">{words.what.map((t) => <p key={t.slice(0, 40)}>{t}</p>)}</div>
+            <DocItems lang={lang} items={words.what} />
           </AccordionContent>
         </AccordionItem>
       </Accordion>

@@ -10,5 +10,5 @@ export const generateMetadata = collectionMetadata(data, '/architect/super-node'
 
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
-  return <CollectionPage lang={lang} dir="/architect/super-node" page={data} content={content(lang)} widget={<SuperNodeSettings words={superNodeUi(lang)} />} />
+  return <CollectionPage lang={lang} dir="/architect/super-node" page={data} content={content(lang)} widget={<SuperNodeSettings lang={lang} words={superNodeUi(lang)} />} />
 }

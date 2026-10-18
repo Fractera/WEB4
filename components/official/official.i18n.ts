@@ -1,9 +1,13 @@
 // СЛОВА ВКЛАДКИ «ПАСПОРТ → ОФИЦИАЛЬНЫЙ АККАУНТ» (530-2): метка «Официальный» по документу Lagrix 24 простыми словами и заявка на узле.
-// `en` основа, `ru` перевод.
+// Каждое утверждение — со ссылкой на документ Lagrix (532, слово владельца 2026-10-18). `en` основа, `ru` перевод.
+
+import type { DocItem, LagrixDoc } from "@/lib/lagrix-docs"
+
+const D = (text: string, ...docs: LagrixDoc[]): DocItem => ({ text, docs })
 
 export type OfficialWords = {
   whatTitle: string
-  what: string[]
+  what: DocItem[]
   noWallet: string
   walletLink: string
   postHint: string
@@ -29,11 +33,11 @@ const UI: Record<"en" | "ru", OfficialWords> = {
   en: {
     whatTitle: "What the «Official» mark is",
     what: [
-      "Anyone can publish an agent under any name. The «Official» mark shows which agent is really yours: it stands on the node's wallet and on all its elements, next to their reputation.",
-      "To apply you present at least three official sources that have already verified you — accounts on platforms that confirmed whose they are. In each one you publish a post with the node's wallet address. Your own domain is not a source.",
-      "The application costs $100 in USDC and is not returned. Nine super-nodes chosen at random decide; the mark is given when at least eight vote yes. Anyone can challenge a mark the same way.",
-      "The mark does not move an agent in search results and opens no conversation without your yes. The procedure starts once ten super-nodes pass the network's quality minimum; until then only the founder's mark exists.",
-      "Here the node keeps your prepared application. Nothing is sent and nothing is paid until the procedure opens in the Lagrix network.",
+      D("Anyone can publish an agent under any name. The «Official» mark shows which agent is really yours: it stands on the node's wallet and on all its elements, next to their reputation.", "24-official-agents"),
+      D("To apply you present at least three official sources that have already verified you — accounts on platforms that confirmed whose they are. In each one you publish a post with the node's wallet address. Your own domain is not a source.", "24-official-agents"),
+      D("The application costs $100 in USDC and is not returned. Nine super-nodes chosen at random decide; the mark is given when at least eight vote yes. The $100 is divided equally among those who voted, whatever the outcome — about $11 each. Anyone can challenge a mark the same way.", "24-official-agents"),
+      D("The mark does not move an agent in search results and opens no conversation without your yes. The procedure starts once ten super-nodes pass the network's quality minimum; until then only the founder's mark exists.", "24-official-agents", "17-discovery-ranking-feedback", "05-fees-and-reputation"),
+      D("Here the node keeps your prepared application. Nothing is sent and nothing is paid until the procedure opens in the Lagrix network.", "24-official-agents"),
     ],
     noWallet: "The application comes from the node's wallet, and the node has none yet.",
     walletLink: "Connect the main wallet",
@@ -64,11 +68,11 @@ const UI: Record<"en" | "ru", OfficialWords> = {
   ru: {
     whatTitle: "Что такое метка «Официальный»",
     what: [
-      "Опубликовать агента под любым именем может кто угодно. Метка «Официальный» показывает, какой агент действительно ваш: она стоит на кошельке узла и на всех его элементах — рядом с их репутацией.",
-      "Чтобы подать заявку, нужны не меньше трёх официальных источников, которые уже проверили вас, — аккаунты на площадках, подтвердивших, чьи они. В каждом вы публикуете пост с адресом кошелька узла. Ваш собственный домен источником не считается.",
-      "Заявка стоит $100 в USDC и не возвращается. Решают девять супер-узлов, выбранных случайно; метка выдаётся, если «да» сказали не меньше восьми. Оспорить метку может любой — тем же путём.",
-      "Метка не поднимает агента в выдаче и не открывает разговор без вашего «да». Процедура начнётся, когда десять супер-узлов пройдут минимум качества сети; до тех пор метка есть только у основателя.",
-      "Здесь узел хранит подготовленную вами заявку. Ничего не отправляется и не оплачивается, пока процедура не откроется в сети Lagrix.",
+      D("Опубликовать агента под любым именем может кто угодно. Метка «Официальный» показывает, какой агент действительно ваш: она стоит на кошельке узла и на всех его элементах — рядом с их репутацией.", "24-official-agents"),
+      D("Чтобы подать заявку, нужны не меньше трёх официальных источников, которые уже проверили вас, — аккаунты на площадках, подтвердивших, чьи они. В каждом вы публикуете пост с адресом кошелька узла. Ваш собственный домен источником не считается.", "24-official-agents"),
+      D("Заявка стоит $100 в USDC и не возвращается. Решают девять супер-узлов, выбранных случайно; метка выдаётся, если «да» сказали не меньше восьми. $100 при любом исходе делятся поровну между проголосовавшими — около $11 каждому. Оспорить метку может любой — тем же путём.", "24-official-agents"),
+      D("Метка не поднимает агента в выдаче и не открывает разговор без вашего «да». Процедура начнётся, когда десять супер-узлов пройдут минимум качества сети; до тех пор метка есть только у основателя.", "24-official-agents", "17-discovery-ranking-feedback", "05-fees-and-reputation"),
+      D("Здесь узел хранит подготовленную вами заявку. Ничего не отправляется и не оплачивается, пока процедура не откроется в сети Lagrix.", "24-official-agents"),
     ],
     noWallet: "Заявка подаётся от кошелька узла, а у узла его пока нет.",
     walletLink: "Подключить главный кошелёк",
