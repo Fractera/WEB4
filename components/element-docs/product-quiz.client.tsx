@@ -1,9 +1,14 @@
 "use client"
 
 import { useEffect, useRef, useState, type PointerEvent } from "react"
-import Link from "next/link"
+import { MessageSquareText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { BlockTask } from "@/_tools/block-task/client/block-task.client"
+import type { BlockTaskUi } from "@/_tools/block-task/types/block-task"
+import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
+import { isLoopbackHostname } from "@/lib/auth/owner-at-machine"
+import { cleanPaste } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { H2, H3, P, Small } from "@/components/ui/typography"
@@ -57,7 +62,23 @@ export type ProductQuizWords = {
   noSteps: string
   /** «{commit}» is replaced. */
   commit: string
+  /** 536-3: the 💬 of an item and the task line it puts in the window. «{id}», «{title}», «{text}» are replaced. */
+  ask: string
+  askItem: string
+  askVision: string
+  askQuestion: string
+  askContinue: string
+  askStart: string
+  /** Opened not from this computer (the terminal works only here): the window copies the phrase for the element's bot. */
+  remoteNote: string
+  telegramPhrase: string
+  sendRemote: string
+  copied: string
+  copyFailed: string
 }
+
+/** 536-3: the window of a quiz task — the block-task tool in its note mode, with the quiz's own words; the server picks them. */
+export type QuizTaskKit = { ui: BlockTaskUi; dialogUi: AppDialogUi; keyHref: string }
 
 // 🔒 Colours are the core theme's tokens, light and dark: done — success, in progress — warning, planned — tone-reach, none — an empty
 // ring. The colour is never the only carrier: the dot has its words as the label and in the hover.
@@ -145,10 +166,63 @@ const fill = (text: string, values: Record<string, string | number>) =>
 
 const anchor = (id: string) => `quiz-${id}`
 
-export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: string; lang: string; terminalHref: string; words: ProductQuizWords }) {
+// 536-3 (the person, 2026-10-18): «напротив каждого абзаца иконка и инструкция например если хотите обратить внимание на этот часть
+// инструкции нажмите на иконку! Агент из искусственного интеллекта уточнит что вы имели в виду». The 💬 opens the block-task window in
+// its note mode: the task line names the item, the person adds words or voice. On this computer «Send» opens the element's terminal
+// with the task in the paste window (it goes into the terminal only by the person's own button, law 316) — the same road as «Reject»
+// of a preview (356-3). Opened from the internet, the terminal is not reachable: the window copies the phrase for the element's bot.
+async function copyText(text: string): Promise<boolean> {
+  try {
+    await navigator.clipboard.writeText(text)
+    return true
+  } catch {
+    // No secure context (plain http on an address): the old way still works where the new one is missing.
+    const area = document.createElement("textarea")
+    area.value = text
+    document.body.appendChild(area)
+    area.select()
+    const ok = document.execCommand("copy")
+    area.remove()
+    return ok
+  }
+}
+
+export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { item: string; lang: string; terminalHref: string; words: ProductQuizWords; task: QuizTaskKit }) {
   const [read, setRead] = useState<Read | null>(null)
   const [failed, setFailed] = useState(false)
   const [bot, setBot] = useState<string | null>(null)
+  const [local, setLocal] = useState(true)
+  const [askLine, setAskLine] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
+  useEffect(() => setLocal(isLoopbackHostname(window.location.hostname)), [])
+
+  async function send(text: string) {
+    setAskLine(null)
+    if (local) {
+      window.location.href = `${BASE}${terminalHref}?paste=${encodeURIComponent(cleanPaste(text))}`
+      return
+    }
+    setNotice((await copyText(text)) ? words.copied : words.copyFailed)
+  }
+  const askButton = (line: string, id: string) => (
+    <Button type="button" variant="ghost" size="icon-xs" aria-label={words.ask} title={words.ask} onClick={() => { setNotice(null); setAskLine(line) }} data-quiz-ask={id}>
+      <MessageSquareText aria-hidden />
+    </Button>
+  )
+  const dialog = (
+    <BlockTask
+      note
+      open={askLine !== null}
+      onOpenChange={(o) => { if (!o) setAskLine(null) }}
+      address={askLine ?? ""}
+      lang={lang}
+      ui={local ? task.ui : { ...task.ui, send: words.sendRemote }}
+      dialogUi={task.dialogUi}
+      voiceApiUrl={`${BASE}/api/transcribe?item=${encodeURIComponent(item)}`}
+      keyHref={task.keyHref}
+      onSend={(text) => void send(text)}
+    />
+  )
 
   useEffect(() => {
     let live = true
@@ -172,9 +246,9 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
   }, [item, lang])
 
   const terminal = (
-    <Link href={terminalHref} className={buttonVariants({})} data-quiz-terminal>
-      {words.terminal}
-    </Link>
+    <Button type="button" onClick={() => { setNotice(null); setAskLine(words.askContinue) }} data-quiz-terminal>
+      {local ? words.terminal : words.telegramPhrase}
+    </Button>
   )
   const telegram = bot ? (
     <a href={`https://t.me/${bot}`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })} data-quiz-telegram>
@@ -193,12 +267,17 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
           <CardTitle>{words.emptyTitle}</CardTitle>
           <CardDescription>{words.emptyText}</CardDescription>
         </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          <Link href={terminalHref} className={buttonVariants({})} data-quiz-start>
-            {words.start}
-          </Link>
-          {telegram}
+        <CardContent className="flex flex-col gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" onClick={() => { setNotice(null); setAskLine(words.askStart) }} data-quiz-start>
+              {local ? words.start : words.telegramPhrase}
+            </Button>
+            {telegram}
+          </div>
+          {!local && <Small className="text-muted-foreground" data-quiz-remote>{words.remoteNote}</Small>}
+          {notice && <Small role="status" data-quiz-notice>{notice}</Small>}
         </CardContent>
+        {dialog}
       </Card>
     )
   }
@@ -219,6 +298,8 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           <div className="flex flex-wrap gap-2">{terminal}{telegram}</div>
+          {!local && <Small className="text-muted-foreground" data-quiz-remote>{words.remoteNote}</Small>}
+          {notice && <Small role="status" data-quiz-notice>{notice}</Small>}
           <Small className="text-muted-foreground" data-quiz-counters>
             {fill(words.counters, { confirmed: confirmedCount, total: items.length, questions: quiz.openQuestions.length })}
             {" · "}
@@ -245,6 +326,7 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
         <div className="flex items-center gap-2">
           <H2 variant="ui">{words.vision}</H2>
           {statusBadge(quiz.vision.status)}
+          {askButton(words.askVision, "vision")}
         </div>
         <P>{quiz.vision.text}</P>
       </section>
@@ -276,6 +358,7 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
                   <H3 variant="ui">{it.title}</H3>
                   <Badge variant="outline">{words.kinds[it.kind]}</Badge>
                   {statusBadge(it.status, it.confirmed?.date)}
+                  {askButton(fill(words.askItem, { id: it.id, title: it.title }), it.id)}
                 </div>
                 {it.text && <P className="my-0">{it.text}</P>}
                 {it.acceptance && <Small className="text-muted-foreground">{words.acceptance}: {it.acceptance}</Small>}
@@ -300,7 +383,10 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
           <ul className="flex flex-col gap-2">
             {quiz.openQuestions.map((o) => (
               <li key={o.id} id={anchor(o.id)} className="flex flex-col gap-0.5">
-                <Small><span className="font-mono text-muted-foreground">{o.id}</span> {o.text}</Small>
+                <div className="flex items-start gap-1">
+                  <Small><span className="font-mono text-muted-foreground">{o.id}</span> {o.text}</Small>
+                  {askButton(fill(words.askQuestion, { id: o.id, text: o.text }), o.id)}
+                </div>
                 {o.about.length > 0 && (
                   <Small className="text-muted-foreground">
                     {o.about.map((d, i) => <span key={d}>{i > 0 && ", "}<a href={`#${anchor(d)}`} className="underline underline-offset-4">{d}</a></span>)}
@@ -344,6 +430,7 @@ export function ProductQuizIsland({ item, lang, terminalHref, words }: { item: s
           </ul>
         </section>
       )}
+      {dialog}
     </div>
   )
 }

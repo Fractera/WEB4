@@ -2,6 +2,8 @@
 // умолчанию (решение владельца 2026-10-18: «only default lang»); здесь только слова вокруг него.
 
 import type { ProductQuizWords } from "@/components/element-docs/product-quiz.client"
+import type { BlockTaskUi } from "@/_tools/block-task/types/block-task"
+import { blockTaskUi } from "@/_tools/block-task/types/block-task.i18n"
 
 const DICT: Record<"en" | "ru", ProductQuizWords> = {
   en: {
@@ -42,6 +44,18 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     stepsTitle: "Development steps of this item",
     noSteps: "No step of the element serves this item yet.",
     commit: "commit {commit}",
+    ask: "Discuss with the agent",
+    askItem: "Product quiz, item {id} «{title}». Ask me what I mean, show what the change touches, and edit the quiz only after my «yes».",
+    askVision: "Product quiz, the vision. Ask me what I mean, show what the change touches, and edit the quiz only after my «yes».",
+    askQuestion: "Product quiz, open question {id} «{text}». Here is my answer; show what it changes in the quiz.",
+    askContinue: "Product quiz: let's continue developing it.",
+    askStart: "Product quiz: let's start deep planning of this element.",
+    remoteNote:
+      "The terminal opens only on this computer. From here, write to the element's bot in Telegram: the window copies a ready phrase with the item number.",
+    telegramPhrase: "Phrase for Telegram",
+    sendRemote: "Copy for Telegram",
+    copied: "Copied. Paste it into the chat with the element's bot.",
+    copyFailed: "Could not copy. Select the text in the window and copy it by hand.",
   },
   ru: {
     loading: "Читаю продуктовый квиз…",
@@ -81,7 +95,45 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     stepsTitle: "Шаги разработки этого пункта",
     noSteps: "Ни один шаг элемента пока не служит этому пункту.",
     commit: "коммит {commit}",
+    ask: "Обсудить с агентом",
+    askItem: "Продуктовый квиз, пункт {id} «{title}». Уточни, что я имею в виду, покажи, что затронет изменение, и поправь квиз только после моего «да».",
+    askVision: "Продуктовый квиз, замысел. Уточни, что я имею в виду, покажи, что затронет изменение, и поправь квиз только после моего «да».",
+    askQuestion: "Продуктовый квиз, открытый вопрос {id} «{text}». Вот мой ответ; покажи, что он меняет в квизе.",
+    askContinue: "Продуктовый квиз: продолжим его развитие.",
+    askStart: "Продуктовый квиз: начнём глубокое планирование этого элемента.",
+    remoteNote:
+      "Терминал открывается только на этом компьютере. Отсюда пишите боту элемента в Telegram: окно скопирует готовую фразу с номером пункта.",
+    telegramPhrase: "Фраза для Telegram",
+    sendRemote: "Скопировать для Telegram",
+    copied: "Скопировано. Вставьте текст в чат с ботом элемента.",
+    copyFailed: "Не удалось скопировать. Выделите текст в окне и скопируйте его вручную.",
   },
+}
+
+// 536-3: the window of a quiz task — the block-task tool in its note mode with these words (as `rejectTaskUi` does for a preview).
+const QUIZ_TASK: Record<"en" | "ru", Partial<BlockTaskUi>> = {
+  en: {
+    title: "What should the agent do with this?",
+    description: "The element's terminal opens with this task ready to send to its agent. Before it changes the quiz, the agent asks what you mean.",
+    block: "Task for the agent",
+    details: "What you want",
+    detailsPlaceholder: "Add, change, remove or ask, in your own words…",
+    send: "Open the terminal",
+    cancel: "Cancel",
+  },
+  ru: {
+    title: "Что сделать агенту с этим?",
+    description: "Откроется терминал элемента, и эта задача уже будет готова к отправке его агенту. Прежде чем менять квиз, агент уточнит, что вы имели в виду.",
+    block: "Задача агенту",
+    details: "Что вы хотите",
+    detailsPlaceholder: "Добавить, изменить, убрать или спросить — своими словами…",
+    send: "Открыть терминал",
+    cancel: "Отмена",
+  },
+}
+
+export function quizTaskUi(lang: string): BlockTaskUi {
+  return { ...blockTaskUi(lang), ...(lang === "ru" ? QUIZ_TASK.ru : QUIZ_TASK.en) }
 }
 
 export function productQuizUi(lang: string): ProductQuizWords {
