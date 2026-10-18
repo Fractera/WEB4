@@ -8,7 +8,8 @@ import { DraftCards } from '../../../_components/draft-cards'
 import { DeleteDraftButton } from '../../../_components/delete-draft-button.client'
 import { appDialogUi } from '@/components/dialog/app-dialog.i18n'
 import { draftAddress, getDraft } from '@/lib/web4-items/drafts'
-import { findTreePage, MOVED_PAGES, MOVED_WITH, TREE_GROUPS, treeLang, treeVisible, type TreeGroup, type TreePage } from '@/lib/web4-items/item-tree'
+import { findTreePath, movedPage, MOVED_WITH, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
+import { AccordionSection } from '@/components/accordion/accordion-section.client'
 import { getService, listServices, serviceUrl } from '@/lib/microservices/registry'
 import { BirthButton } from '../../../_components/birth-button.client'
 import { birthState } from '@/lib/web4-items/birth'
@@ -57,6 +58,8 @@ import { elementDocsUi, elementOrdersUi, passportDoorUi } from '../../../_i18n/e
 import { ElementOrdersIsland } from '@/components/element-docs/element-orders.client'
 import { LagrixRating } from '@/components/element-docs/lagrix-rating'
 import { lagrixRatingUi } from '../../../_i18n/lagrix-rating.i18n'
+import { ElementMessengerSettings } from '../../../_components/element-messenger-settings.client'
+import { messengerSettingsUi } from '../../../_i18n/element-messenger-settings.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -78,8 +81,13 @@ const PASSPORT_TASK: Record<'en' | 'ru', string> = {
   ru: "Сейчас ты будешь создавать описание для паспорта, используя текстовый ввод пользователя ниже. Ты должен вызвать для этого навык passport-description: только тексты паспорта, ничего не строй; покажи их мне до сохранения.\nТекст пользователя:\n",
 }
 
-// 326-3: страница дерева «Строительство» → вид острова комплекта агента (имя шаблона комплекта).
-const AGENT_PAGES: Record<string, AgentKitPage | undefined> = { subscription: 'claude-code', terminal: 'terminal', telegram: 'telegram' }
+// 326-3: страница дерева → вид острова комплекта агента (имя шаблона комплекта). 472: Telegram-бот — и в H2A (у элементов с флагом
+// H2A), и в «Строительстве» (у остальных). 528-1: ключ — полный путь страницы под элементом.
+const AGENT_PAGES: Record<string, AgentKitPage | undefined> = {
+  'build/subscription': 'claude-code', 'build/terminal': 'terminal', 'build/telegram': 'telegram', 'messenger/h2a/telegram': 'telegram',
+}
+
+const SUBSCRIPTIONS = 'workflow/process/subscriptions'
 
 // 325-3: сегмент пути — адрес элемента в ядре или его id (id неизменен; адрес — слой над ним, `lib/web4-items/element-address.ts`).
 function resolve(p: Params) {
@@ -87,28 +95,30 @@ function resolve(p: Params) {
   const draft = id ? getDraft(id) : null
   if (!draft) return null
   const path = p.page ?? []
-  if (path.length === 0) return { draft, found: null, service: undefined }
+  if (path.length === 0) return { draft, trail: [] as TreePage[], service: undefined }
   // 463 (владелец 2026-10-12: «…создавать отдельные страницы а не валить в одну кучу»): у каждого внешнего сервиса элемента
-  // своя страница `process/subscriptions/<id>`; id — из его OWN-SERVICE-PROPS/SUBSCRIPTIONS.json, чужой id — 404.
-  if (path.length === 3 && path[0] === 'process' && path[1] === 'subscriptions') {
-    const known = elementPassport(draft.id)?.subscriptions?.services.some((s) => s.id === path[2])
-    const parent = findTreePage(path.slice(0, 2))
-    return known && parent ? { draft, found: parent, service: path[2] } : null
+  // своя страница `workflow/process/subscriptions/<id>` (528-1); id — из его OWN-SERVICE-PROPS/SUBSCRIPTIONS.json, чужой id — 404.
+  if (path.length === 4 && path.slice(0, 3).join('/') === SUBSCRIPTIONS) {
+    const known = elementPassport(draft.id)?.subscriptions?.services.some((s) => s.id === path[3])
+    const trail = findTreePath(path.slice(0, 3))
+    return known && trail ? { draft, trail, service: path[3] } : null
   }
-  const found = findTreePage(path)
+  const trail = findTreePath(path)
+  if (!trail) return null
   // 412-2: страница документа есть, только пока есть его файл в папке элемента.
-  if (found?.page?.doc && !hasDoc(draft.id, found.page.doc)) return null
-  // 472: разделы и страницы по флагам паспорта (H2A · H2H · A2A) — тот же ответ, что в левом меню.
+  const doc = trail[trail.length - 1].doc
+  if (doc && !hasDoc(draft.id, doc)) return null
+  // 472: разделы и страницы по флагам паспорта (H2A · H2H · A2A) — тот же ответ, что в левом меню; 528-1 — по всей цепочке.
   const ctx = { catalog: hasCatalog(draft.id), messengers: elementMessengers(draft.id) }
-  if (found && (!treeVisible(found.section, ctx) || (found.page && !treeVisible(found.page, ctx)))) return null
-  return found ? { draft, found, service: undefined } : null
+  if (!trail.every((t) => treeVisible(t, ctx))) return null
+  return { draft, trail, service: undefined }
 }
 
 export async function generateMetadata({ params }: { params: Promise<Params> }): Promise<Metadata> {
   const p = await params
   const r = resolve(p)
   const l = treeLang(p.lang)
-  const words = r?.found ? (r.found.page ?? r.found.section).words[l] : null
+  const words = r?.trail.length ? r.trail[r.trail.length - 1].words[l] : null
   return {
     title: words ? `${words.title} — ${p.item}` : p.item,
     description: words?.lead,
@@ -118,8 +128,8 @@ export async function generateMetadata({ params }: { params: Promise<Params> }):
 
 export default async function Page({ params }: { params: Promise<Params> }) {
   const p = await params
-  // 451-2: вкладки i2i и f2f переехали в «Строительство» — старый адрес ведёт на новый.
-  const moved = MOVED_PAGES[(p.page ?? []).join('/')]
+  // 451-2, 528-1: прежние адреса (i2i, f2f, H2H, H2A, A2A, Процесс, Документы, Проектирование) ведут на новые.
+  const moved = movedPage(p.page ?? [])
   if (moved) redirect(`/${p.lang}${ARCHITECT_HOME}/${p.item}/${moved}`)
   // 472: у элемента с H2A Telegram-бот живёт в H2A — старый адрес «Строительства» ведёт туда.
   const movedWith = MOVED_WITH[(p.page ?? []).join('/')]
@@ -156,7 +166,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   )
 
   // Главная группы — две карточки, как у корня; у черновика под ними — «Родить элемент».
-  if (!r.found) {
+  if (r.trail.length === 0) {
     return (
       <ArchitectPage
         lang={lang}
@@ -185,16 +195,18 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     )
   }
 
-  const { section, page } = r.found
-  const words = (page ?? section).words[l]
-  const sectionPath = `${dir}/${section.slug}`
-  const path = page ? `${sectionPath}/${page.slug}` : sectionPath
+  // 528-1: страница дерева — последнее звено цепочки «раздел → подраздел → страница»; привязки ниже — по её полному пути `key`.
+  const node = r.trail[r.trail.length - 1]
+  const key = r.trail.map((t) => t.slug).join('/')
+  const words = node.words[l]
+  const nodePath = `${dir}/${key}`
+  const path = r.service ? `${nodePath}/${r.service}` : nodePath
 
-  // Страница раздела перечисляет свои страницы и справа — вместе с третьим уровнем левого меню (320).
+  // Страница с детьми (раздел или подраздел) перечисляет их и справа — вместе с левым меню (320, 528-1).
   const pageCard = (sp: TreePage) => (
     <li key={sp.slug}>
       <Link
-        href={`/${lang}${sectionPath}/${sp.slug}`}
+        href={`/${lang}${nodePath}/${sp.slug}`}
         className="flex flex-col gap-1 rounded-lg border border-border p-3 transition-colors hover:bg-muted/60"
       >
         <span className="font-medium text-foreground">{sp.words[l].title}</span>
@@ -203,35 +215,31 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     </li>
   )
   const treeCtx = { catalog: hasCatalog(item), messengers: elementMessengers(item) }
-  const shown = (section.pages ?? []).filter((sp) => treeVisible(sp, treeCtx) && (!sp.doc || hasDoc(item, sp.doc)))
-  // 435-3: страницы группы — под раскрывающимся заголовком (серверный `<details>`), как в левом меню.
-  const groups = [...new Set(shown.map((sp) => sp.group).filter((g): g is TreeGroup => !!g))]
-  const list = !page && shown.length > 0 ? (
+  const shown = (node.pages ?? []).filter((sp) => treeVisible(sp, treeCtx) && (!sp.doc || hasDoc(item, sp.doc)))
+  const list = !r.service && shown.length > 0 ? (
     <nav aria-label={ui.sectionPages} className="flex flex-col gap-2">
       <p className="text-[length:var(--fs-small)] font-medium text-muted-foreground">{ui.sectionPages}</p>
-      <ul className="grid gap-2 sm:grid-cols-2">{shown.filter((sp) => !sp.group).map(pageCard)}</ul>
-      {groups.map((g) => (
-        <details key={g} className="group/tg mt-2 rounded-lg border border-border px-3 py-2" data-tree-group={g}>
-          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-medium text-foreground [&::-webkit-details-marker]:hidden">
-            {TREE_GROUPS[g][l]}
-            <span aria-hidden className="text-muted-foreground transition-transform group-open/tg:rotate-180">▾</span>
-          </summary>
-          <ul className="mt-2 grid gap-2 sm:grid-cols-2">{shown.filter((sp) => sp.group === g).map(pageCard)}</ul>
-        </details>
-      ))}
+      <ul className="grid gap-2 sm:grid-cols-2">{shown.map(pageCard)}</ul>
     </nav>
   ) : null
-  // 435-2/3: абзацы под заголовком — у раздела на его главной, у страницы на ней самой.
-  const aboutText = (page ?? section).about?.[l]
+  // 435-2/3: абзацы под заголовком. 528-1 (владелец 2026-10-18: «описание длинной ленты не показывать скрывать их в аккордеона») —
+  // свёрнуты в общий аккордеон продукта (shadcn), под ним список страниц.
+  const aboutText = r.service ? undefined : node.about?.[l]
   const about = aboutText?.length ? (
-    <div className="flex max-w-3xl flex-col gap-3 text-sm leading-relaxed" data-tree-about>
-      {aboutText.map((p) => <p key={p.slice(0, 40)}>{p}</p>)}
+    <div className="mb-4 max-w-3xl" data-tree-about>
+      <AccordionSection
+        panels={[{
+          id: 'about',
+          summary: ui.aboutSummary,
+          content: <div className="flex flex-col gap-3 text-sm leading-relaxed">{aboutText.map((t) => <p key={t.slice(0, 40)}>{t}</p>)}</div>,
+        }]}
+      />
     </div>
   ) : null
 
   // 319-2: РОДИВШИЙСЯ элемент (он уже в реестре узла) показывает в Preview свой сайт — тот же просмотр, что у служб, с
   // подсветкой и «Найти блок». Черновик, ещё не родившийся, — только заголовок раздела: показывать нечего.
-  const preview = section.slug === 'preview' && !page && serviceUrl(item)
+  const preview = key === 'preview' && serviceUrl(item)
     // Терминал рождённого элемента — под `build/` (как у «Описания» ниже); путь служб ядра вёл на ошибку (замерено 356-3).
     ? <ElementPreview serviceId={item} terminalService={`${slug}/build`} devHref={`/${lang}/${slug}/build/deployments`} lang={lang} words={elementPreviewWords(lang)} task={previewTaskKit(item, lang)} />
     : null
@@ -239,33 +247,33 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 326-3: «Подписка Claude Code», «Терминал», «Telegram бот» — острова ОБЩЕЙ копии комплекта агента (`../_agent-kit`, 326-1);
   // Claude Code живёт в папке элемента `WEB4-ITEMS/user/<id>`. У черновика — объяснение.
   // 472: Telegram-бот — и в H2A (у элементов с флагом H2A), и в «Строительстве» (у остальных).
-  const kitPage = (section.slug === 'build' || section.slug === 'h2a') && page ? AGENT_PAGES[page.slug] : undefined
+  const kitPage = AGENT_PAGES[key]
   const agent = kitPage
     ? (entry ? agentKitWidget(kitPage, item, lang) : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).agentNotBorn}</p>)
     : null
 
   // 319-5: страница GitHub — связь элемента с репозиторием владельца и выгрузка кнопкой; у нерождённого — объяснение.
-  const github = section.slug === 'build' && page?.slug === 'github'
+  const github = key === 'build/github'
     ? (entry
       ? <ElementGithub id={item} lang={lang} ui={elementGithubUi(lang)} />
       : <p className="my-4 text-sm text-muted-foreground">{elementGithubUi(lang).notBorn}</p>)
     : null
 
   // 336-1: «Переменные окружения» элемента — имена и пояснения из его `.env.example`, ключ OpenAI с проверкой; у черновика — объяснение.
-  const environment = section.slug === 'build' && page?.slug === 'environment'
+  const environment = key === 'build/environment'
     ? (entry ? <EnvironmentPanel target={item} lang={lang} /> : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).notBorn}</p>)
     : null
 
   // 321: «Развёртывания» — версии элемента стандартной таблицей каталога (`table`: поиск сверху, страницы снизу, 262).
-  const isDeployments = section.slug === 'build' && page?.slug === 'deployments'
+  const isDeployments = key === 'build/deployments'
   const versions = isDeployments && entry ? elementVersions(item) : null
   const dui = elementDeploymentsUi(lang)
-  // 472-2: дашборд H2A · H2H · A2A. У A2A собеседники и сделки — из сделок элемента (`listOrders`, тот же источник, что «Сделки»);
-  // у H2A и H2H источника пока нет — нули и честная строка. Данные — при открытии страницы, без таймеров.
-  const dashboardBlocks: Block[] = page?.slug === 'dashboard'
+  // 472-2: дашборд H2A · H2H · A2A. У «A2A: ваша работа» собеседники и сделки — из сделок элемента (`listOrders`, тот же источник,
+  // что её «Сделки»); у H2A, H2H и «A2A: ваши заказы» источника пока нет — нули и честная строка. Данные — при открытии, без таймеров.
+  const dashboardBlocks: Block[] = node.slug === 'dashboard'
     ? (() => {
         const dw = elementDashboardUi(lang)
-        const orders = section.slug === 'connectors' && entry ? listOrders(item) : []
+        const orders = key === 'workflow/a2a-work/dashboard' && entry ? listOrders(item) : []
         const by = new Map<string, { n: number; last: string }>()
         for (const o of orders) {
           const who = o.from || '—'
@@ -297,7 +305,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const sui = elementSettingsUi(lang)
   // 328: «Настройки» раскрывается — «Опасная зона» (прежняя страница) и «Настройки сайта» (конфигуратор элемента).
   // 443-5: «Настройки → Домен» — главное зеркало и адрес элемента (прежде — в «Опасной зоне»).
-  const domainSettings = section.slug === 'settings' && page?.slug === 'domain'
+  const domainSettings = key === 'settings/domain'
     ? (entry
       ? <ElementDangerZone ui={sui} badge={false} cards={domainRecord(item) && primaryDomain() ? ['mirror', 'address', 'signIn'] : ['mirror', 'address']} actions={{
           // 446-3: оранжевая карточка — только при подключённом своём домене; центр входа — `auth.<зона узла>`.
@@ -309,7 +317,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
         }} />
       : <p className="my-4 text-sm text-muted-foreground">{sui.notBorn}</p>)
     : null
-  const settings = section.slug === 'settings' && page?.slug === 'danger-zone'
+  const settings = key === 'settings/danger-zone'
     ? (entry
       ? <ElementDangerZone ui={sui} actions={{
           // 325-2: задание агенту — в окно вставки терминала элемента (`<id>/build/terminal`), отправляет человек.
@@ -326,7 +334,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
         }} />
       : <p className="my-4 text-sm text-muted-foreground">{sui.notBorn}</p>)
     : null
-  const siteSettings = section.slug === 'settings' && page?.slug === 'site-settings'
+  const siteSettings = key === 'settings/site-settings'
     ? (entry
       ? <ElementSiteSettings lang={lang} ui={sui} siteUrl={domainRecord(item)?.url ?? `https://${address}`} configOn={readLinks(item).config} />
       : <p className="my-4 text-sm text-muted-foreground">{sui.notBorn}</p>)
@@ -378,23 +386,31 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     : null
 
   // 406-4 (карта меню 406-2, решение владельца): эти страницы показывают разделы паспорта элемента, своей копии у них нет.
+  // 528-1: ключ — полный путь; витрина A2A стала «Карточками возможностей» в «A2A: ваша работа».
   const PASSPORT_VIEWS: Record<string, PassportView> = {
-    'build/api': 'api', 'build/mcp': 'mcp', 'connectors/a2a': 'a2a', 'build/catalog': 'catalog',
-    'build/publish': 'publish', 'build/find': 'find', 'process/subscriptions': 'subscriptions', 'process/cron': 'cron',
+    'build/i2i/api': 'api', 'build/i2i/mcp': 'mcp', 'workflow/a2a-work/capabilities': 'a2a', 'build/i2i/catalog': 'catalog',
+    'build/f2f/publish': 'publish', 'build/f2f/find': 'find', [SUBSCRIPTIONS]: 'subscriptions', 'workflow/process/cron': 'cron',
   }
-  const passportView = page ? PASSPORT_VIEWS[`${section.slug}/${page.slug}`] : undefined
+  const passportView = PASSPORT_VIEWS[key]
   // 412-2: документ элемента — текст спрашивает островок при открытии (страница предрендерена, агент правит файлы в любую минуту).
   // 417: новый паспорт — сверху кнопка генерации и ответ двери элемента (как его получает ядро), ниже README и файл.
-  const passportDoor = page?.slug === 'own-service-props' && entry
+  const passportDoor = key === 'build/documents/own-service-props' && entry
     ? <PassportDoor item={item} terminalHref={terminalLink({ lang, service: `${slug}/build`, text: PASSPORT_TASK[lang === 'ru' ? 'ru' : 'en'] })} words={passportDoorUi(lang)} />
     : null
-  const doc = page?.doc ? <>{passportDoor}<ElementDocIsland item={item} page={page.slug} words={elementDocsUi(lang)} /></> : null
-  // 412-6: сводки сделок элемента и беседы за ними; у черновика сделок не бывает. 436-2: «Процесс → Заказы» → «Связи (A2A) → Сделки».
-  const orders = section.slug === 'connectors' && page?.slug === 'deals'
+  const doc = node.doc ? <>{passportDoor}<ElementDocIsland item={item} page={node.slug} words={elementDocsUi(lang)} /></> : null
+  // 412-6: сводки сделок элемента и беседы за ними; у черновика сделок не бывает. 436-2: «Процесс → Заказы» → «Связи (A2A) → Сделки»;
+  // 528-1: «Рабочий процесс → A2A: ваша работа → Сделки». У «A2A: ваши заказы» источника заказов элемента пока нет — честная строка.
+  const orders = key === 'workflow/a2a-work/deals'
     ? (entry ? <ElementOrdersIsland item={item} words={elementOrdersUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).notBorn}</p>)
+    : key === 'workflow/a2a-orders/deals'
+      ? <p className="my-4 max-w-3xl text-sm text-muted-foreground" data-orders-empty>{ui.ordersEmpty}</p>
+      : null
+  // 528-2 (владелец 2026-10-18): «Messenger → Настройки» — тариф первого контакта и правила агента; хранятся в паспорте элемента.
+  const messengerSettings = key === 'messenger/settings'
+    ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
     : null
-  // 436-3 (владелец 2026-10-09): главная «Связи (A2A)» начинается с рейтинга элемента в Lagrix — пока заглушка, все значения «—».
-  const lagrix = section.slug === 'connectors' && !page ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
+  // 436-3 (владелец 2026-10-09): рейтинг элемента в Lagrix; 528-1 — на главной «Рабочего процесса», куда переехал A2A.
+  const lagrix = key === 'workflow' ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
   // 435-3: «Каталог» показывает и элементы узла — из того же реестра, по которому элементы ищут соседей (`nodeEntries`);
   // у элемента без визитки — только адрес.
   const nodeElements: NodeElementRow[] | undefined = passportView === 'catalog'
@@ -407,7 +423,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       })()
     : undefined
   // 463: страница одного внешнего сервиса — `service`; ссылки списка «Подписки» строятся от `subscriptionsHref`.
-  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/process/subscriptions`} /> : null
+  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${SUBSCRIPTIONS}`} /> : null
 
   return (
     <ArchitectPage
@@ -416,7 +432,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

@@ -13,30 +13,30 @@ import { data as p7 } from './hosting/_data'
 import { data as p8 } from './kits/_data'
 import { data as p9 } from './passport/_data'
 import { data as p10 } from './root/_data'
-import { PAGES as c0 } from './auth/_list.generated'
-import { PAGES as c1 } from './blocks/_list.generated'
-import { PAGES as c2 } from './build/_list.generated'
-import { PAGES as c3 } from './config/_list.generated'
-import { PAGES as c4 } from './dashboard/_list.generated'
-import { PAGES as c5 } from './data/_list.generated'
-import { PAGES as c6 } from './design/_list.generated'
-import { PAGES as c7 } from './hosting/_list.generated'
-import { PAGES as c9 } from './passport/_list.generated'
-import { PAGES as c10 } from './root/_list.generated'
+import { PAGES as c0, TREE as t0 } from './auth/_list.generated'
+import { PAGES as c1, TREE as t1 } from './blocks/_list.generated'
+import { PAGES as c2, TREE as t2 } from './build/_list.generated'
+import { PAGES as c3, TREE as t3 } from './config/_list.generated'
+import { PAGES as c4, TREE as t4 } from './dashboard/_list.generated'
+import { PAGES as c5, TREE as t5 } from './data/_list.generated'
+import { PAGES as c6, TREE as t6 } from './design/_list.generated'
+import { PAGES as c7, TREE as t7 } from './hosting/_list.generated'
+import { PAGES as c9, TREE as t9 } from './passport/_list.generated'
+import { PAGES as c10, TREE as t10 } from './root/_list.generated'
 
 export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10]
 
 /** Each child together with its own children — see the law in the generator. */
 export const TREE: CollectionBranch[] = [
-  { page: p0, children: c0 },
-  { page: p1, children: c1 },
-  { page: p2, children: c2 },
-  { page: p3, children: c3 },
-  { page: p4, children: c4 },
-  { page: p5, children: c5 },
-  { page: p6, children: c6 },
-  { page: p7, children: c7 },
+  { page: p0, children: c0, branches: t0 },
+  { page: p1, children: c1, branches: t1 },
+  { page: p2, children: c2, branches: t2 },
+  { page: p3, children: c3, branches: t3 },
+  { page: p4, children: c4, branches: t4 },
+  { page: p5, children: c5, branches: t5 },
+  { page: p6, children: c6, branches: t6 },
+  { page: p7, children: c7, branches: t7 },
   { page: p8, children: [] },
-  { page: p9, children: c9 },
-  { page: p10, children: c10 },
+  { page: p9, children: c9, branches: t9 },
+  { page: p10, children: c10, branches: t10 },
 ]

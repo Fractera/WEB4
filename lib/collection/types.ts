@@ -106,6 +106,8 @@ export type WorkspacePageData = {
 export type CollectionBranch = {
   page: WorkspacePageData
   children: readonly WorkspacePageData[]
+  /** 528-3: дерево детей, у которых есть свои дети (раздел → подразделы); нет — у детей нет своих страниц. */
+  branches?: readonly CollectionBranch[]
 }
 
 /** The words of a page in one language, falling back to `en`. */

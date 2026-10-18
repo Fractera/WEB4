@@ -10,6 +10,10 @@ export type Web4DraftsUi = {
   createFailed: string
   draftBadge: string
   sectionPages: string
+  /** 528-1: подпись свёрнутого описания раздела или страницы элемента. */
+  aboutSummary: string
+  /** 528-1: «A2A: ваши заказы → Сделки» — честная строка, пока источника заказов элемента нет. */
+  ordersEmpty: string
   portTitle: string
   portLine: string
   addressTitle: string
@@ -67,6 +71,8 @@ const DICT: Record<string, Web4DraftsUi> = {
     zoneCustom: "Custom WEB4 ITEMS",
     draftBadge: "Draft",
     sectionPages: "Pages of this section",
+    aboutSummary: "More about this",
+    ordersEmpty: "No orders yet. Work this element orders from other agents will appear here once it starts placing orders over A2A.",
     portTitle: "Port on this machine",
     portLine: "No port assigned yet: the draft has no process of its own.",
     addressTitle: "Address on the internet",
@@ -119,6 +125,8 @@ const DICT: Record<string, Web4DraftsUi> = {
     zoneCustom: "Кастомные WEB4 ITEMS",
     draftBadge: "Черновик",
     sectionPages: "Страницы раздела",
+    aboutSummary: "Подробнее",
+    ordersEmpty: "Заказов пока нет. Работа, которую элемент закажет у других агентов, появится здесь, когда он начнёт заказывать по A2A.",
     portTitle: "Порт на этой машине",
     portLine: "Порт ещё не назначен: у черновика нет своего процесса.",
     addressTitle: "Адрес в интернете",

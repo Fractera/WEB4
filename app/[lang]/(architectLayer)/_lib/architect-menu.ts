@@ -50,6 +50,10 @@ export const ARCHITECT_PAGES: readonly { path: string; page: { overrides?: Recor
   TREE.flatMap((b) => [
     { path: dirOf(b.page.meta.slug), page: b.page },
     ...b.children.map((c) => ({ path: `${dirOf(b.page.meta.slug)}/${c.meta.slug}`, page: c })),
+    // 528-3: подразделы раздела («Главный агент → Messenger → H2H»).
+    ...(b.branches ?? []).flatMap((s) =>
+      s.children.map((g) => ({ path: `${dirOf(b.page.meta.slug)}/${s.page.meta.slug}/${g.meta.slug}`, page: g })),
+    ),
   ])
 
 /** Адрес каждой страницы слоя — для сторожа маршрутов и любого обхода. */
@@ -72,9 +76,17 @@ export function architectMenu(lang: string, currentPath: string): WorkspaceItem[
     const branch = TREE.find((b) => b.page.meta.slug === group.meta.slug)
     const dir = dirOf(group.meta.slug)
 
-    const children = pagesInOrder(branch?.children ?? []).map((p) => {
+    const children: WorkspaceItem[] = pagesInOrder(branch?.children ?? []).map((p) => {
       const path = `${dir}/${p.meta.slug}`
-      return { label: wordsOf(p, lang).title, href: at(path), active: path === currentPath }
+      // 528-3: раздел со своими подразделами раскрывается третьим уровнем; открыт, когда человек на нём или внутри.
+      const sub = branch?.branches?.find((s) => s.page.meta.slug === p.meta.slug)
+      const kids = pagesInOrder(sub?.children ?? []).map((k) => {
+        const kp = `${path}/${k.meta.slug}`
+        return { label: wordsOf(k, lang).title, href: at(kp), active: kp === currentPath }
+      })
+      return kids.length > 0
+        ? { label: wordsOf(p, lang).title, href: at(path), active: path === currentPath, open: path === currentPath || kids.some((k) => k.active), children: kids }
+        : { label: wordsOf(p, lang).title, href: at(path), active: path === currentPath }
     })
 
     return {
@@ -82,7 +94,7 @@ export function architectMenu(lang: string, currentPath: string): WorkspaceItem[
       ...(group.meta.icon ? { icon: group.meta.icon } : {}),
       href: at(dir),
       active: currentPath === dir,
-      open: currentPath === dir || children.some((c) => c.active),
+      open: currentPath === dir || children.some((c) => c.active || c.open),
       ...(children.length > 0 ? { children } : {}),
     }
   })

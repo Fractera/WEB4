@@ -1,5 +1,10 @@
 # Section «A2A» of an element — why it exists
 
+> 🪦 Node step 528 (owner 2026-10-18): there is no section «A2A» any more. Its pages live in «Working process»: «A2A: your work»
+> (`workflow/a2a-work` — Deals, native, Telegram, dashboard, Capability cards = the former showcase) and «A2A: your orders»
+> (`workflow/a2a-orders`); the Lagrix rating card stands on the Working process home page (`workflow`). Old addresses redirect
+> (`movedPage()` in `lib/web4-items/item-tree.ts`). The text below keeps the old addresses as history.
+
 > Node step 451-2 (owner 2026-10-11): the section is now only the working process over a2a — the showcase and the deals. API, MCP and
 > Catalog moved into «Build → Inside the node (i2i)»; whole-element exchange is «Build → Exchange with Fractera (f2f)». Old
 > addresses redirect (`MOVED_PAGES`).
