@@ -25,6 +25,26 @@ export type NodeWalletWords = {
   income: DocItem[]
   costsTitle: string
   costs: DocItem[]
+  // 532: создание ключа на узле, резервная копия, кошелёк элемента
+  elementTitle: string
+  temporaryAddress: string
+  or: string
+  generate: string
+  generateNote: string
+  generatedNote: string
+  addressNote: string
+  backup: string
+  removeWarning: string
+  removeYes: string
+  cancel: string
+  ownWallet: string
+  removeOwn: string
+  inheritsNode: string
+  noNodeWallet: string
+  nodeWalletLink: string
+  addOwn: string
+  ownNote: string
+  afterRemove: string
 }
 
 const D = (text: string, ...docs: LagrixDoc[]): DocItem => ({ text, docs })
@@ -61,6 +81,25 @@ const UI: Record<"en" | "ru", NodeWalletWords> = {
       D("A message through a super-node: $0.001; a direct message is free.", "17-discovery-ranking-feedback", "23-spam-and-the-price-of-a-first-contact"),
       D("The gas of its own transactions: in ether, or in USDC through a third-party paymaster.", "08-account-abstraction-bundler"),
     ],
+    elementTitle: "Element wallet",
+    temporaryAddress: "Wallets are changed only on this computer or on your own domain, not through the temporary address.",
+    or: "or",
+    generate: "Generate a wallet",
+    generateNote: "Generating creates the wallet's key right here, on this node: the node will sign with it. The key never goes to the browser — only into a backup file you download yourself.",
+    generatedNote: "Created on this node: the key is kept in the node's data, outside git. Download a backup and keep it offline — whoever knows the key controls the money on this wallet.",
+    addressNote: "Connected by address: payments come to this wallet, but the node cannot sign with it.",
+    backup: "Download the key backup",
+    removeWarning: "The wallet stops being used. Its key is not erased: the node keeps it in the wallet-removed folder of its data. Make sure you have a backup.",
+    removeYes: "Remove the wallet",
+    cancel: "Cancel",
+    ownWallet: "The element's own wallet:",
+    removeOwn: "Remove own wallet",
+    inheritsNode: "The element works with the node wallet:",
+    noNodeWallet: "The node has no wallet yet, so there is nothing to inherit.",
+    nodeWalletLink: "Node wallet",
+    addOwn: "Add its own wallet",
+    ownNote: "The network sees an element with its own wallet as a separate node: the wallet's address is a node's name.",
+    afterRemove: "Removing the own wallet returns the element to the node wallet",
   },
   ru: {
     lang: "ru",
@@ -93,6 +132,25 @@ const UI: Record<"en" | "ru", NodeWalletWords> = {
       D("Сообщение через супер-узел: $0,001; прямое сообщение бесплатно.", "17-discovery-ranking-feedback", "23-spam-and-the-price-of-a-first-contact"),
       D("Газ своих транзакций: эфиром или в USDC через сторонний Paymaster.", "08-account-abstraction-bundler"),
     ],
+    elementTitle: "Кошелёк элемента",
+    temporaryAddress: "Кошелёк меняется только на этом компьютере или на вашем домене, не через временный адрес.",
+    or: "или",
+    generate: "Сгенерировать кошелёк",
+    generateNote: "Генерация создаёт ключ кошелька прямо здесь, на узле: узел будет им подписывать. В браузер ключ не уходит — только в файл резервной копии, который вы скачиваете сами.",
+    generatedNote: "Создан на этом узле: ключ хранится в данных узла, вне git. Скачайте резервную копию и храните её вне сети — кто знает ключ, тот распоряжается деньгами на кошельке.",
+    addressNote: "Подключён адресом: платежи приходят на этот кошелёк, но подписывать им узел не может.",
+    backup: "Скачать резервную копию ключа",
+    removeWarning: "Кошелёк перестанет использоваться. Ключ не стирается: узел сохранит его в папке wallet-removed своих данных. Убедитесь, что резервная копия у вас есть.",
+    removeYes: "Снять кошелёк",
+    cancel: "Отмена",
+    ownWallet: "Свой кошелёк элемента:",
+    removeOwn: "Удалить свой кошелёк",
+    inheritsNode: "Элемент работает кошельком узла:",
+    noNodeWallet: "У узла пока нет кошелька — наследовать нечего.",
+    nodeWalletLink: "Кошелёк узла",
+    addOwn: "Добавить свой кошелёк",
+    ownNote: "Элемент со своим кошельком сеть видит отдельным узлом: адрес кошелька — имя узла.",
+    afterRemove: "Удалив свой кошелёк, элемент снова работает кошельком узла",
   },
 }
 

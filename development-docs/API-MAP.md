@@ -7,7 +7,7 @@
 Имя маршрута — то, чем его находят: 6–12 слов, глагол первым. Правило проверяется `npm run check:api`,
 который стоит в `prebuild` — маршрут без имени роняет сборку.
 
-Всего маршрутов: **60**
+Всего маршрутов: **71**
 
 | Адрес | Методы | Что делает | Продукт |
 |---|---|---|---|
@@ -52,17 +52,28 @@
 | `/api/media/upload` | POST | upload a file into the platform media store | — |
 | `/api/node/a2a` | GET | find which node element can do a job and where | — |
 | `/api/node/a2a-log` | GET, POST | write and read the log of agent-to-agent calls between node elements | — |
+| `/api/node/a2a-log/pin` | POST | pin one agent conversation so the log keeps it | — |
 | `/api/node/attention` | GET | list open element terminals and previews waiting for the architect | — |
 | `/api/node/deploy` | GET, POST | list node elements with pending changes and start their deployment | — |
+| `/api/node/element-docs` | GET | read one development document of a WEB4 ITEM | — |
+| `/api/node/element-orders` | GET | list the order summaries one WEB4 ITEM saved | — |
 | `/api/node/github-backup` | GET, POST | report and create the GitHub repositories of every element | — |
+| `/api/node/messenger-settings` | GET, POST | read and save an element's messenger settings in its passport | — |
+| `/api/node/official` | GET, POST, DELETE | read save or drop the node's official mark application draft | — |
 | `/api/node/online` | GET | ask Cloudflare whether the node's site is online right now | — |
 | `/api/node/origin` | GET | tell how far this node's fork is behind the original | — |
+| `/api/node/own-service-props` | GET | read an element passport through its door with the node key | — |
+| `/api/node/passport` | GET | list every element of the node as a passport card | — |
 | `/api/node/place` | GET, POST | read or set where this node stands | — |
 | `/api/node/preview-url` | GET | tell the address where an element of this node can be previewed | — |
 | `/api/node/projects` | GET | list every WEB4 ITEM with its state and last commit | — |
 | `/api/node/reach` | GET, POST | measure and connect a service's address on the node's own domain | — |
 | `/api/node/review-inbox` | POST | element agent leaves a self-review finding about something outside it | — |
 | `/api/node/state` | GET | report how this node is reachable and whether it is walled off | — |
+| `/api/node/stripe` | GET, POST | read which Stripe keys are set and save checked new ones | — |
+| `/api/node/super-node` | GET, POST | read the super node application and settings and change them | — |
+| `/api/node/super-node/remote` | GET | read one part of the super node server through its operator API | — |
+| `/api/node/wallet` | GET, POST, DELETE | manage the node or element wallet and its key backup | — |
 | `/api/openai-models` | GET | list the live model names this key can actually use | — |
 | `/api/project-types/[lang]/[id]` | GET | describe one project direction for the home page window | — |
 | `/api/revalidate` | POST | rebuild public pages after the owner changes app settings | — |

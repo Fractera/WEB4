@@ -413,12 +413,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const messengerSettings = key === 'messenger/settings'
     ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
     : null
-  // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3 (кошелёк узла, один на все элементы).
+  // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3. 532: Web3 — кошелёк элемента: наследует
+  // кошелёк узла, свой добавляется и удаляется (снова кошелёк узла) — слово владельца в `lib/web4-items/node-wallet.ts`.
   const pw = paymentsUi(lang)
   const payments = key === 'settings/payments/web2'
     ? (entry ? <StripeKeys target={item} words={pw.stripe} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
     : key === 'settings/payments/web3'
-      ? <NodeWalletCard words={nodeWalletUi(lang)} note={pw.web3ElementNote} />
+      ? (entry ? <NodeWalletCard words={nodeWalletUi(lang)} note={pw.web3ElementNote} element={item} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
       : null
   // 436-3 (владелец 2026-10-09): рейтинг элемента в Lagrix; 528-1 — на главной «Рабочего процесса», куда переехал A2A.
   const lagrix = key === 'workflow' ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
