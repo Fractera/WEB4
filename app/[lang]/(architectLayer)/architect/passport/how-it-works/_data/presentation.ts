@@ -8,7 +8,7 @@
 export type PresentationPart = { title: string; items: string[] }
 export type PresentationSection = { title: string; parts: PresentationPart[] }
 export type PresentationCard = { title: string; text: string; action: string }
-export type PresentationWords = { intro: string; card: PresentationCard; lagrixCard: PresentationCard; sections: PresentationSection[] }
+export type PresentationWords = { intro: string; card: PresentationCard; lagrixCard: PresentationCard; aiCard: PresentationCard; sections: PresentationSection[] }
 
 const UI: Record<'en' | 'ru', PresentationWords> = {
   en: {
@@ -26,6 +26,14 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
       text:
         '**Discovery** — an agent for anything and a direct line to anyone through their agent, with no platform in between. **Honest reputation** — a review comes only from someone who had a real, paid deal with you, and that history cannot be bought, faked or rewritten.',
       action: 'Open the Lagrix site',
+    },
+    // 535-4 (владелец 2026-10-18): карточка в конце раздела 2 — без ИИ узел полноценно не работает; Pro за $20 достаточно (claude.com/pricing,
+    // 2026-10-18: «$20 if billed monthly», «Claude Code is included in all paid plans»); главный агент жизни.
+    aiCard: {
+      title: 'AI is the heart of the node: connect Claude Code',
+      text:
+        'The node is built and its workflows are run by the Claude Code AI agent; without it the node cannot fully work — it neither builds elements nor runs their processes. A **Claude Pro** subscription at **$20 a month** is enough. Make it the main agent of your life: if you pay for Perplexity, ChatGPT, Grok or Gemini, you can cancel them — one subscription covers it all, and your knowledge, notes and conversations stay as history on your own computer.',
+      action: 'Connect Claude Code',
     },
     sections: [
       {
@@ -63,7 +71,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
           {
             title: '2.1 What you can build',
             items: [
-              'A landing page, a blog, a shop, a personal account, a company\'s internal system, an app with a database and sign-in.',
+              'A landing page, a blog, a shop, a personal account, a company\'s internal system, an app with a database and sign-in — the Claude Code AI agent builds it from your words.',
               'The site is open by a link at once: a temporary Cloudflare address on the first start, later your own domain.',
               'Pages are static and visible to search engines; a copy of the site answers even when your computer is off.',
             ],
@@ -132,6 +140,12 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
         '**Обнаружение** — агент для любого дела и прямая связь с любым человеком через его агента, без платформы посередине. **Честная репутация** — отзыв оставляет только тот, с кем у вас была настоящая оплаченная сделка, и эту историю нельзя купить, подделать или переписать.',
       action: 'Открыть сайт Lagrix',
     },
+    aiCard: {
+      title: 'ИИ — сердце узла: подключите Claude Code',
+      text:
+        'Узел строит и ведёт его рабочие процессы ИИ-агент Claude Code; без него узел полноценно не работает — не строит элементы и не управляет их процессами. Достаточно подписки **Claude Pro за $20 в месяц**. Сделайте его главным агентом вашей жизни: если вы платите за Perplexity, ChatGPT, Grok или Gemini, эти подписки можно отменить — одной хватит на всё, а ваши знания, заметки и разговоры остаются историей на вашем компьютере.',
+      action: 'Подключить Claude Code',
+    },
     sections: [
       {
         title: '1. Готов к Web4 с первой минуты',
@@ -168,7 +182,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
           {
             title: '2.1 Что можно построить',
             items: [
-              'Лендинг, блог, магазин, личный кабинет, внутреннюю систему компании, приложение с базой данных и входом.',
+              'Лендинг, блог, магазин, личный кабинет, внутреннюю систему компании, приложение с базой данных и входом — всё это по вашим словам строит ИИ-агент Claude Code.',
               'Сайт сразу доступен по ссылке: при первом запуске — временный адрес Cloudflare, потом — ваш домен.',
               'Страницы статические и видны поисковикам; копия сайта отвечает, даже когда компьютер выключен.',
             ],
