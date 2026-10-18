@@ -37,7 +37,7 @@
 | `code01` | `code` | Page material | — | text: string | — |
 | `note01` | `note` | Page material | — | text: string | — |
 | `cta01` | `cta` | Page material | призыв к действию | text?: string; href: string; label: string; secondary?: { href: string; label: string } | [карточка](blocks/cta.md) |
-| `callout01` | `callout` | Page material | — | title: string; text: string | — |
+| `callout01` | `callout` | Page material | — | title: string; text: string; action?: { href: string; label: string } | — |
 | `table01` | `table` | Page material | — | headers: string[]; rows: string[][]; caption?: string | — |
 | `docref01` | `docref` | Page material | a card that leads somewhere: a document to download or a page to open | title: string; summary: string; href: string; label?: string; kicker?: string; navigate?: boolean | [карточка](blocks/docref.md) |
 | `founder01` | `founder` | Testimonials and social proof | the owner's quote, signed from settings | text: string | [карточка](blocks/founder.md) |
