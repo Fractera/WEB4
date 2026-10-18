@@ -40,14 +40,15 @@ const childPages = (dir) =>
 function folders(base) {
   const out = []
   const walk = (rel) => { for (const n of childPages(join(BUILD, ...rel.split('/')))) { const r = `${rel}/${n}`; out.push(r); walk(r) } }
-  if (isPage(join(BUILD, base))) { out.push(base); walk(base) }
+  if (isPage(join(BUILD, ...base.split('/')))) { out.push(base); walk(base) }
   return out
 }
 /** Узлы дерева элемента под разделом — пути от элемента. */
 function treePaths(slug) {
   const out = []
   const walk = (pages, base) => { for (const p of pages) { const path = `${base}/${p.slug}`; out.push(path); if (p.pages) walk(p.pages, path) } }
-  const section = tree.ITEM_TREE.find((s) => s.slug === slug)
+  const trail = tree.findTreePath(slug.split('/'))
+  const section = trail ? trail[trail.length - 1] : null
   if (section) { out.push(slug); walk(section.pages ?? [], slug) }
   return out
 }
@@ -56,7 +57,8 @@ const errors = []
 const PLACE = scheme.MAIN_AGENT_PLACE
 const borrowed = new Set(Object.entries(PLACE).map(([slug, parent]) => `${parent}/${slug}`))
 
-for (const section of ['messenger', 'workflow']) {
+// 530-1: и «Настройки → Платежи» — у главного агента та же ветка (остальные настройки элемента у ядра законно другие).
+for (const section of ['messenger', 'workflow', 'settings/payments']) {
   const onDisk = new Set(folders(section))
   for (const p of treePaths(section)) {
     if (!onDisk.has(p) && !borrowed.has(p)) errors.push(`у элемента есть «${p}», у главного агента — нет (ни папки build/${p}, ни места в схеме)`)
@@ -80,4 +82,4 @@ if (errors.length) {
   console.log(`===MAIN_AGENT_MENU_FAILED=== ошибок: ${errors.length}`)
   process.exit(1)
 }
-console.log(`===MAIN_AGENT_MENU_OK=== Messenger и Рабочий процесс совпадают с элементом, страниц россыпью нет, мест в схеме: ${Object.keys(PLACE).length}`)
+console.log(`===MAIN_AGENT_MENU_OK=== Messenger, Рабочий процесс и Платежи совпадают с элементом, страниц россыпью нет, мест в схеме: ${Object.keys(PLACE).length}`)

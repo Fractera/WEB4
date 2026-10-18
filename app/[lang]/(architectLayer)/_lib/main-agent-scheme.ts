@@ -16,7 +16,7 @@
 export const MAIN_AGENT = 'build'
 
 /** Пункты верхнего уровня главного агента — как разделы элемента; всё остальное обязано иметь место ниже. */
-export const MAIN_AGENT_TOP = ['messenger', 'workflow', 'construction'] as const
+export const MAIN_AGENT_TOP = ['messenger', 'workflow', 'construction', 'settings'] as const
 
 export const MAIN_AGENT_PLACE: Record<string, string> = {
   // «Строительство» — как у элемента: GitHub, подписка, терминал, развёртывание, переменные, i2i, Документы.
@@ -52,5 +52,6 @@ export const MAIN_AGENT_PLACE: Record<string, string> = {
  * элемента); `null` — своя страница ядра. Сторож сверяет эти пути с деревом элемента.
  */
 export function elementPathOf(rel: string): string | null {
-  return rel.startsWith('messenger') || rel.startsWith('workflow') ? rel : null
+  // 530-1: и «Настройки → Платежи» — та же страница у элемента.
+  return rel.startsWith('messenger') || rel.startsWith('workflow') || rel.startsWith('settings') ? rel : null
 }

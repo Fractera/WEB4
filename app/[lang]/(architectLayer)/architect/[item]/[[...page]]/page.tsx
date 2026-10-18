@@ -60,6 +60,10 @@ import { LagrixRating } from '@/components/element-docs/lagrix-rating'
 import { lagrixRatingUi } from '../../../_i18n/lagrix-rating.i18n'
 import { ElementMessengerSettings } from '../../../_components/element-messenger-settings.client'
 import { messengerSettingsUi } from '../../../_i18n/element-messenger-settings.i18n'
+import { StripeKeys } from '@/components/payments/stripe-keys.client'
+import { paymentsUi } from '@/components/payments/payments.i18n'
+import { NodeWalletCard } from '@/components/wallet/node-wallet.client'
+import { nodeWalletUi } from '@/components/wallet/node-wallet.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -409,6 +413,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const messengerSettings = key === 'messenger/settings'
     ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
     : null
+  // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3 (кошелёк узла, один на все элементы).
+  const pw = paymentsUi(lang)
+  const payments = key === 'settings/payments/web2'
+    ? (entry ? <StripeKeys target={item} words={pw.stripe} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
+    : key === 'settings/payments/web3'
+      ? <NodeWalletCard words={nodeWalletUi(lang)} note={pw.web3ElementNote} />
+      : null
   // 436-3 (владелец 2026-10-09): рейтинг элемента в Lagrix; 528-1 — на главной «Рабочего процесса», куда переехал A2A.
   const lagrix = key === 'workflow' ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
   // 435-3: «Каталог» показывает и элементы узла — из того же реестра, по которому элементы ищут соседей (`nodeEntries`);
@@ -432,7 +443,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import type { Block } from '@/lib/content/blocks/types'
 import { type WorkspacePageData, wordsOf } from '@/lib/collection/types'
 import { ArchitectPage } from './architect-page'
@@ -11,7 +12,8 @@ import { MainAgentElements } from '../_components/main-agent-elements'
 // поставленные сюда схемой `main-agent-scheme.ts`, со своими адресами); у страниц Messenger и Рабочего процесса — эта же страница у
 // элементов. Одна оболочка на все такие страницы, чтобы список пунктов страницы и меню не разошлись: оба берутся из `groupTree`.
 
-export function MainAgentPage({ lang, rel, page }: { lang: string; rel: string; page: WorkspacePageData }) {
+/** `own` — своя работающая часть страницы (530-1: ключи Stripe ядра, кошелёк узла); встаёт над ссылками на элементы. */
+export function MainAgentPage({ lang, rel, page, own }: { lang: string; rel: string; page: WorkspacePageData; own?: ReactNode }) {
   const ui = architectLayerUi(lang)
   const words = wordsOf(page, lang)
   const node = groupNode(MAIN_AGENT, rel)
@@ -32,7 +34,7 @@ export function MainAgentPage({ lang, rel, page }: { lang: string; rel: string; 
       title={words.title}
       lead={words.lead}
       children={items}
-      widget={elementPath ? <MainAgentElements lang={lang} path={elementPath} /> : undefined}
+      widget={own || elementPath ? <>{own}{elementPath ? <MainAgentElements lang={lang} path={elementPath} /> : null}</> : undefined}
     />
   )
 }
