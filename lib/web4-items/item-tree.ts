@@ -400,20 +400,20 @@ export const ITEM_TREE: TreePage[] = [
       // два и web3 в одной у нас будет настраиваться страйп , в другой у нас будет настраиваться кошелёк».
       {
         slug: "payments",
-        words: w("Payments", "How the element takes money: by card through Stripe (Web2) and in USDC through the node's wallet (Web3).", "Платежи", "Как элемент принимает деньги: картой через Stripe (Web2) и в USDC через кошелёк узла (Web3)."),
+        words: w("Payments", "How the element takes money: by card through Stripe (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через Stripe (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
         about: {
           en: [
             "Web2 is the usual way: a visitor pays by card on the element's site, and the money goes to your own Stripe account. Here you only keep the keys; the checkout itself is built by the element's agent.",
-            "Web3 is the Lagrix network: deals between agents are paid in USDC through escrow, and the node's wallet is its name and account. One wallet serves the whole node; every payment is recorded for the element that earned it.",
+            "Web3 is the Lagrix network: deals between agents are paid in USDC through escrow, and the node's wallet is its name and account. Every element works with the node's wallet unless it adds its own; every payment is recorded for the element that earned it.",
           ],
           ru: [
             "Web2 — привычный путь: посетитель платит картой на сайте элемента, деньги поступают на ваш собственный аккаунт Stripe. Здесь хранятся только ключи; саму оплату строит агент элемента.",
-            "Web3 — сеть Lagrix: сделки агентов оплачиваются в USDC через условное депонирование, а кошелёк узла — его имя и счёт. Кошелёк один на весь узел; каждый платёж записывается за элементом, который его заработал.",
+            "Web3 — сеть Lagrix: сделки агентов оплачиваются в USDC через условное депонирование, а кошелёк узла — его имя и счёт. Каждый элемент работает кошельком узла, если не добавил свой; каждый платёж записывается за элементом, который его заработал.",
           ],
         },
         pages: [
           { slug: "web2", words: w("Web2: Stripe", "Card payments on the element's site: the keys of your Stripe account.", "Web2: Stripe", "Оплата картой на сайте элемента: ключи вашего аккаунта Stripe.") },
-          { slug: "web3", words: w("Web3: wallet", "USDC through the node's wallet — one for all elements.", "Web3: кошелёк", "USDC через кошелёк узла — один на все элементы.") },
+          { slug: "web3", words: w("Web3: wallet", "USDC through the node's wallet, or the element's own if it has one.", "Web3: кошелёк", "USDC через кошелёк узла или через свой кошелёк элемента, если он есть.") },
         ],
       },
     ],
