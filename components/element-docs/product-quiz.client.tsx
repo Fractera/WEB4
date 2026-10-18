@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState, type PointerEvent } from "react"
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
@@ -72,8 +72,29 @@ function Dot({ work }: { work: QuizWork }) {
   return <span className={`inline-block size-2.5 shrink-0 rounded-full ${DOT[work]}`} aria-hidden />
 }
 
+// 🔒 HOVER FOR A MOUSE, A PRESS FOR A FINGER (536-2, measured): with plain mouse handlers the hover opened the window and the click
+// that followed toggled it shut — and a phone sends a compatibility hover before every tap, so a tap closed it at once. Hover reacts
+// only to `pointerType === "mouse"`; a mouse click keeps it open; a tap and the keyboard (click with `detail === 0`) toggle it. Closing
+// on leave waits a moment, so the pointer can cross the gap from the dot to the window.
 function ItemWork({ it, words }: { it: QuizItem; words: ProductQuizWords }) {
   const [open, setOpen] = useState(false)
+  const pointer = useRef("mouse")
+  const closing = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const stay = () => {
+    if (closing.current) clearTimeout(closing.current)
+    closing.current = null
+  }
+  const hoverIn = (e: PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== "mouse") return
+    stay()
+    setOpen(true)
+  }
+  const hoverOut = (e: PointerEvent<HTMLElement>) => {
+    if (e.pointerType !== "mouse") return
+    stay()
+    closing.current = setTimeout(() => setOpen(false), 150)
+  }
+  useEffect(() => stay, [])
   const numbers = it.steps.filter((s) => s.state === it.work).map((s) => s.number).join(", ")
   const label = fill(words.work[it.work], { step: numbers })
   return (
@@ -81,13 +102,19 @@ function ItemWork({ it, words }: { it: QuizItem; words: ProductQuizWords }) {
       <PopoverTrigger
         className="inline-flex size-6 shrink-0 items-center justify-center rounded-full hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring"
         aria-label={label}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
+        onPointerDown={(e) => { pointer.current = e.pointerType }}
+        onPointerEnter={hoverIn}
+        onPointerLeave={hoverOut}
+        onClick={(e) => {
+          e.preventDefault()
+          const byMouse = e.detail > 0 && pointer.current === "mouse"
+          setOpen((o) => (byMouse ? true : !o))
+        }}
         data-quiz-dot={it.work}
       >
         <Dot work={it.work} />
       </PopoverTrigger>
-      <PopoverContent align="start" className="flex w-80 flex-col gap-2" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} data-quiz-steps={it.id}>
+      <PopoverContent align="start" className="flex w-80 flex-col gap-2" onPointerEnter={hoverIn} onPointerLeave={hoverOut} data-quiz-steps={it.id}>
         <Small className="font-medium">{label}</Small>
         {it.steps.length > 0 ? (
           <>
