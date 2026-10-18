@@ -16,6 +16,10 @@ import { getService } from "@/lib/microservices/registry"
 
 export const EDITABLE = ["OPENAI_API_KEY"] as const
 export type EditableName = (typeof EDITABLE)[number]
+// 530-1: ключи Stripe пишет ТОЛЬКО своя дверь `/api/node/stripe` (проверка формата и вызов Stripe до записи), не дверь окружения:
+// в EDITABLE их нет намеренно.
+export const STRIPE_NAMES = ["STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET"] as const
+export type StripeName = (typeof STRIPE_NAMES)[number]
 export type EnvTarget = "core" | string
 export type EnvVar = { name: string; group: string; help: string }
 
@@ -89,7 +93,7 @@ export function setNames(target: EnvTarget): string[] {
   return [...readLocal(dir)].filter(([, v]) => v !== "").map(([k]) => k)
 }
 
-function readVar(target: EnvTarget, name: string): string {
+export function readVar(target: EnvTarget, name: string): string {
   const dir = targetDir(target)
   return dir ? readLocal(dir).get(name) ?? "" : ""
 }
@@ -98,7 +102,7 @@ function readVar(target: EnvTarget, name: string): string {
  * Записать одну переменную в `.env.local` цели: строка заменяется на месте, нет — дописывается; концы строк файла
  * сохраняются, запись атомарная (временный файл → переименование). Проверка значения — у вызывающего.
  */
-export function writeVar(target: EnvTarget, name: EditableName, value: string): boolean {
+export function writeVar(target: EnvTarget, name: EditableName | StripeName, value: string): boolean {
   const dir = targetDir(target)
   if (!dir) return false
   const file = localFile(dir)

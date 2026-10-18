@@ -17,20 +17,22 @@ import { data as p11 } from './i2i/_data'
 import { data as p12 } from './instruction/_data'
 import { data as p13 } from './mcp/_data'
 import { data as p14 } from './messenger/_data'
-import { data as p15 } from './skills/_data'
-import { data as p16 } from './step-current/_data'
-import { data as p17 } from './steps-done/_data'
-import { data as p18 } from './steps-new/_data'
-import { data as p19 } from './subscription/_data'
-import { data as p20 } from './task-add/_data'
-import { data as p21 } from './telegram/_data'
-import { data as p22 } from './terminal/_data'
-import { data as p23 } from './translation-debt/_data'
-import { data as p24 } from './workflow/_data'
+import { data as p15 } from './settings/_data'
+import { data as p16 } from './skills/_data'
+import { data as p17 } from './step-current/_data'
+import { data as p18 } from './steps-done/_data'
+import { data as p19 } from './steps-new/_data'
+import { data as p20 } from './subscription/_data'
+import { data as p21 } from './task-add/_data'
+import { data as p22 } from './telegram/_data'
+import { data as p23 } from './terminal/_data'
+import { data as p24 } from './translation-debt/_data'
+import { data as p25 } from './workflow/_data'
 import { PAGES as c14, TREE as t14 } from './messenger/_list.generated'
-import { PAGES as c24, TREE as t24 } from './workflow/_list.generated'
+import { PAGES as c15, TREE as t15 } from './settings/_list.generated'
+import { PAGES as c25, TREE as t25 } from './workflow/_list.generated'
 
-export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24]
+export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15, p16, p17, p18, p19, p20, p21, p22, p23, p24, p25]
 
 /** Each child together with its own children — see the law in the generator. */
 export const TREE: CollectionBranch[] = [
@@ -49,7 +51,7 @@ export const TREE: CollectionBranch[] = [
   { page: p12, children: [] },
   { page: p13, children: [] },
   { page: p14, children: c14, branches: t14 },
-  { page: p15, children: [] },
+  { page: p15, children: c15, branches: t15 },
   { page: p16, children: [] },
   { page: p17, children: [] },
   { page: p18, children: [] },
@@ -58,5 +60,6 @@ export const TREE: CollectionBranch[] = [
   { page: p21, children: [] },
   { page: p22, children: [] },
   { page: p23, children: [] },
-  { page: p24, children: c24, branches: t24 },
+  { page: p24, children: [] },
+  { page: p25, children: c25, branches: t25 },
 ]
