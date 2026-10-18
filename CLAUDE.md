@@ -2966,3 +2966,7 @@ Owner, verbatim — `/code` `current-steps.md`, records «531 — ЗАМЕЧАН
   wallet again, and says that the network sees an element with its own wallet as a separate node (document 19).
 - 🛑 **Fee split, one reading (owner 2026-10-18: «Оставить запись 51»):** 5% fee; with an element received over F2F 1% of the deal
   goes to its author and 4% to the pool; with the provider's own element all 5% go to the pool. Every text names both cases.
+- **Passport → How it works** (step 535): the presentation of the node and its link with Lagrix — intro, the card «you do not have to
+  open this panel: connect Telegram and say what to build», three numbered sections (Web4-ready and Lagrix · the ordinary web · home or
+  a dedicated server). Words in `passport/how-it-works/_data/presentation.ts` (en base, ru), under 1000 words each; blocks h2 → h3 →
+  olist in `_components`. Money figures follow the Lagrix changelog in one reading (step 534).
