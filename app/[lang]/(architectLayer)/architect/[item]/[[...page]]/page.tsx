@@ -64,6 +64,8 @@ import { StripeKeys } from '@/components/payments/stripe-keys.client'
 import { paymentsUi } from '@/components/payments/payments.i18n'
 import { NodeWalletCard } from '@/components/wallet/node-wallet.client'
 import { nodeWalletUi } from '@/components/wallet/node-wallet.i18n'
+import { ProductQuizIsland } from '@/components/element-docs/product-quiz.client'
+import { productQuizUi } from '../../../_i18n/product-quiz.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -413,6 +415,11 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const messengerSettings = key === 'messenger/settings'
     ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
     : null
+  // 536-1 (владелец 2026-10-18): «Продуктовый квиз» — живое описание продукта из `development-docs/product/` элемента; страница
+  // только читает, меняет квиз агент элемента в разговоре. Сверху — терминал элемента и бот Telegram, если он подключён.
+  const productQuiz = key === 'build/product-design/quiz'
+    ? <ProductQuizIsland item={item} lang={lang} terminalHref={`/${lang}/architect/${slug}/build/terminal`} words={productQuizUi(lang)} />
+    : null
   // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3. 532: Web3 — кошелёк элемента: наследует
   // кошелёк узла, свой добавляется и удаляется (снова кошелёк узла) — слово владельца в `lib/web4-items/node-wallet.ts`.
   const pw = paymentsUi(lang)
@@ -444,7 +451,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}{productQuiz}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )
