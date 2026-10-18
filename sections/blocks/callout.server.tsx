@@ -1,5 +1,6 @@
 import type { SectionRenderer } from '@/sections/contract'
 import { inline } from '@/lib/content/blocks/inline'
+import { buttonVariants } from '@/components/ui/button'
 
 // Выноска: то, что читатель не должен пропустить.
 //
@@ -20,9 +21,17 @@ export const callout: SectionRenderer<'callout'> = (b, { key: k }) => (
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0 text-primary" aria-hidden>
       <circle cx="12" cy="12" r="10" /><path d="M12 16v-4M12 8h.01" />
     </svg>
-    <p className="text-base leading-relaxed text-muted-foreground">
-      <span className="font-semibold text-foreground">{b.title} </span>
-      {inline(b.text, k)}
-    </p>
+    <div className="flex flex-col gap-4">
+      <p className="text-base leading-relaxed text-muted-foreground">
+        <span className="font-semibold text-foreground">{b.title} </span>
+        {inline(b.text, k)}
+      </p>
+      {/* 535: необязательная кнопка выноски — ссылка с видом кнопки shadcn. */}
+      {b.action && (
+        <a href={b.action.href} className={buttonVariants({ className: 'w-fit' })} data-callout-action>
+          {b.action.label}
+        </a>
+      )}
+    </div>
   </aside>
 )

@@ -7,7 +7,7 @@
 
 export type PresentationPart = { title: string; items: string[] }
 export type PresentationSection = { title: string; parts: PresentationPart[] }
-export type PresentationWords = { intro: string; card: { title: string; text: string }; sections: PresentationSection[] }
+export type PresentationWords = { intro: string; card: { title: string; text: string; action: string }; sections: PresentationSection[] }
 
 const UI: Record<'en' | 'ru', PresentationWords> = {
   en: {
@@ -17,6 +17,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
       title: 'The main thing: you do not have to open this panel',
       text:
         'The menu on the left holds a lot of settings, and you do not have to use any of them. You can never open this panel at all. All you need is to connect your Telegram and tell it what you want to build. You can stay on your phone the whole time and create large, powerful projects that are open to anyone by a link.',
+      action: 'Connect Telegram',
     },
     sections: [
       {
@@ -115,6 +116,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
       title: 'Главное: открывать эту панель не обязательно',
       text:
         'В левом меню много настроек, и пользоваться ими не обязательно. Эту панель можно вообще никогда не открывать. Достаточно подключить ваш Telegram и рассказать ему, что вы хотите сделать. Можно всё время оставаться на телефоне и создавать огромные мощные проекты, которые доступны любому по ссылке.',
+      action: 'Подключить Telegram',
     },
     sections: [
       {

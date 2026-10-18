@@ -11,7 +11,8 @@ export function content(lang: string): Block[] {
   const w = presentationWords(lang)
   return [
     { kind: 'p', text: w.intro },
-    { kind: 'callout', title: w.card.title, text: w.card.text },
+    // Кнопка карточки — подключение Telegram главного агента (владелец 2026-10-18: «add button … -> …/ru/build/telegram»).
+    { kind: 'callout', title: w.card.title, text: w.card.text, action: { href: `/${lang}/build/telegram`, label: w.card.action } },
     ...w.sections.flatMap((s): Block[] => [
       { kind: 'h2', text: s.title },
       ...s.parts.flatMap((p): Block[] => [
