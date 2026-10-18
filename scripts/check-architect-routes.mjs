@@ -53,6 +53,21 @@ function pages(dir, prefix = '/architect') {
 
 const onDisk = pages(ARCHITECT)
 
+// 🔒 ОБРАТНАЯ СТОРОНА (528-3): папка с `_data/index.ts` попадает в список родителя — то есть в МЕНЮ, — а без `page.tsx` её адрес
+// отвечает 404: мёртвый пункт. ✗ Найдено порчей: на третьем уровне («Главный агент → Messenger → H2H») сторож оставался зелёным,
+// когда `page.tsx` убрали, — проверялась только страница без данных, а не данные без страницы.
+function dataWithoutPage(dir, prefix = '/architect') {
+  for (const name of readdirSync(dir)) {
+    if (!isPageFolder(dir, name)) continue
+    const sub = join(dir, name)
+    if (existsSync(join(sub, '_data', 'index.ts')) && !existsSync(join(sub, 'page.tsx'))) {
+      fail(`«${prefix}/${name}»: есть _data/index.ts, но нет page.tsx — пункт меню поведёт в 404`)
+    }
+    dataWithoutPage(sub, `${prefix}/${name}`)
+  }
+}
+dataWithoutPage(ARCHITECT)
+
 // 🔒 ИСКЛЮЧЕНИЕ РОВНО ОДНО, И ЭТО ВХОД В СЛОЙ. `/architect` — не страница
 // коллекции: сюда попадают, набрав адрес рукой, и родителя, который бы его
 // перечислял, у него нет. Всё остальное — и группы, и разделы — устроено
