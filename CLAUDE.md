@@ -2762,7 +2762,7 @@ Owner: «мне не хватило определения о каком про�
 | | Build process (строительный) | Working process (рабочий) |
 |---|---|---|
 | what | the element as a thing: code, design, texts, deploy, and offering or selling the element as a whole | what the running element does: its skills, calls from neighbours and outside agents, who gets them, at what price and limit |
-| element menu | «Build», «Product design», «Network (M2M)» | «Links (A2A)», «Process» |
+| element menu (step 528) | «Build» with i2i, f2f, Documents, Product design | «Working process» (Process, A2A: your orders, A2A: your work, Reviews), «Messenger» |
 | element agent | the Builder nature (element `CLAUDE.md`, «Two natures») | the Worker nature |
 
 - **Element** (WEB4 ITEM) — one self-contained thing of the node with its own folder, port, address, repository and agent: to the
@@ -2868,3 +2868,41 @@ Domain `lagrix.dev`.
 ## Element menu: H2A, H2H, A2A by passport flags (step 472, 2026-10-13)
 
 Owner: «каждый старт шаблон будет иметь эти вещи … правда или ложь должны передаваться в own-service-props.json». The element passport `OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json` carries `messengers: { h2a, h2h, a2a }` (template v0.3.96 gives true to all three; roman and lagrix set). The tree `lib/web4-items/item-tree.ts` marks pages with `needs`/`unless` and one function `treeVisible` answers for the left menu (`_lib/draft-menu.tsx`), the route (404 when hidden) and the section list. Order: Live site → H2A (native chat, Telegram bot, dashboard) → H2H (native messenger, Telegram, dashboard) → A2A (native messenger, Telegram, dashboard, then the showcase and Deals) → Build. With `h2a` on, the Telegram bot lives at `h2a/telegram` and `build/telegram` redirects there (`MOVED_WITH`); without it the bot stays in Build. Dashboards are core blocks (`metrics`, `table`, `cta` to the element terminal): A2A counts counterparts and deals from `listOrders`; H2A/H2H have no source yet. The registry (`nodeEntries`, `/api/node/a2a`) returns `messengers` read live from the passport — the orchestrator sees which elements use them.
+🪦 The order and the addresses above (`h2a/…`, `h2h/…`, `connectors/…`) are replaced by step 528 below; old addresses redirect.
+
+## Element menu and the main agent: Messenger · Working process · Build (step 528, 2026-10-18)
+
+Owner, verbatim (all words — `/code` `current-steps.md`, records «528 — …»): «сразу под вкладкой живой сайт делаем раскрывающийся
+список: Messenger – h2h – h2a – настройки … Рабочий процесс – Переносим сюда вкладку процесс – А2а ваши заказы … сделки поставить на
+первое место – А2а ваша работа … а2а- карточки возможностей переименовать … Строительство – В Строительство переносим документы,
+проектирование продукта»; «Для всех элементов … core it is main agent - need similar scheme»; «Оставить отзывы» — «Вкладкой в «Рабочем
+процессе»»; Messenger settings — «Сохранять в паспорт элемента».
+
+- **Element tree** (`lib/web4-items/item-tree.ts`, one source for menu, route and section lists): Live site · **Messenger** (H2H —
+  native, Telegram, dashboard · H2A — native chat, Telegram bot, dashboard · Settings) · **Working process** (Process — subscriptions
+  and their services, cron · A2A: your orders — Deals, native, Telegram, dashboard · A2A: your work — Deals, native, Telegram,
+  dashboard, Capability cards (the former showcase) · Reviews) · **Build** (GitHub … environment, i2i, f2f, Documents, Product
+  design) · Settings. Up to three levels under an element and **every level is an address** (`messenger/h2h/native`,
+  `workflow/a2a-work/deals`, `build/i2i/api`, `build/documents/instruction`); the flat `group` mechanism is gone. `findTreePath`
+  returns the chain; page bindings in `architect/[item]/[[...page]]/page.tsx` use the full path. Long `about` texts are folded in the
+  product accordion. The Lagrix rating card stands on the Working process home page.
+- **Old addresses** redirect through `movedPage()` — exact (`connectors/a2a` → `workflow/a2a-work/capabilities`, `build/api` →
+  `build/i2i/api`, `h2a/native-chat` → `messenger/h2a/native`) and by prefix (`h2a`, `h2h`, `connectors` → `workflow/a2a-work`,
+  `process`, `documents` → `build/documents`, `product-design`); the bot of an H2A element — `messenger/h2a/telegram`.
+- **«A2A: your orders → Deals»** shows an honest line: no source of the orders an element places yet. Its dashboard counts zeros.
+- **Messenger → Settings** of an element: first contact price (switch, amount, default on and $1; a fold-out card explains Lagrix
+  record 52 in plain words) and the rules for the agent that holds the conversation («Strictly forbidden», «What interests me», one
+  per line). Door `GET/POST /api/node/messenger-settings` (architect/admin) writes the passport field `messengerSettings` (not
+  `messengers` — those are the menu flags), keeps the file's CRLF, answers 400 `bad-amount`/`bad-switch`/`bad-rules` and leaves the
+  file unchanged. The element's public passport door does not serve it. The network does not apply it; nothing is charged. 🛑 A save
+  is an edit of a git-tracked file of the element: Deployments show it uncommitted until the next commit.
+- **Main agent** (`architect/build`): `messenger/` (h2h, h2a, settings) and `workflow/` (process, a2a-orders, a2a-work, reviews) —
+  folder pages first in its menu. Each shows its title and purpose line and «The same page in each element»
+  (`_components/main-agent-elements.tsx`): root (earlier template — says it has no such page) and every custom element from
+  `listDrafts` with a link to the same path of its tree under the same passport flags. No node-wide data yet.
+- **Menu depth:** `parser-fs` writes each child's tree into its parent's list (`branches`), `architectMenu` unfolds a third level,
+  `ARCHITECT_PAGES` includes it; `workspace-shell.tsx` makes a 4th-level subsection label a link and opens a 5th level
+  (Subscriptions → services). The route guard also fails on a `_data` folder without `page.tsx` (a menu item leading to 404).
+- **Account drawer of the core** = the project shell from root (`/api/shell/<lang>`); the core prepends its own five links
+  (`lib/menu/account-links.ts`: H2H Messenger, H2A Messenger, A2A: your orders, A2A: your work, Reviews — labels from the pages'
+  `_data`) in `components/menu/top/top-menu.server.tsx`. Element and root drawers are unchanged.

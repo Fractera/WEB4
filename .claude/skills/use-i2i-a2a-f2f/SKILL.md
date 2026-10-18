@@ -28,7 +28,7 @@ description: >
 2. Is the thing changing hands **a result of work**? → **a2a**.
 3. Is it **the element itself**? → **f2f**.
 
-Old addresses `connectors/{catalog,api,mcp}` and `web3-store/*` redirect to `build/*` (`MOVED_PAGES` in `item-tree.ts`).
+Old addresses `connectors/{catalog,api,mcp}`, `build/{api,mcp,catalog}` and `web3-store/*`, `build/{find,publish}` redirect to `build/i2i/*` and `build/f2f/*`; a2a lives in «Working process» (`workflow/a2a-work`, `workflow/a2a-orders`) — `movedPage()` in `item-tree.ts` (step 528).
 
 ## Rules that hold
 
