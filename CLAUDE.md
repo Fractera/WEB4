@@ -756,11 +756,11 @@ Page `architect/passport` → one block `nodePassport` (`sections/blocks/node-pa
    its orders it could review), under it count · weight of those dislikes; the hint is the owner's text. «Burned» is gone (step 500
    decided: a refund lowers the customer's likes). The same card stands on every element A2A home.
    Every value is «—» until the Lagrix network exists.
-2. **The node wallet** — `GET|POST|DELETE /api/node/wallet` (architect), file `data/node/wallet.json` (outside git), EVM address only
-   (`0x` + 40 hex, else 422). Without a wallet — two cards in the page accordion: «before registering» (visible; search $0.10 in ordinary
-   money through a super-node; no reputation; no escrow) and «after» (search $0.01 from a prepaid balance; USDC escrow; reviews build
-   element reputation; fee ≤ 5% to super-nodes) — Lagrix changelog entry 29. 🛑 It records an address, it is NOT a registration in the
-   network and proves no ownership (no signature) — say so if asked.
+2. **The node wallet** — `GET|POST|DELETE /api/node/wallet` (architect), files `data/node/wallet.json` (+ `wallet-key.json` when
+   generated; outside git). Since step 532 it is connected by address OR generated on the node (see «Wallet: generate, inherit»
+   below). Since step 533 the island says first **what comes into the wallet**, then what it pays, every point linked to its Lagrix
+   document; «Without a wallet» only while there is none. 🪦 The «$0.10 without a wallet» card (entry 29) is gone — entry 39: every
+   node has a wallet, one search price. 🛑 Nothing is registered in the network — say so if asked.
 3. **Element cards** — the same rating card for root and every custom element (native services hidden): the name links to the
    element, the first line of its description, «Full description» in the page accordion (one open). «Described» = `described` in the
    registry (set only by «Take into the core», step 325). Without it — a red dot before the name and a red button «Order a
@@ -2936,3 +2936,33 @@ Owner, verbatim — `/code` `current-steps.md`, record «530 — ЗАДАЧА В
   the default prohibited list (read-only).
 - 🛑 **The Lagrix network is not connected:** approval, warnings and payouts have no writer yet and are shown empty in words; the node keeps
   only what the person did. No timers, no polling, nothing sent out.
+- 🪦 **Step 531 replaced the machine check:** `notices` no longer measures THIS computer (owner: «ты не должен проверять текущий компьютер
+  … Супер узел это отдельный компьютер»); `/api/node/super-node/machine`, `/payouts` and `lib/web4-items/machine-facts.ts` are removed.
+
+## Super node status and operator API v1; wallet generate and inherit; income texts (steps 531, 532, 533, 2026-10-18)
+
+Owner, verbatim — `/code` `current-steps.md`, records «531 — ЗАМЕЧАНИЯ ВЛАДЕЛЬЦА К 530», «531 — ОТВЕТ ВЛАДЕЛЬЦА НА ПЛАН», «532 — ЗАДАЧА
+ВЛАДЕЛЬЦА», «533 — ЗАМЕЧАНИЕ ВЛАДЕЛЬЦА» and his answer on the fee split: «Оставить запись 51».
+- **Every statement about the network links to its Lagrix document** (owner: «Все вещи которые ты рассказываешь должны ссылаться на
+  соответствующую страницу документации Lagrix»): `lib/lagrix-docs.ts` (`LagrixDoc`, `lagrixDocHref` → `https://lagrix.dev/<en|ru>/docs/<doc>`)
+  and `components/lagrix/doc-items.tsx` (`DocItems`, `DocLinks`; no «use client» — usable in islands). Words are `DocItem { text, docs }`.
+  New text about Lagrix without a document link is a defect.
+- **Super node home:** what it is (collapsed), «What a super-node is paid for» — the deal fee pool (4% of a deal with an F2F element,
+  1% to its author; the whole 5% with the provider's own element — entry 51), redistribution (a super-node failing the minimum gets
+  no share; the founder's share stays in the pool), $0.01 per result list, $0.001 per delivered message, ≈ $11 per Official vote,
+  a reward for a proven violation — and a button to **Status** (`architect/super-node/status`).
+- **Status:** the application (no server and no spending needed; 48 hours after approval to set up the server from the installation
+  package; a powerful home computer may serve), «approved» shows the time and **Run the test**; «Simulate approval (prototype)» exists
+  because approval comes from a network that does not exist yet. **The super-node is a separate machine:** the node connects to it by
+  address + operator key (`POST /api/node/super-node` `connect`, checked by a `status` call before saving; the key never goes back to
+  the browser) and reads `status|hardware|notices|payouts|declaration` through `GET /api/node/super-node/remote?part=` — the operator
+  API v1 (Lagrix document 15 §15.7; prototype `lagrix-supernode/prototype/operator-api.mjs`, run by the person, port 4011).
+- **Wallet: generate, inherit (532).** `lib/web4-items/evm-address.mjs` (secp256k1 via `@noble/curves`, keccak-256 + EIP-55 via
+  `@noble/hashes`; instrument `scripts/check-wallet-address.mjs` in prebuild). «Generate a wallet» makes the key on the node
+  (`data/node/wallet-key.json`); only «Download the key backup» (`GET /api/node/wallet?backup=1`) returns it, never on the temporary
+  address. Removing a generated wallet moves the key to `wallet-removed/` — it is never erased by a click. **Elements inherit the node
+  wallet** like the GitHub token and the OpenAI key: `?element=<address or id>` answers `{ wallet, source: element|node|null, own,
+  node }`; the element's Web3 page shows the inherited wallet, «Add its own wallet» (address or generate), «Remove own wallet» → node
+  wallet again, and says that the network sees an element with its own wallet as a separate node (document 19).
+- 🛑 **Fee split, one reading (owner 2026-10-18: «Оставить запись 51»):** 5% fee; with an element received over F2F 1% of the deal
+  goes to its author and 4% to the pool; with the provider's own element all 5% go to the pool. Every text names both cases.
