@@ -307,16 +307,55 @@ export function WorkspaceShell({
                               {sub.children.map((leaf, k) => (
                                 <li key={`${id}-m-${i}-${j}-${k}`}>
                                   {leaf.children && leaf.children.length > 0 ? (
-                                    /* 435-3 (владелец 2026-10-08): ГРУППА ВНУТРИ РАЗДЕЛА — «Техническое описание». Тот же серверный
-                                       `<details>`, без своей страницы: подпись — переключатель, открыт, когда человек на одной из её страниц. */
+                                    /* 435-3 (владелец 2026-10-08): ПОДРАЗДЕЛ ВНУТРИ РАЗДЕЛА. Тот же серверный `<details>`, открыт, когда
+                                       человек на одной из его страниц. 528-1: у подраздела дерева элемента есть своя страница (H2H,
+                                       «A2A ваша работа», «Документы») — подпись становится ссылкой с той же отметкой «вы здесь»; без
+                                       адреса остаётся подписью. Его страница с детьми (Подписки → сервисы, 463) раскрывается пятым уровнем. */
                                     <details open={leaf.open ?? leaf.active} className="group/sub4">
                                       <summary className="flex cursor-pointer list-none items-center gap-1 py-0.5 text-[length:var(--fs-small)] text-muted-foreground hover:text-foreground [&::-webkit-details-marker]:hidden">
-                                        <span className="truncate whitespace-nowrap px-0.5">{leaf.label}</span>
+                                        {leaf.href ? (
+                                          <Item
+                                            item={leaf}
+                                            closes={drawer}
+                                            base="block w-fit max-w-full truncate whitespace-nowrap border-b-2 px-0.5 transition-colors"
+                                            activeClass=" border-primary font-medium text-foreground"
+                                            idleClass={leaf.open ? ' border-transparent font-medium text-foreground' : ' border-transparent text-muted-foreground hover:border-border hover:text-foreground'}
+                                          />
+                                        ) : (
+                                          <span className="truncate whitespace-nowrap px-0.5">{leaf.label}</span>
+                                        )}
                                         <ChevronDown size={12} aria-hidden className="shrink-0 transition-transform duration-200 group-open/sub4:rotate-180" />
                                       </summary>
                                       <ul className="mt-0.5 ml-[5px] flex flex-col gap-0.5 border-l border-border pl-[9px]">
                                         {leaf.children.map((g, q) => (
                                           <li key={`${id}-m-${i}-${j}-${k}-${q}`}>
+                                            {g.children && g.children.length > 0 ? (
+                                              <details open={g.open ?? g.active} className="group/sub5">
+                                                <summary className="flex cursor-pointer list-none items-center gap-1 py-0.5 text-[length:var(--fs-small)] [&::-webkit-details-marker]:hidden">
+                                                  <Item
+                                                    item={g}
+                                                    closes={drawer}
+                                                    base="block w-fit max-w-full truncate whitespace-nowrap border-b-2 px-0.5 transition-colors"
+                                                    activeClass=" border-primary font-medium text-foreground"
+                                                    idleClass=" border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+                                                  />
+                                                  <ChevronDown size={12} aria-hidden className="shrink-0 text-muted-foreground transition-transform duration-200 group-open/sub5:rotate-180" />
+                                                </summary>
+                                                <ul className="mt-0.5 ml-[5px] flex flex-col gap-0.5 border-l border-border pl-[9px]">
+                                                  {g.children.map((x, y) => (
+                                                    <li key={`${id}-m-${i}-${j}-${k}-${q}-${y}`}>
+                                                      <Item
+                                                        item={x}
+                                                        closes={drawer}
+                                                        base="block w-fit max-w-full truncate whitespace-nowrap border-b-2 px-0.5 py-0.5 text-[length:var(--fs-small)] transition-colors"
+                                                        activeClass=" border-primary font-medium text-foreground"
+                                                        idleClass=" border-transparent text-muted-foreground hover:border-border hover:text-foreground"
+                                                      />
+                                                    </li>
+                                                  ))}
+                                                </ul>
+                                              </details>
+                                            ) : (
                                             <Item
                                               item={g}
                                               closes={drawer}
@@ -324,6 +363,7 @@ export function WorkspaceShell({
                                               activeClass=" border-primary font-medium text-foreground"
                                               idleClass=" border-transparent text-muted-foreground hover:border-border hover:text-foreground"
                                             />
+                                            )}
                                           </li>
                                         ))}
                                       </ul>

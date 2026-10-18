@@ -2,7 +2,7 @@ import "server-only"
 import type { WorkspaceItem } from '@/lib/content/blocks/types'
 import { listDrafts } from '@/lib/web4-items/drafts'
 import { addressOf } from '@/lib/web4-items/element-address'
-import { ITEM_TREE, TREE_GROUPS, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
+import { ITEM_TREE, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { elementMessengers, elementPassport, hasCatalog } from '@/lib/a2a/element-passport'
 import { hasDoc } from '@/lib/web4-items/element-docs'
 import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
@@ -54,36 +54,27 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     // своей странице, «открыт» — пока человек на любой его странице: отметка «вы здесь» не стоит в двух местах.
     // 406-4: пункт «Каталог» — только у элемента, чей паспорт объявляет каталог.
     const catalog = hasCatalog(d.id)
-    // 463 (владелец 2026-10-12: «…выпадающий список … отдельные страницы а не валить в одну кучу»): «Процесс → Подписки» раскрывается
-    // пунктом на каждый внешний сервис элемента (OWN-SERVICE-PROPS/SUBSCRIPTIONS.json), у каждого своя страница.
+    // 463 (владелец 2026-10-12: «…выпадающий список … отдельные страницы а не валить в одну кучу»): «Подписки» раскрывается
+    // пунктом на каждый внешний сервис элемента (OWN-SERVICE-PROPS/SUBSCRIPTIONS.json), у каждого своя страница (528-1: под
+    // «Рабочий процесс → Процесс»).
     const services = elementPassport(d.id)?.subscriptions?.services ?? []
     // 472: разделы H2A/H2H и страницы по флагам паспорта элемента (`messengers`); одна функция и для маршрута.
     const ctx = { catalog, messengers: elementMessengers(d.id) }
-    const children = ITEM_TREE.filter((s) => treeVisible(s, ctx)).map((s) => {
-      const path = `${dir}/${s.slug}`
+    // 412-2: пункт документа — только пока его файл есть в папке элемента.
+    const shownOf = (pages?: TreePage[]) => (pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
+    // 528-1: раздел, подраздел и страница устроены одинаково — пункт со ссылкой; есть видимые дети — раскрывается; открыт, когда
+    // человек на нём или внутри; «вы здесь» — только на самой странице.
+    const node = (p: TreePage, base: string): WorkspaceItem => {
+      const path = `${base}/${p.slug}`
       const inside = currentPath.startsWith(`${path}/`)
-      // 412-2: пункт документа — только пока его файл есть в папке элемента.
-      const visible = (s.pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
-      const leaf = (p: TreePage): WorkspaceItem => {
-        const pagePath = `${path}/${p.slug}`
-        if (s.slug === 'process' && p.slug === 'subscriptions' && services.length) {
-          const kids = services.map((x) => ({ label: x.name, href: at(`${pagePath}/${x.id}`), active: `${pagePath}/${x.id}` === currentPath }))
-          return { label: p.words[l].title, href: at(pagePath), active: pagePath === currentPath, open: currentPath.startsWith(pagePath), children: kids }
-        }
-        return { label: p.words[l].title, href: at(pagePath), active: pagePath === currentPath }
-      }
-      // 435-3: страницы одной группы — раскрывающийся пункт без своей страницы, на месте первой из них; открыт, когда человек внутри.
-      const pages: WorkspaceItem[] = []
-      for (const p of visible) {
-        if (!p.group) { pages.push(leaf(p)); continue }
-        if (pages.some((x) => x.label === TREE_GROUPS[p.group!][l])) continue
-        const members = visible.filter((m) => m.group === p.group).map(leaf)
-        pages.push({ label: TREE_GROUPS[p.group][l], open: members.some((m) => m.active), children: members })
-      }
-      return pages.length > 0
-        ? { label: s.words[l].title, href: at(path), active: path === currentPath, open: path === currentPath || inside, children: pages }
-        : { label: s.words[l].title, href: at(path), active: path === currentPath || inside }
-    })
+      const kids: WorkspaceItem[] = path === `${dir}/workflow/process/subscriptions`
+        ? services.map((x) => ({ label: x.name, href: at(`${path}/${x.id}`), active: `${path}/${x.id}` === currentPath }))
+        : shownOf(p.pages).map((c) => node(c, path))
+      return kids.length > 0
+        ? { label: p.words[l].title, href: at(path), active: path === currentPath, open: path === currentPath || inside, children: kids }
+        : { label: p.words[l].title, href: at(path), active: path === currentPath || inside }
+    }
+    const children = shownOf(ITEM_TREE).map((s) => node(s, dir))
     return {
       label: slug,
       icon: 'box',
