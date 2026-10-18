@@ -148,7 +148,9 @@ export type LeafBlock =
   | { kind: 'docref'; title: string; summary: string; href: string; label?: string; kicker?: string; navigate?: boolean }
   // "Did you know" callout — icon + tinted panel for an aside fact (e.g. the page
   // auto-updates in real time as an AI agent edits it). title is the lead-in.
-  | { kind: 'callout'; title: string; text: string }
+  // `action` — необязательная кнопка под текстом (шаг 535, владелец 2026-10-18: кнопка карточки «Главное: открывать эту панель не
+  // обязательно» → подключение Telegram). Без неё выноска выглядит как прежде.
+  | { kind: 'callout'; title: string; text: string; action?: { href: string; label: string } }
   // Comparison table — static, no-JS. `headers` is the column row (first column is
   // the row label); `rows` are the body rows (each a cell array matching headers).
   // The LAST column is visually emphasized as the "ours/highlight" column. Cells
