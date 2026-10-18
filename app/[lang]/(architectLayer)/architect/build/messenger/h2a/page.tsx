@@ -1,14 +1,13 @@
-import { CollectionPage } from '../../../../_lib/collection-page'
+import { MainAgentPage } from '../../../../_lib/main-agent-page'
 import { collectionMetadata } from '../../../../_lib/collection-metadata'
-import { MainAgentElements } from '../../../../_components/main-agent-elements'
 import { data } from './_data'
-import { content } from './_components'
 
-// СТРАНИЦА «H2A» «Главного агента» — `/{lang}/architect/build/messenger/h2a` (528-3): заголовок, строка о назначении и эта же
-// страница у root и каждого кастомного элемента. Сводных данных пока нет.
+// «Главный агент» → `/{lang}/architect/build/messenger/h2a` (528-3, 528-6): меню главного агента повторяет меню элемента. Страница рисуется
+// общей оболочкой: заголовок и строка о назначении, пункты под ней в меню (`main-agent-scheme.ts`) и, где это та же страница
+// элемента, — она у root и каждого кастомного элемента.
 export const generateMetadata = collectionMetadata(data, '/architect/build/messenger')
 
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
-  return <CollectionPage lang={lang} dir="/architect/build/messenger" page={data} content={content(lang)} widget={<MainAgentElements lang={lang} path="messenger/h2a" />} />
+  return <MainAgentPage lang={lang} rel="messenger/h2a" page={data} />
 }

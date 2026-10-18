@@ -1,6 +1,7 @@
 import type { WorkspaceItem } from '@/lib/content/blocks/types'
-import { pagesInOrder, wordsOf } from '@/lib/collection/types'
+import { pagesInOrder, wordsOf, type CollectionBranch, type WorkspacePageData } from '@/lib/collection/types'
 import { TREE } from '../architect/_list.generated'
+import { MAIN_AGENT, MAIN_AGENT_PLACE } from './main-agent-scheme'
 
 // МЕНЮ СЛОЯ АРХИТЕКТОРА — СОБИРАЕТСЯ ИЗ ДЕРЕВА ПАПОК, А НЕ ИЗ СПИСКА (254).
 //
@@ -47,14 +48,63 @@ const dirOf = (slug: string) => `${ARCHITECT_HOME}/${slug}`
  * догадываться, и она догадывалась: печатала каждый включённый язык подряд.
  */
 export const ARCHITECT_PAGES: readonly { path: string; page: { overrides?: Record<string, unknown> } }[] =
-  TREE.flatMap((b) => [
-    { path: dirOf(b.page.meta.slug), page: b.page },
-    ...b.children.map((c) => ({ path: `${dirOf(b.page.meta.slug)}/${c.meta.slug}`, page: c })),
-    // 528-3: подразделы раздела («Главный агент → Messenger → H2H»).
-    ...(b.branches ?? []).flatMap((s) =>
-      s.children.map((g) => ({ path: `${dirOf(b.page.meta.slug)}/${s.page.meta.slug}/${g.meta.slug}`, page: g })),
-    ),
-  ])
+  // 528-3, 528-6: на любую глубину — раздел, подраздел, страница («Главный агент → Messenger → H2H → Нативный мессенджер»).
+  TREE.flatMap((b) => {
+    const out: { path: string; page: WorkspacePageData }[] = [{ path: dirOf(b.page.meta.slug), page: b.page }]
+    const walk = (nodes: MenuNode[]) => nodes.forEach((n) => { out.push({ path: n.path, page: n.page }); walk(n.kids) })
+    walk(physical(b, dirOf(b.page.meta.slug), ''))
+    return out
+  })
+
+/** Страница слоя в дереве меню: адрес папки, путь от группы и пункты под ней. */
+export type MenuNode = { page: WorkspacePageData; path: string; rel: string; kids: MenuNode[] }
+
+/** Дерево папок группы как есть на диске (`_list.generated.ts` каждой папки, `branches`). */
+function physical(branch: CollectionBranch | undefined, dir: string, relBase: string): MenuNode[] {
+  return (branch?.children ?? []).map((p) => {
+    const rel = relBase ? `${relBase}/${p.meta.slug}` : p.meta.slug
+    const sub = branch?.branches?.find((s) => s.page.meta.slug === p.meta.slug)
+    return { page: p, path: `${dir}/${p.meta.slug}`, rel, kids: physical(sub, `${dir}/${p.meta.slug}`, rel) }
+  })
+}
+
+const ordered = (nodes: MenuNode[]): MenuNode[] =>
+  pagesInOrder(nodes.map((n) => n.page)).map((p) => {
+    const n = nodes.find((x) => x.page === p)!
+    return { ...n, kids: ordered(n.kids) }
+  })
+
+/**
+ * Дерево меню группы. У «Главного агента» (528-6) страницы, чьё место названо в `MAIN_AGENT_PLACE`, встают под свой пункт-родитель —
+ * адрес страницы при этом прежний. Место названо, а родителя нет — страница остаётся наверху (её найдёт сторож), а не пропадает.
+ */
+export function groupTree(slug: string): MenuNode[] {
+  const nodes = physical(TREE.find((b) => b.page.meta.slug === slug), dirOf(slug), '')
+  if (slug !== MAIN_AGENT) return ordered(nodes)
+  const all = new Map<string, MenuNode>()
+  const index = (ns: MenuNode[]) => ns.forEach((n) => { all.set(n.rel, n); index(n.kids) })
+  index(nodes)
+  const moved = new Set<string>()
+  for (const [rel, parent] of Object.entries(MAIN_AGENT_PLACE)) {
+    const n = all.get(rel)
+    const to = all.get(parent)
+    if (n && to && n !== to) { to.kids.push(n); moved.add(rel) }
+  }
+  return ordered(nodes.filter((n) => !moved.has(n.rel)))
+}
+
+/** Пункт дерева группы по пути от группы (`construction`, `messenger/h2a`) — для страниц-оглавлений. */
+export function groupNode(slug: string, rel: string): MenuNode | null {
+  const find = (ns: MenuNode[]): MenuNode | null => {
+    for (const n of ns) {
+      if (n.rel === rel) return n
+      const deeper = find(n.kids)
+      if (deeper) return deeper
+    }
+    return null
+  }
+  return find(groupTree(slug))
+}
 
 /** Адрес каждой страницы слоя — для сторожа маршрутов и любого обхода. */
 export const ARCHITECT_PATHS: readonly string[] = ARCHITECT_PAGES.map((p) => p.path)
@@ -72,22 +122,18 @@ export const ARCHITECT_PATHS: readonly string[] = ARCHITECT_PAGES.map((p) => p.p
 export function architectMenu(lang: string, currentPath: string): WorkspaceItem[] {
   const at = (path: string) => `/${lang}${path}`
 
-  return pagesInOrder(TREE.map((b) => b.page)).map((group) => {
-    const branch = TREE.find((b) => b.page.meta.slug === group.meta.slug)
-    const dir = dirOf(group.meta.slug)
+  // 528-3, 528-6: пункт с детьми раскрывается следующим уровнем; открыт, когда человек на нём или где-то под ним (и под пунктом,
+  // который стоит здесь по схеме главного агента, хотя адрес у него свой).
+  const item = (n: MenuNode): WorkspaceItem => {
+    const kids = n.kids.map(item)
+    return kids.length > 0
+      ? { label: wordsOf(n.page, lang).title, href: at(n.path), active: n.path === currentPath, open: n.path === currentPath || kids.some((k) => k.active || k.open), children: kids }
+      : { label: wordsOf(n.page, lang).title, href: at(n.path), active: n.path === currentPath }
+  }
 
-    const children: WorkspaceItem[] = pagesInOrder(branch?.children ?? []).map((p) => {
-      const path = `${dir}/${p.meta.slug}`
-      // 528-3: раздел со своими подразделами раскрывается третьим уровнем; открыт, когда человек на нём или внутри.
-      const sub = branch?.branches?.find((s) => s.page.meta.slug === p.meta.slug)
-      const kids = pagesInOrder(sub?.children ?? []).map((k) => {
-        const kp = `${path}/${k.meta.slug}`
-        return { label: wordsOf(k, lang).title, href: at(kp), active: kp === currentPath }
-      })
-      return kids.length > 0
-        ? { label: wordsOf(p, lang).title, href: at(path), active: path === currentPath, open: path === currentPath || kids.some((k) => k.active), children: kids }
-        : { label: wordsOf(p, lang).title, href: at(path), active: path === currentPath }
-    })
+  return pagesInOrder(TREE.map((b) => b.page)).map((group) => {
+    const dir = dirOf(group.meta.slug)
+    const children: WorkspaceItem[] = groupTree(group.meta.slug).map(item)
 
     return {
       label: wordsOf(group, lang).title,

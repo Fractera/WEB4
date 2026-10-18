@@ -290,7 +290,8 @@ for (const root of COLLECTION_ROOTS) {
       const file = `${dir}/_data/${lang}.ts`
       if (!fs.existsSync(file)) { pageHoles.push(`${where}: нет ${lang}.ts`); continue }
       const body = fs.readFileSync(file, "utf8")
-      const title = body.match(/title:\s*'([^']*)'/)?.[1]
+      // 528-6: заголовок может приходить словом дерева элемента — `treeWords('<путь>', …)`; путь сверяет check-main-agent-menu.
+      const title = body.match(/title:\s*'([^']*)'/)?.[1] ?? body.match(/title:\s*treeWords\('([^']+)'/)?.[1]
       if (!title || !title.trim()) pageHoles.push(`${where}: ${lang} без title — пункт меню будет без подписи`)
     }
   }
