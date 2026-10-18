@@ -5,12 +5,14 @@ import type { WorkspacePageData, CollectionBranch } from '@/lib/collection/types
 import { data as p0 } from './notices/_data'
 import { data as p1 } from './payouts/_data'
 import { data as p2 } from './settings/_data'
+import { data as p3 } from './status/_data'
 
-export const PAGES: WorkspacePageData[] = [p0, p1, p2]
+export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3]
 
 /** Each child together with its own children — see the law in the generator. */
 export const TREE: CollectionBranch[] = [
   { page: p0, children: [] },
   { page: p1, children: [] },
   { page: p2, children: [] },
+  { page: p3, children: [] },
 ]

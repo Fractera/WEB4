@@ -1,6 +1,8 @@
 # `/architect/super-node/payouts` — Payouts
 
-Step 530-3. The page shows the payouts table (`TableTools`: search on top, pages below) from `data/node/super-node-payouts.jsonl` through `/api/node/super-node/payouts` — no writer today, so it is empty and says so — and what payouts are for (Lagrix documents 09, 17, 24, 06, entry 52).
+Steps 530-3 and 531. The payouts table (`TableTools`: search on top, pages below) read from the super-node's server through the operator
+API v1 (`/operator/v1/payouts`, Lagrix document 15, section 15.7), and what a super-node is paid for — five points, each with its Lagrix
+document (09, 17, 24, 06, 26). When the server is not connected, the page says so and points to «Status».
 
 | Path | Role |
 |---|---|

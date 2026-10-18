@@ -3,16 +3,20 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
-import { applySuperNode, parseSettings, readSuperNode, saveSettings, withdrawSuperNode } from "@/lib/web4-items/super-node"
+import {
+  applySuperNode, connectServer, disconnectServer, parseSettings, readSuperNode, runTest, saveSettings, simulateApproval, withdrawSuperNode,
+} from "@/lib/web4-items/super-node"
 
-// СУПЕР-УЗЕЛ (530-3): GET — заявка (нет · подана · одобрена), предупреждения, настройки, кошелёк узла.
-// POST `{ action: "apply" }` — заявка от кошелька узла (без кошелька — 409); `{ action: "withdraw" }` — отозвать;
-// `{ action: "settings", country, coverage[], regional[], lists[] }` — проверка и запись (отказ — 400 с родом, файл не тронут).
-// В сеть Lagrix ничего не уходит. Только архитектор; на временном адресе запись запрещена.
+// СУПЕР-УЗЕЛ (530-3, 531): GET — заявка (нет · подана · одобрена), подключённый сервер (только адрес), последний тест, настройки, кошелёк.
+// POST `action`: `apply` (от кошелька узла, без него 409) · `withdraw` · `approve` (прототип: имитация одобрения сети) · `connect`
+// `{ url, key }` (проверка запросом к API оператора до записи) · `disconnect` · `test` (оборудование сервера против Tier-2) · `settings`
+// (запись на узле и декларация серверу). Отказ — 400/409/502 с родом. В сеть Lagrix ничего не уходит. Только архитектор; на временном
+// адресе запись запрещена.
 export const dynamic = "force-dynamic"
 
 const ROLES = ["architect"] as const
 const NO_STORE = { "Cache-Control": "no-store" }
+const fail = (error: string, status: number) => NextResponse.json({ ok: false, error }, { status, headers: NO_STORE })
 
 export async function GET(req: NextRequest) {
   const denied = await requireRoles(req, ROLES)
@@ -21,21 +25,42 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  if (isTemporaryPublicAddress(req)) return NextResponse.json({ ok: false, error: "temporary-address" }, { status: 403, headers: NO_STORE })
+  if (isTemporaryPublicAddress(req)) return fail("temporary-address", 403)
   const denied = await requireRoles(req, ROLES)
   if (denied) return denied
-  const body = (await req.json().catch(() => null)) as { action?: unknown } | null
-  if (body?.action === "apply") {
-    const r = applySuperNode()
-    if (r === "no-wallet") return NextResponse.json({ ok: false, error: "no-wallet" }, { status: 409, headers: NO_STORE })
-  } else if (body?.action === "withdraw") {
-    withdrawSuperNode()
-  } else if (body?.action === "settings") {
-    const parsed = parseSettings(body)
-    if (!parsed.ok) return NextResponse.json({ ok: false, error: parsed.error }, { status: 400, headers: NO_STORE })
-    saveSettings(parsed.value)
-  } else {
-    return NextResponse.json({ ok: false, error: "bad-action" }, { status: 400, headers: NO_STORE })
+  const body = (await req.json().catch(() => null)) as { action?: unknown; url?: unknown; key?: unknown } | null
+  let extra: Record<string, unknown> = {}
+  switch (body?.action) {
+    case "apply":
+      if (applySuperNode() === "no-wallet") return fail("no-wallet", 409)
+      break
+    case "withdraw":
+      withdrawSuperNode()
+      break
+    case "approve":
+      if (simulateApproval() === "no-application") return fail("no-application", 409)
+      break
+    case "connect": {
+      const r = await connectServer(body.url, body.key)
+      if (r !== "ok") return fail(r, r === "unreachable" ? 502 : 400)
+      break
+    }
+    case "disconnect":
+      disconnectServer()
+      break
+    case "test": {
+      const r = await runTest()
+      if (!r.ok) return fail(r.error, r.status)
+      break
+    }
+    case "settings": {
+      const parsed = parseSettings(body)
+      if (!parsed.ok) return fail(parsed.error, 400)
+      extra = await saveSettings(parsed.value)
+      break
+    }
+    default:
+      return fail("bad-action", 400)
   }
-  return NextResponse.json({ ok: true, ...readSuperNode() }, { headers: NO_STORE })
+  return NextResponse.json({ ok: true, ...readSuperNode(), ...extra }, { headers: NO_STORE })
 }

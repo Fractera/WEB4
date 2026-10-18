@@ -7,17 +7,19 @@ import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import { Textarea } from "@/components/ui/textarea"
+import { DocLinks } from "@/components/lagrix/doc-items"
 import type { SuperNodeWords } from "./super-node.i18n"
 
-// «СУПЕР УЗЕЛ → НАСТРОЙКИ» (530-3): страна оператора, покрытие (принимаемые теги), региональные запреты, открытые списки — три слоя
+// «СУПЕР УЗЕЛ → НАСТРОЙКИ» (530-3, 531): страна оператора, покрытие (принимаемые теги), региональные запреты, открытые списки — три слоя
 // ограничений документа Lagrix 17.9 и декларация 18.4; запрещённое по умолчанию — только для чтения. Хранится на узле
-// (`/api/node/super-node`, `action: "settings"`); в сеть не уходит. Опроса нет.
+// (`/api/node/super-node`, `action: "settings"`); если сервер супер-узла подключён, декларация уходит ему (`PUT /operator/v1/declaration`,
+// документ 15 §15.7), и он публикует её. Опроса нет.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 type Settings = { country: string; coverage: string[]; regional: string[]; lists: string[] } | null
 const lines = (t: string) => t.split(/\r?\n/).map((s) => s.trim()).filter(Boolean)
 
-export function SuperNodeSettings({ words }: { words: SuperNodeWords }) {
+export function SuperNodeSettings({ lang, words }: { lang: string; words: SuperNodeWords }) {
   const [state, setState] = useState<"loading" | "failed" | "ready">("loading")
   const [country, setCountry] = useState("")
   const [coverage, setCoverage] = useState("")
@@ -38,26 +40,27 @@ export function SuperNodeSettings({ words }: { words: SuperNodeWords }) {
       .catch(() => setState("failed"))
   }, [])
 
+  const s = words.settings
   async function save() {
     setBusy(true)
     setNote(null)
-    const s = words.settings
     try {
       const r = await fetch(`${BASE}/api/node/super-node`, {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ action: "settings", country, coverage: lines(coverage), regional: lines(regional), lists: lines(lists) }),
       })
-      const j = (await r.json().catch(() => null)) as { ok?: boolean; error?: string; settings?: Settings } | null
-      if (j?.ok) { apply(j.settings ?? null); setNote({ ok: true, text: s.saved }) }
-      else setNote({ ok: false, text: `${words.failed} ${words.errors[j?.error ?? ""] ?? j?.error ?? r.status}` })
+      const j = (await r.json().catch(() => null)) as { ok?: boolean; error?: string; settings?: Settings; pushed?: boolean | null } | null
+      if (j?.ok) {
+        apply(j.settings ?? null)
+        setNote({ ok: j.pushed !== false, text: j.pushed === true ? s.savedPushed : j.pushed === false ? s.savedNotPushed : s.saved })
+      } else setNote({ ok: false, text: `${words.failed} ${words.errors[j?.error ?? ""] ?? j?.error ?? r.status}` })
     } catch {
       setNote({ ok: false, text: words.failed })
     }
     setBusy(false)
   }
 
-  const s = words.settings
   if (state === "loading") return <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {words.loading}</p>
   if (state === "failed") return <p className="text-sm text-destructive" role="alert">{words.loadFailed}</p>
   return (
@@ -98,6 +101,7 @@ export function SuperNodeSettings({ words }: { words: SuperNodeWords }) {
           <ul className="list-disc space-y-1 pl-5 text-sm text-foreground" data-default-prohibited>{s.defaults.map((d) => <li key={d}>{d}</li>)}</ul>
         </CardContent>
       </Card>
+      <p className="text-sm text-muted-foreground">{words.docsTitle}: <DocLinks lang={lang} docs={words.pageDocs.settings} className="text-sm" /></p>
     </div>
   )
 }
