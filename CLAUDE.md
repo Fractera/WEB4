@@ -858,9 +858,11 @@ A born element is not deleted as a draft (409). Not built yet: birth in seconds.
   `scripts/element-preview.mjs` passes `languages` from the element's APP-CONFIG (supported · default · indexed) into the
   preview build — Preview and Deploy build the same set. Template law and guard: the element's `CLAUDE.md` («People see
   every language…»), `scripts/check-seo-html.mjs` rules 9–13, `npm run check:index`.
-- **The same block in CONFIG (step 341).** CONFIG v0.2.25 (`/<lang>/architect/languages`) carries «Languages for search
+- **The same block in CONFIG (step 341; v0.2.26, step 520).** CONFIG (`/<lang>/architect/languages`) carries «Languages for search
   engines» under its language set: it writes the CONFIG patch `languages.indexed`, and below it lists the elements that take
-  their languages from CONFIG (door `/api/language-followers`, architect only: `.env.example` declares
+  their languages from CONFIG (door `/api/language-followers`, architect only; elements are looked up next to the registry
+  folder — `WEB4-ITEMS`, not a hard-coded name — and in their address folder, ✗ v0.2.25 read `AGI-ITEMS/<kind>/<id>` and
+  went empty after step 519: `.env.example` declares
   `NEXT_PUBLIC_SUPPORTED_LANGUAGES`, CONFIG link not off), each linking to its Deployments — a born element to its own page,
   the node site (root) to the node board `/architect/build/deployments` (`/root/build/deployments` is 404). An element on an
   older template is marked: its code shows search engines every language. 🔒 **The build reads the same source as the running
