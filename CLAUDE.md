@@ -2906,3 +2906,33 @@ Owner, verbatim (all words — `/code` `current-steps.md`, records «528 — …
 - **Account drawer of the core** = the project shell from root (`/api/shell/<lang>`); the core prepends its own five links
   (`lib/menu/account-links.ts`: H2H Messenger, H2A Messenger, A2A: your orders, A2A: your work, Reviews — labels from the pages'
   `_data`) in `components/menu/top/top-menu.server.tsx`. Element and root drawers are unchanged.
+- **Main agent menu = element menu (528-6, owner: «Подвергни критическому анализу соответствия и отставание меню главного агента меню
+  элементы. Приведи в соответствие»).** Core page addresses do not move (the agent kit puts Subscription, Terminal and Telegram strictly at
+  `build/<name>`, GitHub keeps its doors in its folder); `_lib/main-agent-scheme.ts` places each `build/<name>` page under its menu parent
+  (`construction`, `i2i`, `documents`, `messenger/h2a`), and `groupTree` in `architect-menu.ts` builds the menu from folders plus that
+  scheme. Containers and third-level pages are real folder pages drawn by `_lib/main-agent-page.tsx` (title + purpose line + items under
+  it + the same page in each element). Titles come from the element tree (`treeWords`). Guard `scripts/check-main-agent-menu.mjs`
+  (prebuild): Messenger, Working process and Settings → Payments must match the element tree; no main-agent page may lie loose.
+
+## Payments, Passport tabs and the Super node section (step 530, 2026-10-18)
+
+Owner, verbatim — `/code` `current-steps.md`, record «530 — ЗАДАЧА ВЛАДЕЛЬЦА». Built from Lagrix documents 05 §5.6, 06, 09, 14, 15, 17.9,
+18.4, 19, 24 and entries 32, 45, 52.
+- **Settings → Payments → Web2 / Web3** for every element (`settings/payments/web2|web3` in `item-tree.ts`) and the main agent
+  (`build/settings/payments/web2|web3`). Web2: Stripe keys of the target (`core` or an element) in its `.env.local` via
+  `GET/POST /api/node/stripe` (`lib/stripe-keys.ts`): format, one mode for the pair, the secret key checked with a real Stripe call
+  (`GET /v1/balance`, 401 → 422) before writing; values never come back; only this door writes `STRIPE_*` (`STRIPE_NAMES` in
+  `lib/env-file.ts`, not in `EDITABLE`). Checkout code is the element's own. Web3: the node wallet — one island
+  `components/wallet/node-wallet.client.tsx` in four places (Passport home card, Passport → Main wallet, Payments → Web3 of the main
+  agent and of each element), one door `/api/node/wallet`.
+- **Passport → Official account** (`architect/passport/official`): the «Official» mark in plain words (document 24) and an application kept on
+  the node (`/api/node/official`, `data/node/official.json`): name, what known for, ≥ 3 https sources on 3 different platforms; no node
+  wallet → 409. Nothing goes to the network. **Passport → Main wallet** (`architect/passport/wallet`).
+- **Super node** (group `architect/super-node`, order 11, under Passport): home — what a super-node is, what is needed, the application
+  (none · submitted, waiting for approval · approved, waiting for integration; from the node wallet; `/api/node/super-node`,
+  `data/node/super-node.json`); `notices` — this computer against the Tier-2 profile (`/api/node/super-node/machine`, asked in the
+  browser; bandwidth and addresses «not measured here») and capacity warnings; `payouts` — `TableTools` over
+  `data/node/super-node-payouts.jsonl` (`/api/node/super-node/payouts`); `settings` — country, coverage, regional restrictions, open lists,
+  the default prohibited list (read-only).
+- 🛑 **The Lagrix network is not connected:** approval, warnings and payouts have no writer yet and are shown empty in words; the node keeps
+  only what the person did. No timers, no polling, nothing sent out.
