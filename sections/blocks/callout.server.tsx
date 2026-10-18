@@ -28,7 +28,12 @@ export const callout: SectionRenderer<'callout'> = (b, { key: k }) => (
       </p>
       {/* 535: необязательная кнопка выноски — ссылка с видом кнопки shadcn. */}
       {b.action && (
-        <a href={b.action.href} className={buttonVariants({ className: 'w-fit' })} data-callout-action>
+        <a
+          href={b.action.href}
+          className={buttonVariants({ className: 'w-fit' })}
+          data-callout-action
+          {...(b.action.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+        >
           {b.action.label}
         </a>
       )}

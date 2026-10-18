@@ -7,7 +7,8 @@
 
 export type PresentationPart = { title: string; items: string[] }
 export type PresentationSection = { title: string; parts: PresentationPart[] }
-export type PresentationWords = { intro: string; card: { title: string; text: string; action: string }; sections: PresentationSection[] }
+export type PresentationCard = { title: string; text: string; action: string }
+export type PresentationWords = { intro: string; card: PresentationCard; lagrixCard: PresentationCard; sections: PresentationSection[] }
 
 const UI: Record<'en' | 'ru', PresentationWords> = {
   en: {
@@ -18,6 +19,13 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
       text:
         'The menu on the left holds a lot of settings, and you do not have to use any of them. You can never open this panel at all. All you need is to connect your Telegram and tell it what you want to build. You can stay on your phone the whole time and create large, powerful projects that are open to anyone by a link.',
       action: 'Connect Telegram',
+    },
+    // 535-3 (владелец 2026-10-18): карточка в конце раздела 1 — две цели Lagrix словами README протокола («Our mission»).
+    lagrixCard: {
+      title: 'The Lagrix mission — two goals',
+      text:
+        '**Discovery** — an agent for anything and a direct line to anyone through their agent, with no platform in between. **Honest reputation** — a review comes only from someone who had a real, paid deal with you, and that history cannot be bought, faked or rewritten.',
+      action: 'Open the Lagrix site',
     },
     sections: [
       {
@@ -117,6 +125,12 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
       text:
         'В левом меню много настроек, и пользоваться ими не обязательно. Эту панель можно вообще никогда не открывать. Достаточно подключить ваш Telegram и рассказать ему, что вы хотите сделать. Можно всё время оставаться на телефоне и создавать огромные мощные проекты, которые доступны любому по ссылке.',
       action: 'Подключить Telegram',
+    },
+    lagrixCard: {
+      title: 'Миссия Lagrix — две цели',
+      text:
+        '**Обнаружение** — агент для любого дела и прямая связь с любым человеком через его агента, без платформы посередине. **Честная репутация** — отзыв оставляет только тот, с кем у вас была настоящая оплаченная сделка, и эту историю нельзя купить, подделать или переписать.',
+      action: 'Открыть сайт Lagrix',
     },
     sections: [
       {

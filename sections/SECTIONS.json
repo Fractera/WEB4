@@ -409,7 +409,7 @@
       "kind": "callout",
       "type": "page-material",
       "shape": "callout",
-      "fields": "title: string; text: string; action?: { href: string; label: string }",
+      "fields": "title: string; text: string; action?: { href: string; label: string; external?: boolean }",
       "title": null,
       "description": null,
       "hasCard": false,
