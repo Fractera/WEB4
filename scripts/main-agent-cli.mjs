@@ -1,0 +1,265 @@
+// КОМАНДЫ ГЛАВНОГО АГЕНТА УЗЛА (узел, шаги 548-4 и 548-11). Главный агент живёт в `data/main-agent` (`lib/main-agent/`) и зовёт их
+// своими `npm run …`: `node ../../scripts/main-agent-cli.mjs <команда>`. Файлов ядра он не читает — всё, что ему нужно знать
+// об узле и его элементах, печатают эти команды (ровно столько, сколько нужно для решения, — модель не платит за лишнее).
+//
+// Слова владельца 2026-10-19 (548-6): узел, «когда в приложении пришёл запрос на элемент», должен «во-первых создать его, во-вторых
+// передать в него техническое задание, в-третьих передать агенту внутри этого элемента начать собственный жизненный процесс»,
+// сообщить архитектору, «как он может продолжить работать в этом процессе и контролировать его», а при другом стечении
+// обстоятельств — вести элемент самому, «без личного участия».
+//
+//   contacts                 — состав узла одним экраном: элемент · адрес · род · состояние · роль · как до него достучаться
+//   find <слова>             — кто в узле умеет это (поиск реестра ядра `GET /api/node/a2a?q=`)
+//   lagrix <слова>           — f2f: поиск целого элемента в сети Lagrix; сети ещё нет — ИМИТАЦИЯ (запрос по документам 17 и 20)
+//   create --role "<фраза>" (--brief "<текст>" | --brief-file <путь>) [--native] [--supervise main|architect] [--no-wake]
+//                            — новый элемент: черновик → рождение из шаблона → роль → задание в его приёмную → пробуждение агента
+//   task <id> "<текст>"      — поручение агенту элемента (живой сессии — во вход, спящему — пробуждением)
+//   state <id>               — как идёт работа элемента: роль, текущий шаг, приёмная, коммиты, надзор
+//   role <id> "<фраза>"      — назначить элементу роль (`data/node/roles.json`)
+//   supervise <id> main|architect|off [--max N] — кто ведёт элемент
+//   person                   — как связаться с архитектором из этой сессии (Telegram главного агента или терминал ядра)
+// 🔒 Ничего не делается само: каждую команду запускает главный агент по слову человека или по событию надзора.
+
+import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs'
+import { randomBytes } from 'node:crypto'
+import { spawnSync } from 'node:child_process'
+import { createRequire } from 'node:module'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const require = createRequire(import.meta.url)
+const supervision = require('../lib/web4-items/supervision.cjs')
+const { simulatedF2fSearch } = await import('../lib/web4-items/lagrix-simulated.mjs')
+
+const readJson = (p, fallback = null) => { try { return JSON.parse(readFileSync(p, 'utf8')) } catch { return fallback } }
+const env = (() => {
+  const out = {}
+  try {
+    for (const line of readFileSync(join(ROOT, '.env.local'), 'utf8').split(/\r?\n/)) {
+      const m = line.match(/^([A-Z0-9_]+)=(.*)$/)
+      if (m) out[m[1]] = m[2].replace(/^["']|["']$/g, '')
+    }
+  } catch { /* нет .env.local — ключа нет */ }
+  return out
+})()
+const KEY = env.SETTINGS_SECRET ?? ''
+const LANG = env.NEXT_PUBLIC_LANG || 'en'
+const CORE = `http://localhost:${readJson(join(ROOT, 'logs', 'runtime.json'), {})?.port ?? 24680}`
+const ZONE = readJson(join(ROOT, 'logs', 'domain.json'), {})?.zone ?? ''
+const ORIGIN = ZONE ? `https://architect.${ZONE}` : CORE
+
+const fail = (msg) => { console.log(`===MAIN_AGENT_FAIL=== ${msg}`); process.exit(1) }
+const firstSentence = (t, n = 170) => {
+  const s = String(t ?? '').replace(/\s+/g, ' ').trim()
+  const cut = s.match(/^.{20,}?[.!?](?=\s|$)/)?.[0] ?? s
+  return cut.length > n ? `${cut.slice(0, cut.lastIndexOf(' ', n - 1) > 40 ? cut.lastIndexOf(' ', n - 1) : n - 1)}…` : cut
+}
+async function core(path, init = {}) {
+  const r = await fetch(`${CORE}${path}`, { ...init, headers: { 'X-Node-Key': KEY, 'Content-Type': 'application/json', ...(init.headers ?? {}) }, signal: AbortSignal.timeout(init.timeout ?? 15_000) })
+  let body = null
+  try { body = await r.json() } catch { /* не JSON */ }
+  return { status: r.status, body }
+}
+
+const registry = () => readJson(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), { services: [] }).services ?? []
+const addressOf = (id) => {
+  const a = readJson(join(ROOT, 'data', 'services', id, 'address.json'), null)?.address
+  return typeof a === 'string' && /^[a-z0-9-]{1,40}$/.test(a) ? a : id
+}
+const itemDir = (id) => {
+  const e = registry().find((s) => s.id === id)
+  if (!e) return null
+  const base = join(ROOT, 'WEB4-ITEMS', e.kind === 'user' ? 'user' : 'core')
+  const byAddress = join(base, addressOf(id))
+  return existsSync(byAddress) ? byAddress : existsSync(join(base, id)) ? join(base, id) : null
+}
+const born = (id) => Boolean(registry().find((s) => s.id === id && s.kind === 'user' && s.born))
+const botOf = (id) => readJson(join(ROOT, 'data', 'services', id, 'channel', 'telegram', 'bot.json'), null)?.username ?? null
+const terminalOf = (id) => born(id) ? `${ORIGIN}/${LANG}/${addressOf(id)}/build/terminal` : `${ORIGIN}/${LANG}/architect/${id}/terminal`
+const reachOf = (id) => {
+  const bot = botOf(id)
+  return bot ? `Telegram t.me/${bot} · terminal ${terminalOf(id)}` : `terminal ${terminalOf(id)} (no Telegram bot)`
+}
+const rolesFile = join(ROOT, 'data', 'node', 'roles.json')
+const roles = () => ({ ...readJson(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'roles.json'), {}), ...readJson(rolesFile, {}) })
+
+const [cmd, ...rest] = process.argv.slice(2)
+const flag = (name) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] ?? '' : null }
+const has = (name) => rest.includes(name)
+
+if (cmd === 'contacts') {
+  const r = await core('/api/node/projects').catch(() => null)
+  const rows = Array.isArray(r?.body?.rows) ? r.body.rows : registry().map((s) => ({ id: s.id, custom: Boolean(s.born), service: s.id, status: 'unknown' }))
+  const role = roles()
+  console.log(`Node ${ZONE || '(no domain yet)'} — core ${ORIGIN}: the registry of elements, waking agents, birth of new elements. You are its main agent (terminal ${ORIGIN}/${LANG}/architect/build/terminal).`)
+  for (const x of rows) {
+    const what = role[x.id] ?? x.role ?? firstSentence(x.description) ?? ''
+    console.log(`- ${x.id} · ${x.service} · ${x.custom ? 'custom' : 'native'} · ${x.status} — ${what || 'no role yet'} — ${reachOf(x.id)}`)
+  }
+  process.exit(0)
+}
+
+if (cmd === 'find') {
+  const words = rest.join(' ').trim()
+  if (!words) fail('find <plain words of the job>')
+  const r = await core(`/api/node/a2a?q=${encodeURIComponent(words)}`).catch((e) => fail(`the core did not answer: ${e.message}`))
+  const entries = r.body?.entries ?? []
+  if (!entries.length) { console.log(`Nobody in this node does «${words}». Next: npm run lagrix -- ${words}`); process.exit(0) }
+  const role = roles()
+  for (const e of entries.slice(0, 5)) {
+    const id = registry().find((s) => s.id === e.address || addressOf(s.id) === e.address)?.id ?? e.address
+    console.log(`- ${e.address} — ${role[id] ?? firstSentence(e.description)} · skills: ${(e.skills ?? []).map((s) => s.id).join(', ') || '—'} — ${reachOf(id)}`)
+  }
+  process.exit(0)
+}
+
+if (cmd === 'lagrix') {
+  const words = rest.join(' ').trim()
+  if (!words) fail('lagrix <plain words of the element you need>')
+  const out = simulatedF2fSearch(words, { framework: 'next', country: env.NODE_COUNTRY || '', dataDir: join(ROOT, 'data', 'node') })
+  console.log(JSON.stringify(out, null, 2))
+  process.exit(0)
+}
+
+if (cmd === 'role') {
+  const [id, ...words] = rest
+  const text = words.join(' ').trim()
+  if (!id || !text) fail('role <id> "<one sentence: what this element does for the node>"')
+  if (!registry().some((s) => s.id === id)) fail(`no element ${id} in the registry`)
+  const j = readJson(rolesFile, {})
+  j[id] = text
+  mkdirSync(dirname(rolesFile), { recursive: true })
+  writeFileSync(rolesFile, JSON.stringify(j, null, 2) + '\n', 'utf8')
+  console.log(`===ROLE_OK=== ${id}: ${text}`)
+  process.exit(0)
+}
+
+if (cmd === 'supervise') {
+  const [id, by] = rest
+  if (!id || !['main', 'architect', 'off'].includes(by)) fail('supervise <id> main|architect|off [--max N]')
+  const max = Number(flag('--max')) || supervision.DEFAULT_MAX
+  const r = supervision.set(id, by, { max, root: ROOT })
+  console.log(`===SUPERVISE_OK=== ${id}: ${by === 'off' ? 'not supervised' : by === 'main' ? `the main agent leads it, up to ${max} cycles` : 'the architect leads it'}${r ? ` (cycles so far ${r.cycles ?? 0})` : ''}`)
+  process.exit(0)
+}
+
+if (cmd === 'person') {
+  const p = readJson(join(ROOT, 'data', 'services', 'build', 'channel', 'telegram', 'person.json'), null)
+  const bot = botOf('build')
+  if (bot && p) console.log(`Telegram bot @${bot} is yours: write to the architect with the reply tool, chat_id ${p.chatId ?? p.chat_id ?? p.id ?? '(see person.json)'}, language ${p.lang ?? LANG}.`)
+  else console.log(`No Telegram bot for the main agent: the architect reads you in the core's terminal ${ORIGIN}/${LANG}/architect/build/terminal — answer there.`)
+  process.exit(0)
+}
+
+if (cmd === 'task') {
+  const [id, ...words] = rest
+  const text = words.join(' ').trim()
+  if (!id || !text) fail('task <id> "<what the element agent must do>"')
+  if (!registry().some((s) => s.id === id)) fail(`no element ${id} in the registry`)
+  const supervised = supervision.byMain(id, ROOT)
+  const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: firstSentence(text, 300), reason: 'main-agent-task', supervised }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  const b = r.body ?? {}
+  console.log(b.ok ? (b.pending ? `===TASK_OK=== ${id}: asked its person in Telegram to turn the agent on` : b.already ? `===TASK_OK=== ${id}: pasted into its live session` : `===TASK_OK=== ${id}: its agent woke with the task`) : `===TASK_FAIL=== ${id}: ${b.reason ?? r.status}${b.freeMb ? ` (free ${b.freeMb} MB, needs ${b.perSessionMb} MB — try later)` : ''}`)
+  process.exit(b.ok ? 0 : 1)
+}
+
+if (cmd === 'state') {
+  const [id] = rest
+  if (!id) fail('state <id>')
+  const dir = itemDir(id)
+  if (!dir) fail(`no folder of element ${id}`)
+  const role = roles()[id]
+  const docs = join(dir, 'development-docs')
+  const step = existsSync(join(docs, 'current-step.md')) ? readFileSync(join(docs, 'current-step.md'), 'utf8').split(/\r?\n/).slice(0, 60).join('\n') : '(no development-docs/current-step.md)'
+  const intake = existsSync(join(docs, 'pre-steps')) ? readdirSync(join(docs, 'pre-steps')).filter((f) => /^\d\d-\d\d-\d{4}_/.test(f)) : []
+  const git = spawnSync('git', ['-C', dir, 'log', '--oneline', '-5'], { encoding: 'utf8', windowsHide: true })
+  const sup = supervision.read(ROOT).elements[id]
+  console.log(`Element ${id} (${addressOf(id)}) — role: ${role ?? 'none'}`)
+  console.log(`Led by: ${sup?.active ? (sup.by === 'main' ? `the main agent, cycle ${sup.cycles ?? 0} of ${sup.max}` : 'the architect') : 'the architect (no supervision record)'} · reach: ${reachOf(id)}`)
+  console.log(`Intake: ${intake.length ? intake.join(', ') : 'empty'}`)
+  console.log(`Last commits:\n${(git.stdout || '(none)').trim()}`)
+  console.log(`current-step.md (first 60 lines):\n${step}`)
+  process.exit(0)
+}
+
+if (cmd === 'create') {
+  const role = (flag('--role') ?? '').trim()
+  const briefFile = flag('--brief-file')
+  const brief = (briefFile ? (existsSync(briefFile) ? readFileSync(briefFile, 'utf8') : fail(`no file ${briefFile}`)) : flag('--brief') ?? '').trim()
+  const by = flag('--supervise') ?? 'architect'
+  if (!role || !brief) fail('create --role "<one sentence>" (--brief "<the task, the person\'s words first>" | --brief-file <path>) [--native] [--supervise main|architect] [--no-wake]')
+  if (!['main', 'architect'].includes(by)) fail('--supervise main|architect')
+
+  // 1. Черновик — тем же правилом имени, что кнопка «Создать WEB4 ITEM» (`lib/web4-items/drafts.ts`).
+  const RESERVED = new Set(['auth', 'blocks', 'build', 'config', 'data', 'design', 'hosting', 'kits', 'passport', 'root', 'admin', 'architect', 'api', 'www', 'mail', 'memory', 'telegram', 'store', 'items'])
+  const draftsFile = join(ROOT, 'data', 'web4-drafts.json')
+  const drafts = readJson(draftsFile, { drafts: [] }).drafts ?? []
+  const busy = new Set([...RESERVED, ...registry().map((s) => s.id), ...drafts.map((d) => d.id)])
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789'
+  let id = ''
+  for (let i = 0; i < 100 && (!id || busy.has(id)); i++) {
+    const b = randomBytes(5)
+    id = alphabet[b[0] % 26] + [1, 2, 3, 4].map((k) => alphabet[b[k] % 36]).join('')
+  }
+  if (busy.has(id)) fail('no free name')
+  const tmp = `${draftsFile}.${process.pid}.tmp`
+  writeFileSync(tmp, JSON.stringify({ drafts: [...drafts, { id, createdAt: new Date().toISOString() }] }, null, 2) + '\n', 'utf8')
+  renameSync(tmp, draftsFile)
+  console.log(`draft ${id} — birth starts (clone of the template, install, build: a few minutes)`)
+
+  // 2. Рождение — тот же путь, что кнопка «Родить элемент».
+  const birth = spawnSync(process.execPath, [join(ROOT, 'scripts', 'item-birth.mjs'), id, '--look', 'project', ...(has('--native') ? ['--native'] : [])], { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: 20 * 60_000 })
+  const log = `${birth.stdout ?? ''}${birth.stderr ?? ''}`
+  if (!/===BIRTH_OK===/.test(log)) fail(`birth of ${id} failed: ${log.trim().split(/\r?\n/).slice(-3).join(' | ')}`)
+  const dir = itemDir(id)
+  if (!dir) fail(`element ${id} was born but its folder is not found`)
+
+  // 3. Роль — в данные узла: по ней его найдут соседи и главный агент.
+  const rj = readJson(rolesFile, {})
+  rj[id] = role
+  mkdirSync(dirname(rolesFile), { recursive: true })
+  writeFileSync(rolesFile, JSON.stringify(rj, null, 2) + '\n', 'utf8')
+
+  // 4. Задание — в приёмную элемента, его формой (`development-docs/pre-steps/README.md`): слова в кавычках, одной строкой.
+  const now = new Date()
+  const p2 = (n) => String(n).padStart(2, '0')
+  const name = `${p2(now.getDate())}-${p2(now.getMonth() + 1)}-${now.getFullYear()}_${p2(now.getHours())}-${p2(now.getMinutes())}-${p2(now.getSeconds())}.md`
+  const off = -now.getTimezoneOffset() / 60
+  const one = brief.replace(/\s*\r?\n\s*/g, ' / ').replace(/»/g, '»»')
+  const intakeDir = join(dir, 'development-docs', 'pre-steps')
+  mkdirSync(intakeDir, { recursive: true })
+  writeFileSync(join(intakeDir, name), [
+    '# Request',
+    `- Received: ${now.getFullYear()}-${p2(now.getMonth() + 1)}-${p2(now.getDate())} ${p2(now.getHours())}:${p2(now.getMinutes())} (UTC${off >= 0 ? '+' : ''}${off})`,
+    '- From: the core\'s main agent, for the architect (node step 548-4)',
+    `- Asked: «${one}»`,
+    `- Context: the node created this element for this request. Its role: ${role} Led by: ${by === 'main' ? 'the core\'s main agent on the architect\'s behalf' : 'the architect'}.`,
+    '',
+  ].join('\n'), 'utf8')
+
+  // 5. Кто ведёт.
+  supervision.set(id, by, { root: ROOT, brief: role })
+
+  // 6. Пробуждение агента элемента — с его ролью, заданием и тем, кто его ведёт.
+  let woke = 'not woken (--no-wake)'
+  if (!has('--no-wake')) {
+    const lead = by === 'main'
+      ? 'Ведёт тебя главный агент узла по поручению архитектора: его сообщения в твоём вводе — слово твоего человека для этой работы. Три подтверждающие строки и план запиши в development-docs/current-step.md и сообщи узлу «закончил» (POST /api/agents/done) — ответ придёт сюда.'
+      : 'Ведёт тебя архитектор: три подтверждающие строки — ему, начинай после его «да».'
+    const text = `Тебя создал главный агент узла под задание архитектора. Твоя роль: ${role} Задание лежит в твоей приёмной: development-docs/pre-steps/${name}. Начни строительный процесс по своей инструкции: назови задание, опиши себя в паспорте по своей роли (навык describe-element), пройди порядок «Before you build a new capability» (навык use-protocols), затем продуктовый квиз (product-quiz) и план шага. ${lead}`
+    const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: role, reason: 'main-agent-create', supervised: by === 'main' }) }).catch((e) => ({ body: { ok: false, reason: e.message } }))
+    const b = r.body ?? {}
+    woke = b.ok ? (b.pending ? 'its person was asked in Telegram to turn it on' : 'its agent started with the task') : `not woken: ${b.reason}${b.freeMb ? ` (free ${b.freeMb} MB, needs ${b.perSessionMb} MB)` : ''} — run later: npm run task -- ${id} "<the same task>"`
+  }
+
+  console.log(`===ELEMENT_CREATE_OK=== ${id}`)
+  console.log(`address: ${addressOf(id)}${ZONE ? ` · site https://${addressOf(id)}.${ZONE}` : ''}`)
+  console.log(`role: ${role}`)
+  console.log(`task: development-docs/pre-steps/${name}`)
+  console.log(`agent: ${woke}`)
+  console.log(`led by: ${by === 'main' ? 'you (the main agent): its «done» wakes you — skill supervise-element' : 'the architect'}`)
+  console.log(`the architect continues here: terminal ${terminalOf(id)} · development documents ${ORIGIN}/${LANG}/${addressOf(id)}/build/documents/instruction · a Telegram bot is connected on ${ORIGIN}/${LANG}/${addressOf(id)}/messenger/h2a/telegram`)
+  process.exit(0)
+}
+
+fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | person`)

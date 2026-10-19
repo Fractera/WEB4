@@ -55,6 +55,8 @@ const service = args.find((a) => !a.startsWith('--'))
 const update = args.includes('--update')
 const force = args.includes('--force') || update
 const asNode = args.includes('--node')
+// 548-4: главный агент узла живёт в своей папке-репозитории data/main-agent (lib/main-agent/, scripts/main-agent-install.mjs).
+const asMain = args.includes('--main-agent')
 // 326: группа `[item]` — всегда общая копия для рождённых (и при `agent-kit:update -- [item]`).
 const asBorn = args.includes('--born') || service === BORN_GROUP
 
@@ -133,7 +135,7 @@ const previous = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath
 // 🔒 `--update` ПОВТОРЯЕТ ПРЕЖНЮЮ УСТАНОВКУ, А НЕ СТАВИТ ЗАНОВО ПО УМОЛЧАНИЯМ. Иначе обновление мастера
 // молча переименовало бы страницы узла обратно в `claude-code` и сломало адреса, которые уже раздали.
 const namedPages = args.includes('--page')
-const workspace = asBorn ? 'born-items' : asNode || (update && previous?.workspace === 'node') ? 'node' : 'web4-item'
+const workspace = asBorn ? 'born-items' : asMain || (update && previous?.workspace === 'main-agent') ? 'main-agent' : asNode || (update && previous?.workspace === 'node') ? 'node' : 'web4-item'
 const pages = asBorn ? [] : update && !namedPages && Array.isArray(previous?.pages) && previous.pages.length ? previous.pages : pagesFromArgs()
 
 if (workspace === 'web4-item') {
@@ -179,7 +181,7 @@ writeFileSync(
   )}\n`,
 )
 
-const where = workspace === 'node' ? 'корень узла' : workspace === 'born-items' ? 'WEB4-ITEMS/user/<id> каждого рождённого элемента' : `WEB4-ITEMS/<kind>/${service}`
+const where = workspace === 'main-agent' ? 'data/main-agent (главный агент узла)' : workspace === 'node' ? 'корень узла' : workspace === 'born-items' ? 'WEB4-ITEMS/user/<id> каждого рождённого элемента' : `WEB4-ITEMS/<kind>/${service}`
 console.log(`agent-kit: architect/${service}/ — _agent-kit (версия ${version}), страницы ${pages.map((p) => p.slug).join(', ')}, agent-api/{${DOORS.join(',')}}`)
 console.log(`agent-kit: рабочая папка агента — ${where}`)
 console.log(`===AGENT_KIT_OK=== группа «${service}» ${update ? 'обновлена' : 'получила комплект'}. Пересоберите узел: npm run serve:rebuild`)

@@ -12,6 +12,10 @@
 //   `web4-item` — папка элемента `WEB4-ITEMS/<kind>/<id>`, как было: агент службы заперт её деревом;
 //   `node`     — корень узла: так живёт агент САМОГО узла (вкладка «Строительство»), потому что его
 //                предмет — код узла, и `CLAUDE.md` узла лежит в корне.
+//   `main-agent` — `data/main-agent`, своя папка-репозиторий главного агента узла (548-4): он направляет просьбы к элементам,
+//                рождает новые и ведёт их, а не строит код узла, — поэтому не грузит ни `CLAUDE.md` узла (252 тыс. знаков),
+//                ни 61 навык корня (Claude Code берёт навыки из всех родителей до корня репозитория). Ставит её
+//                `scripts/main-agent-install.mjs` из `lib/main-agent/`.
 // Какая из двух — сказано в манифесте установки `architect/<группа>/agent-kit.json`, который пишет
 // установщик. 🛑 Имени конкретной группы здесь нет и быть не должно: комплект переносим.
 //
@@ -67,6 +71,10 @@ function serviceDir(service) {
   if (!ID_SHAPE.test(id)) return null
   // Корень узла — только по слову манифеста: иначе любая опечатка в имени открыла бы агенту весь узел.
   if (manifest(id)?.workspace === 'node') return ROOT
+  if (manifest(id)?.workspace === 'main-agent') {
+    const dir = path.join(ROOT, 'data', 'main-agent')
+    return existsSync(path.join(dir, 'CLAUDE.md')) ? dir : null
+  }
   const entry = registered().find((s) => s.id === id)
   if (!entry) return null
   const dir = itemDir(id, entry.kind)

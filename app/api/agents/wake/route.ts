@@ -2,6 +2,8 @@
 import { timingSafeEqual } from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 
+import supervision from "@/lib/web4-items/supervision.cjs"
+
 // ПРОБУЖДЕНИЕ АГЕНТА ЭЛЕМЕНТА (шаг 409-1; владелец 2026-10-05: «агент должен уметь запускать собственный терминал»; «примерно
 // 300 МБ свободной памяти на один терминал»). POST `{ service, reason?, text? }` с ключом узла (`X-Node-Key`): сессия `claude`
 // рождается тем же путём, что кнопкой в окне терминала (`_agent-kit/server/bridge.cjs` → `wake`), `text` вставляется во вход
@@ -13,7 +15,10 @@ export const dynamic = "force-dynamic"
 
 const HEADERS = { "Cache-Control": "no-store" }
 
-type Wake = (service: string, opts: { text?: string; from?: string; about?: string; declineUrl?: string }) => Promise<Record<string, unknown> & { ok: boolean }>
+type Wake = (service: string, opts: { text?: string; from?: string; about?: string; declineUrl?: string; confirmed?: boolean }) => Promise<Record<string, unknown> & { ok: boolean }>
+// 548-11: `supervised: true` — поручение главного агента элементу, который архитектор отдал ему под надзор
+// (`data/node/supervision.json`, `lib/web4-items/supervision.cjs`): включается без вопроса в Telegram — человек этот вопрос уже
+// решил, выбрав надзор. Нет записи надзора — флаг ничего не меняет.
 
 function nodeKeyOk(given: string | null): boolean {
   const expected = process.env.SETTINGS_SECRET ?? ""
@@ -27,7 +32,7 @@ export async function POST(req: NextRequest) {
   if (!nodeKeyOk(req.headers.get("x-node-key"))) {
     return NextResponse.json({ ok: false, reason: "node key required (X-Node-Key)" }, { status: 401, headers: HEADERS })
   }
-  let body: { service?: unknown; reason?: unknown; text?: unknown; from?: unknown; about?: unknown; declineUrl?: unknown }
+  let body: { service?: unknown; reason?: unknown; text?: unknown; from?: unknown; about?: unknown; declineUrl?: unknown; supervised?: unknown }
   try { body = await req.json() } catch {
     return NextResponse.json({ ok: false, reason: "invalid JSON" }, { status: 400, headers: HEADERS })
   }
@@ -41,7 +46,8 @@ export async function POST(req: NextRequest) {
   }
   const text = typeof body.text === "string" && body.text.trim() ? body.text.slice(0, 8000) : undefined
   const str = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined)
-  const out = await wake(service, { text, from: str(body.from, 120), about: str(body.about, 600), declineUrl: str(body.declineUrl, 300) })
+  const confirmed = body.supervised === true && supervision.byMain(service)
+  const out = await wake(service, { text, from: str(body.from, 120), about: str(body.about, 600), declineUrl: str(body.declineUrl, 300), ...(confirmed ? { confirmed: true } : {}) })
   console.log(`[agents/wake] ${service} reason=${String(body.reason ?? "-").slice(0, 32)} → ${out.ok ? (out.pending ? "asked in Telegram" : out.already ? "already" : "started") : out.reason}`)
   const status = out.ok ? 200 : out.reason === "memory" ? 503 : out.reason === "no-agent-kit" || out.reason === "no-agent-dir" ? 404 : 409
   return NextResponse.json(out, { status, headers: HEADERS })
