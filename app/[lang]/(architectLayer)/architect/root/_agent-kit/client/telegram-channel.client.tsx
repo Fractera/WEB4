@@ -38,6 +38,8 @@ type State = {
   running: boolean
   terminalWithoutChannel: boolean
   suggestion: { name: string; username: string }
+  // 547: пути разделов агента от узла — у рождённого элемента они под его адресом и build/.
+  links?: { terminal: string; subscription: string }
 }
 
 function Locked({ text }: { text: string }) {
@@ -118,8 +120,9 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
   // Узел хранит тексты системного сообщения: он отвечает боту и тогда, когда эта страница закрыта.
   useEffect(() => {
     if (!configured) return
-    const base = `${window.location.origin}${BASE}/${lang}/architect/${service}`
-    const fill = (t: string) => t.replace("{subscription}", `${base}/claude-code`).replace("{terminal}", `${base}/terminal`)
+    const base = `${window.location.origin}${BASE}/${lang}`
+    const links = (state && state !== "forbidden" ? state.links : undefined) ?? { terminal: `/architect/${service}/terminal`, subscription: `/architect/${service}/claude-code` }
+    const fill = (t: string) => t.replace("{subscription}", `${base}${links.subscription}`).replace("{terminal}", `${base}${links.terminal}`)
     void fetch(door, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -160,7 +163,7 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
   if (state === "forbidden") return <ForbiddenWithExit reason={words.forbidden} why={words.exitWhy} open={words.exitOpen} />
   if (state === null) return <p className="my-6 text-muted-foreground text-sm">{words.loading}</p>
 
-  const terminalHref = `/${lang}/architect/${service}/terminal`
+  const terminalHref = `/${lang}${state.links?.terminal ?? `/architect/${service}/terminal`}`
 
   return (
     <div className="my-6 flex flex-col gap-3" data-telegram-channel data-running={state.running ? "1" : "0"}>

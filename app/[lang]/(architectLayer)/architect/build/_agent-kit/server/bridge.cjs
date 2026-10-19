@@ -148,6 +148,7 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
     session.remember(born, data)
     for (const client of born.clients) if (client.readyState === client.OPEN) client.send(data)
     watchPrompt(born)
+    watchTrust(born)
   })
   child.onExit(() => session.exited(born))
   return { ok: true, session: born }
@@ -167,6 +168,30 @@ const plainScreen = (raw) => raw
   .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)/g, '')
   .replace(/\x1b[()][0-9A-Za-z]/g, '')
   .replace(/\s+/g, ' ')
+/** 547: стоит ли на экране вопрос доверия папке Claude Code («Is this a project you created or one you trust?»). */
+function trustOnScreen(buffer) {
+  const tail = plainScreen(buffer.slice(-4000)).replace(/\s+/g, '')
+  return /Isthisaprojectyoucreatedoroneyoutrust/i.test(tail) && /Yes,Itrustthisfolder/i.test(tail)
+}
+/**
+ * 547 (владелец 2026-10-19: «ты активируешь папку также как и запускаешь агента то есть прямо из чата»): у пробуждённого агента
+ * вопрос доверия папке отвечается так, как ответил бы человек, — стрелка вниз на «Yes, I trust this folder» и Enter, — но только
+ * когда включение подтверждено кнопкой в Telegram (`trustOk`; вопрос с кнопками говорит и о папке). Иначе бот зовёт человека в
+ * терминал (`telegram.tellWaiting`). Один раз на сессию; запуск со страницы терминала не трогается — человек видит вопрос сам.
+ */
+function watchTrust(s) {
+  if (!s.viaWake || s.trustDone) return
+  clearTimeout(s.trustTimer)
+  s.trustTimer = setTimeout(() => {
+    if (session.current(s.service) !== s || s.trustDone || !trustOnScreen(s.buffer)) return
+    s.trustDone = true
+    if (!s.trustOk) { void telegram.tellWaiting(s.service).catch(() => {}); return }
+    try { s.proc.write('\x1b[B') } catch { return }
+    setTimeout(() => { try { s.proc.write('\r') } catch { /* процесс завершён */ } }, 250)
+  }, PROMPT_QUIET_MS)
+  s.trustTimer.unref?.()
+}
+
 /** Висит ли на хвосте экрана вопрос-разрешение Claude Code. */
 function promptOnScreen(buffer) {
   const tail = plainScreen(buffer.slice(-4000))
@@ -250,6 +275,9 @@ async function wake(service, { text, from, about, declineUrl, confirmed, taskUrl
   const r = await spawnAgent(service, undefined, undefined, text ? `${text}\n\n${finishRule(service)}` : '')
   if (!r.ok) return { ok: false, reason: r.reason }
   rememberTasks(r.session, urls)
+  // 547: агент включён пробуждением; кнопка «Включить» в Telegram — согласие и на папку.
+  r.session.viaWake = true
+  r.session.trustOk = Boolean(confirmed)
   // 409-5 (владелец: «timeout more then 60 min»): через 60 минут от пробуждения — вопрос «закрыть терминал?». Только для
   // пробуждённых сессий; сама сессия не закрывается — закрывает агент по ответу человека. Переменная — для прибора.
   const born = r.session
