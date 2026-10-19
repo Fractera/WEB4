@@ -2970,3 +2970,30 @@ Owner, verbatim — `/code` `current-steps.md`, records «531 — ЗАМЕЧАН
   open this panel: connect Telegram and say what to build», three numbered sections (Web4-ready and Lagrix · the ordinary web · home or
   a dedicated server). Words in `passport/how-it-works/_data/presentation.ts` (en base, ru), under 1000 words each; blocks h2 → h3 →
   olist in `_components`. Money figures follow the Lagrix changelog in one reading (step 534).
+
+## Product quiz of an element (step 536, 2026-10-18/19)
+
+The owner, verbatim: «я считаю что проект должен быть описан на продуктовом языке» and «по мере того как пользователь говорит: – а ещё
+мне нужно … это должно вызывать процедуру … чтобы понять какие существуют зависимости и на что повлияет это новая Fitch». The page:
+«Building → Product design → Product quiz» (`build/product-design/quiz`).
+
+- **Where the quiz lives:** the element's `development-docs/product/` — `quiz.json` + `modules/<slug>.json`, JSON, only in the element's
+  default language (owner: «only default lang»). Written by the element's agent with the person (skill `product-quiz`); guard
+  `npm run check:product` (not in `prebuild`). Today in roman (18 items) and lagrix (15 items), restored by the node agent from what was
+  built, every item a draft.
+- **The core only reads:** `lib/web4-items/product-quiz.ts` (a broken file is named in `problems`, never hidden) → door
+  `GET /api/node/product-quiz?item=` (architect/admin, `no-store`) → island `components/element-docs/product-quiz.client.tsx`, words
+  `_i18n/product-quiz.i18n.ts`. No door writes the quiz; an item is confirmed only by the person's words to the agent. An element without
+  the folder shows the empty state with «Start deep planning».
+- **Dots:** one source — a step's line `Serves: S-03, R-02` (plan in `steps-new/`, summary in `steps-done/`, a small step in
+  `current-step.md`); the state comes from where the file lies; an item sums its steps: in progress (`warning`) > planned (`tone-reach`)
+  > done or `builtBefore` (`success`) > none (an empty ring). The window of steps opens on hover for a mouse and on a press for a finger
+  (Radix toggles on click — measured: a click after the hover closed it, a tap never opened it).
+- **💬:** the block-task window in its note mode (`quizTaskUi`) → `/<lang>/architect/<address>/build/terminal?paste=` — the task waits
+  in the paste window; not from this computer (`isLoopbackHostname`) the window copies the phrase for Telegram. The Telegram button comes
+  from the element's channel door (`agent-api/channel`: a bot and at least one allowed person).
+- **Template:** v0.3.101 carries the `humanizer` skill and the «Texts» rule; the quiz skill and format are in roman and lagrix only —
+  moving them into the template is the owner's word.
+- 🛑 **A core rebuild stopped half way leaves the live core without `static/chunks`** (every script and style 500, health still 200):
+  measure free memory before `serve:rebuild` (about 2 GB here); with less, copy `.next` without `cache` outside the project and build in
+  the foreground; after the build count the page's static files, not only `/api/health`.
