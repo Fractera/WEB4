@@ -3,7 +3,7 @@ import { listDrafts } from '@/lib/web4-items/drafts'
 import { addressOf } from '@/lib/web4-items/element-address'
 import { getService } from '@/lib/microservices/registry'
 import { findTreePath, treeVisible } from '@/lib/web4-items/item-tree'
-import { elementMessengers, hasCatalog } from '@/lib/a2a/element-passport'
+import { elementMessengers, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
 import { H2 } from '@/components/ui/typography'
 import { ARCHITECT_HOME } from '../_lib/architect-menu'
 import { mainAgentUi } from '../_i18n/main-agent.i18n'
@@ -22,7 +22,7 @@ export function MainAgentElements({ lang, path }: { lang: string; path: string }
   const trail = findTreePath(path.split('/'))
   const rows = listDrafts().map((d) => {
     const slug = addressOf(d.id)
-    const ctx = { catalog: hasCatalog(d.id), messengers: elementMessengers(d.id) }
+    const ctx = { catalog: hasCatalog(d.id), messengers: elementMessengers(d.id), native: isNativeElement(d.id) }
     const visible = !!trail && trail.every((t) => treeVisible(t, ctx))
     const note = !getService(d.id) ? ui.draft : visible ? null : ui.off
     return { slug, href: visible ? `/${lang}${ARCHITECT_HOME}/${slug}/${path}` : null, note }

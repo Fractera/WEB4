@@ -3,7 +3,7 @@ import type { WorkspaceItem } from '@/lib/content/blocks/types'
 import { listDrafts } from '@/lib/web4-items/drafts'
 import { addressOf } from '@/lib/web4-items/element-address'
 import { ITEM_TREE, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
-import { elementMessengers, elementPassport, hasCatalog } from '@/lib/a2a/element-passport'
+import { elementMessengers, elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
 import { hasDoc } from '@/lib/web4-items/element-docs'
 import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 import { CreateDraftButton } from '../_components/create-draft-button.client'
@@ -46,7 +46,7 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     node: <CreateDraftButton lang={lang} label={ui.create} busyLabel={ui.creating} failed={ui.createFailed} />,
   }
 
-  const drafts: WorkspaceItem[] = listDrafts().map((d) => {
+  const drafts: (WorkspaceItem & { native: boolean })[] = listDrafts().map((d) => {
     // 325-3: пункт и пути — по адресу элемента в ядре (нет своего — id).
     const slug = addressOf(d.id)
     const dir = `${ARCHITECT_HOME}/${slug}`
@@ -59,7 +59,8 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     // «Рабочий процесс → Процесс»).
     const services = elementPassport(d.id)?.subscriptions?.services ?? []
     // 472: разделы H2A/H2H и страницы по флагам паспорта элемента (`messengers`); одна функция и для маршрута.
-    const ctx = { catalog, messengers: elementMessengers(d.id) }
+    const native = isNativeElement(d.id)
+    const ctx = { catalog, messengers: elementMessengers(d.id), native }
     // 412-2: пункт документа — только пока его файл есть в папке элемента.
     const shownOf = (pages?: TreePage[]) => (pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
     // 528-1: раздел, подраздел и страница устроены одинаково — пункт со ссылкой; есть видимые дети — раскрывается; открыт, когда
@@ -76,6 +77,7 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     }
     const children = shownOf(ITEM_TREE).map((s) => node(s, dir))
     return {
+      native,
       label: slug,
       icon: 'box',
       href: at(dir),
@@ -87,7 +89,11 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
 
   const i = menu.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/${ANCHOR}`))
   const cut = i < 0 ? menu.length : i + 1
-  const withCustom = [...menu.slice(0, cut), zone(ui.zoneCustom), button, ...drafts, ...menu.slice(cut)]
+  // 544-3 (владелец 2026-10-19: «шаблон … положи в раздел нативных элементов»): рождённый нативный элемент — в зоне «Нативные», за «Дизайном».
+  const strip = ({ native: _native, ...item }: WorkspaceItem & { native: boolean }): WorkspaceItem => item
+  const natives = drafts.filter((d) => d.native).map(strip)
+  const customs = drafts.filter((d) => !d.native).map(strip)
+  const withCustom = [...menu.slice(0, cut), ...natives, zone(ui.zoneCustom), button, ...customs, ...menu.slice(cut)]
   // Нет пункта «Ядро» — первой зоны нет: подпись над пустотой хуже её отсутствия.
   const c = withCustom.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/${CORE}`))
   return c < 0 ? withCustom : [...withCustom.slice(0, c + 1), zone(ui.zoneNative), ...withCustom.slice(c + 1)]
