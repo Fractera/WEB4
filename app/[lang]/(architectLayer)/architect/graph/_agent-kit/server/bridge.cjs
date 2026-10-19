@@ -131,10 +131,13 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
     args = launch.args
   }
   if (!wanted() || session.current(service)) return { ok: false, reason: 'gone' }
+  const viaChannel = args.length > 0
   // 548-7: свои данные службы (`data/services/<id>`) — рабочая папка агента всегда, с ботом и без: изоляция элемента
   // (`scripts/element-isolate.mjs`) закрывает чтение вне рабочих папок, а здесь живут его заказы, журналы и вложения.
+  // 🛑 `--add-dir` забирает ВСЕ следующие аргументы как папки: в конце списка он съел бы первое поручение агенту (✗ замерено
+  // 2026-10-20 на erpxd: пустой ввод, журнала нет). Поэтому — первым, и за ним всегда другой флаг.
   const ownData = path.join(process.cwd(), 'data', 'services', service)
-  if (existsSync(ownData) && !args.includes(ownData)) args = [...args, '--add-dir', ownData]
+  if (existsSync(ownData) && !args.includes(ownData)) args = ['--add-dir', ownData, ...(args.length ? args : ['--permission-mode', 'auto'])]
   // 426 (✗ 2026-10-07: первое сообщение из Telegram пропало целиком — вставка по «3 с тишины» ушла раньше, чем Claude Code начал
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
@@ -147,7 +150,8 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
     notice(`[claude не запустился: ${err instanceof Error ? err.message : String(err)}]`)
     return { ok: false, reason: 'spawn-failed' }
   }
-  const born = session.register({ service, pid: child.pid, proc: child, cwd, channel: args.length > 0 })
+  // 548-13: канал — это аргументы плагина Telegram, а не любые аргументы (поручение и `--add-dir` каналом не делают).
+  const born = session.register({ service, pid: child.pid, proc: child, cwd, channel: viaChannel })
   born.taskUrls = new Set()
   child.onData((data) => {
     session.remember(born, data)
