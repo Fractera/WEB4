@@ -797,7 +797,7 @@ weight) is the owner's task saved as federal step 482 — not designed yet.
 
 **Create a microservice** → draft `<id>` (`data/web4-drafts.json`) → **Give birth to the element** (the draft's home;
 `POST /api/architect/drafts/<id>/birth` runs `scripts/item-birth.mjs <id>` detached, progress from `logs/birth-<id>.log`;
-CLI: `npm run items:birth -- <id>`). The birth clones `fractera-item-starter` at the tag in
+CLI: `npm run items:birth -- <id>`). The birth clones `fractera-custom-item-starter` (renamed from `fractera-item-starter` by the owner, 2026-10-19) at the tag in
 `WEB4-ITEMS-REGISTRY/item-template.json` (owner: from the Fractera repository), cuts the template's history (own `main`, first
 commit «born from …», no `origin`), writes the passport id, adds a registry entry with `born: { from, version, at }`, runs the
 usual `services-install.mjs --only <id>`, starts the service and its watch in pm2 and waits for `/api/health` by fact.
