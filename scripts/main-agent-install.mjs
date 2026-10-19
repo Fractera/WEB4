@@ -39,7 +39,9 @@ export function installMainAgent(root) {
   const posix = root.replace(/\\/g, '/')
   const excludes = [join(root, 'CLAUDE.md'), `${posix}/CLAUDE.md`, `${posix.replace(/^([A-Za-z]):/, (_, d) => `/${d.toLowerCase()}`)}/CLAUDE.md`, `${posix}/CLAUDE.local.md`]
   s.claudeMdExcludes = [...new Set([...(s.claudeMdExcludes ?? []), ...excludes])]
-  s.permissions = { ...(s.permissions ?? {}), blockReadsOutsideWorkingDirectories: true }
+  // 548-13: без блока чтения вне папки — с ним каждая команда с подоболочкой ждала бы человека, а главного агента будит событие.
+  s.permissions = { ...(s.permissions ?? {}) }
+  delete s.permissions.blockReadsOutsideWorkingDirectories
   const { settings } = foreignOff()
   const { skillOverrides, enabledPlugins, ...rest } = settings
   Object.assign(s, rest)

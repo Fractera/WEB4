@@ -17,6 +17,7 @@
 //   role <id> "<фраза>"      — назначить элементу роль (`data/node/roles.json`)
 //   supervise <id> main|architect|off [--max N] — кто ведёт элемент
 //   person                   — как связаться с архитектором из этой сессии (Telegram главного агента или терминал ядра)
+//   done [--close]           — сказать узлу «закончил» (или закрыть свою сессию) без чтения ключей узла
 // 🔒 Ничего не делается само: каждую команду запускает главный агент по слову человека или по событию надзора.
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs'
@@ -151,6 +152,14 @@ if (cmd === 'person') {
   process.exit(0)
 }
 
+// 548-13: «закончил» главного агента — этой командой, без чтения `.env.local` узла (✗ замерено 2026-10-20: по общему правилу
+// пробуждения «ключ из .env.local» главный агент прочитал файл ключей ядра целиком).
+if (cmd === 'done') {
+  const r = await core('/api/agents/done', { method: 'POST', body: JSON.stringify({ service: 'build', ...(has('--close') ? { close: true } : {}) }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  console.log(r.body?.ok ? `===DONE_OK=== ${has('--close') ? 'closing this session' : 'the node knows you finished'}` : `===DONE_FAIL=== ${r.body?.reason ?? r.status}`)
+  process.exit(r.body?.ok ? 0 : 1)
+}
+
 if (cmd === 'task') {
   const [id, ...words] = rest
   const text = words.join(' ').trim()
@@ -262,4 +271,4 @@ if (cmd === 'create') {
   process.exit(0)
 }
 
-fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | person`)
+fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | person | done`)

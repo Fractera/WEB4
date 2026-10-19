@@ -9,7 +9,7 @@
 //
 // Пишет элементу `.claude/settings.local.json` (вне git, путь узла свой у каждой машины):
 //   - `claudeMdExcludes` — CLAUDE.md ядра не грузится;
-//   - `permissions.blockReadsOutsideWorkingDirectories` (548-7) — файловые инструменты отказывают вне рабочих папок в любом режиме;
+//   - 🪦 `permissions.blockReadsOutsideWorkingDirectories` снят 548-13: с ним каждая команда с подоболочкой ждала человека;
 //   - `permissions.ask` — чтение и правка исходников ядра и папок других элементов только с ответа человека в терминале;
 //   - хук `PreToolUse` (`scripts/element-boundary-hook.mjs`, 548-7) — команда оболочки или записываемый файл, где назван путь вне
 //     своей папки, спрашивает человека: правила не видят node-скриптов, а песочницы на Windows нет;
@@ -92,7 +92,9 @@ for (const dir of only ? [] : elements) {
   s.claudeMdExcludes = [...(s.claudeMdExcludes ?? []).filter((x) => !excludes.includes(x)), ...excludes]
   s.permissions = s.permissions ?? {}
   s.permissions.ask = [...(s.permissions.ask ?? []).filter((r) => !ours(r)), ...ask]
-  s.permissions.blockReadsOutsideWorkingDirectories = true
+  // 548-13: блок чтения вне рабочих папок снят — он заставлял Claude Code спрашивать человека о КАЖДОЙ команде с подоболочкой
+  // ($(…)), и разбуженный агент вставал на своём же «закончил» (замерено на erpxd 2026-10-20). Границу держат ask и хук.
+  delete s.permissions.blockReadsOutsideWorkingDirectories
 
   // Сторож путей: своя запись узнаётся по имени сценария и переписывается целиком.
   const hookCmd = `node "${HOOK}" --dir "${dir.replace(/\\/g, '/')}" --data "${join(ROOT, 'data', 'services', id).replace(/\\/g, '/')}" --root "${ROOT.replace(/\\/g, '/')}"`

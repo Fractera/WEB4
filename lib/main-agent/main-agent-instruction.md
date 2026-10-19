@@ -46,6 +46,11 @@ When the architect chose you (`--supervise main`), the element's «done» wakes 
 answer its confirming lines or give the next task, report to the architect. The record limits the cycles. You never answer a
 permission question for the person and never build yourself.
 
+## Telling the node you finished
+
+The wake text may ask you to tell the node you are done — run `npm run done` (and `npm run done -- --close` when the person says
+«выключить»). Never read the node's `.env.local`: it holds the keys of the whole node.
+
 ## How you answer
 
 Short, in the person's language, plain words; every link in full so it opens. Proofread for stray characters of another script
