@@ -801,6 +801,14 @@ weight) is the owner's task saved as federal step 482 — not designed yet.
 parts (passport `visibility: node`, `messengers: { h2a: true, h2h: false, a2a: false }`, no showcase or Nostr fields, no H2H, no
 work for outside agents). The passport field `elementType` says which (`custom` | `native`). Both are mirrors of the standard
 custom element without anyone's data; their home page is one line in the centre and the yellow starter sign.
+🔒 **A native element is born from the command line (544-3):** a draft, then `node scripts/item-birth.mjs <id> --look own --native`
+— the template comes from `WEB4-ITEMS-REGISTRY/native-template.json` (pinned tag); the button births custom ones only. The rest of
+the path is the same (folder `WEB4-ITEMS/user/<address>`, own history, registry `born`, pm2). The core reads `elementType` through
+`readElementProps` (`lib/web4-items/element-props.cjs` — ✗ it once dropped the field and the core saw every element as custom) and
+`isNativeElement` (`lib/a2a/element-passport.ts`): a native element stands in the Native zone of the menu (after Design, before
+the Custom zone), tree pages marked `network: true` in `lib/web4-items/item-tree.ts` (A2A orders and work, Reviews, f2f, Web3 wallet,
+Messenger → Settings — the first-contact tariff) are hidden in the menu and answer 404, and its pages show no Lagrix rating card.
+The first native element is `native-template` (id `q5a0s`, port 24687, `v0.1.1`).
 
 **Create a microservice** → draft `<id>` (`data/web4-drafts.json`) → **Give birth to the element** (the draft's home;
 `POST /api/architect/drafts/<id>/birth` runs `scripts/item-birth.mjs <id>` detached, progress from `logs/birth-<id>.log`;
