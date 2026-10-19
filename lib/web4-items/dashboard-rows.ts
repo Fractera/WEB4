@@ -44,6 +44,16 @@ export type ProjectRow = {
   /** Страница элемента в ядре, без языка: `/architect/<адрес>`. */
   open: string
   online: null
+  /** 548-10: роль элемента в узле одной фразой — назначенная главным агентом (`data/node/roles.json`) или умолчание службы
+   *  (`WEB4-ITEMS-REGISTRY/roles.json`); нет — `null`. По ней агент соседа понимает, кто что делает. */
+  role: string | null
+}
+
+/** 548-10: роли элементов — умолчания служб узла (в git) и назначенные на этом узле (данные, вне git); второе сильнее. */
+function roles(): Record<string, string> {
+  const read = (p: string) => { try { return JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown> } catch { return {} } }
+  const all = { ...read(join(process.cwd(), "WEB4-ITEMS-REGISTRY", "roles.json")), ...read(join(process.cwd(), "data", "node", "roles.json")) }
+  return Object.fromEntries(Object.entries(all).filter(([k, v]) => !k.startsWith("_") && typeof v === "string" && v.trim()).map(([k, v]) => [k, String(v).trim()]))
 }
 
 type NodeDomain = { zone?: string; hostname?: string }
@@ -103,18 +113,20 @@ async function probe(port: number, lang: string): Promise<{ up: boolean; title: 
  * 417 (владелец 2026-10-06): короткое описание элемента в сводке узла — из его паспорта (`GET /api/own-service-props`,
  * `shortDescription`, рабочая природа элемента); паспорта нет или текст пуст — мета главной, как раньше.
  */
-async function passportShort(port: number): Promise<string | null> {
+async function passportShort(port: number): Promise<{ short: string | null; native: boolean }> {
   try {
     const r = await fetch(`http://127.0.0.1:${port}/api/own-service-props`, { cache: "no-store", signal: AbortSignal.timeout(3000) })
-    if (!r.ok) return null
-    const b = (await r.json()) as { shortDescription?: unknown }
-    return typeof b.shortDescription === "string" && b.shortDescription.trim() ? b.shortDescription.trim() : null
+    if (!r.ok) return { short: null, native: false }
+    const b = (await r.json()) as { shortDescription?: unknown; elementType?: unknown }
+    const short = typeof b.shortDescription === "string" && b.shortDescription.trim() ? b.shortDescription.trim() : null
+    // 548-10: элемент из нативного шаблона — нативный, хотя и рождён из черновика (паспорт `elementType`, шаг 544).
+    return { short, native: b.elementType === "native" }
   } catch {
-    return null
+    return { short: null, native: false }
   }
 }
 
-async function row(id: string, entry: RegistryEntry | null, custom: boolean, lang: string, d: NodeDomain | null): Promise<ProjectRow> {
+async function row(id: string, entry: RegistryEntry | null, custom: boolean, lang: string, d: NodeDomain | null, role: string | null): Promise<ProjectRow> {
   const service = serviceHost(id, d)
   const own = domainRecord(id)
   const dir = entry ? (paths.entryDir(entry) as string) : null
@@ -123,14 +135,14 @@ async function row(id: string, entry: RegistryEntry | null, custom: boolean, lan
   const count = dir ? git(dir, ["rev-list", "--count", "HEAD"]) : null
   const port = entry && typeof entry.port === "number" ? entry.port : null
   const seen = port !== null ? await probe(port, lang) : { up: false, title: null, description: null }
-  const short = port !== null && seen.up ? await passportShort(port) : null
+  const passport = port !== null && seen.up ? await passportShort(port) : { short: null, native: false }
   const status: ProjectStatus = building(id) ? "building" : !entry ? "unborn" : seen.up ? "running" : "stopped"
   return {
     id,
-    custom,
+    custom: custom && !passport.native,
     service,
     title: seen.title,
-    description: short ?? seen.description,
+    description: passport.short ?? seen.description,
     domain: own?.domain ?? null,
     web3: null,
     commit: hash ? { hash, subject: subject ?? "" } : null,
@@ -140,6 +152,7 @@ async function row(id: string, entry: RegistryEntry | null, custom: boolean, lan
     link: own ? `https://${own.domain}` : d?.zone ? `https://${service}` : null,
     open: `/architect/${addressOf(id)}`,
     online: null,
+    role,
   }
 }
 
@@ -150,9 +163,10 @@ export async function projectRows(lang: string): Promise<ProjectRow[]> {
   const customIds = new Set(drafts.map((x) => x.id))
   const services = listServices()
   const byId = new Map(services.map((s) => [s.id, s]))
+  const r = roles()
   const jobs = [
-    ...services.filter((s) => !customIds.has(s.id)).map((s) => row(s.id, s, false, lang, d)),
-    ...drafts.map((x) => row(x.id, byId.get(x.id) ?? null, true, lang, d)),
+    ...services.filter((s) => !customIds.has(s.id)).map((s) => row(s.id, s, false, lang, d, r[s.id] ?? null)),
+    ...drafts.map((x) => row(x.id, byId.get(x.id) ?? null, true, lang, d, r[x.id] ?? null)),
   ]
   return Promise.all(jobs)
 }

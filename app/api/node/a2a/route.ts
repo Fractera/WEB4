@@ -39,8 +39,9 @@ export async function GET(req: NextRequest) {
   }
   if (q) {
     const found = findEntries(q, limit)
-    // Уровень 0 (M2M): не нашлось в узле ≠ не существует; выход в сеть узлов пока недоступен — говорится прямо.
-    return NextResponse.json({ ok: true, entries: found.map(withTelegram), outside: found.length ? null : "not found in this node; search on other nodes is not available yet" }, { headers })
+    // Не нашлось в узле ≠ не существует. 548-9 (владелец 2026-10-19): дальше — f2f, поиск целого элемента в сети Lagrix (пока
+    // имитация), затем продуктовый квиз; у нативного элемента f2f нет — сразу квиз или новый элемент через главного агента.
+    return NextResponse.json({ ok: true, entries: found.map(withTelegram), outside: found.length ? null : "not found in this node; next: a custom element searches the Lagrix network for a whole element (npm run f2f -- find <words>); then the product quiz (skill product-quiz), or ask the core's main agent for a new element" }, { headers })
   }
   return NextResponse.json({ ok: true, entries: nodeEntries().map(withTelegram) }, { headers })
 }
