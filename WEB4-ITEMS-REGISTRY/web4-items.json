@@ -84,6 +84,19 @@
       "address": "design"
     },
     {
+      "id": "graph",
+      "repo": "https://github.com/Fractera/fractera-graph-lightrag-starter.git",
+      "version": "v0.1.1",
+      "provides": [
+        "knowledge-graph"
+      ],
+      "required": false,
+      "note": "Граф знаний узла на LightRAG (540): элементы сохраняют то, что узнали, сущностями и связями и находят это по смыслу. Стандартный служебный элемент: v0.1.0 — из roman.",
+      "kind": "core",
+      "port": 24689,
+      "address": "graph"
+    },
+    {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
       "version": "v1.7.36",
