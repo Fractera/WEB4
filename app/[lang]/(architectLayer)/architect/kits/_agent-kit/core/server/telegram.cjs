@@ -22,7 +22,7 @@
 // опрашиватель: как только терминал запущен с каналом, узел замолкает и бота читает плагин.
 
 const { spawn } = require('node:child_process')
-const { randomBytes } = require('node:crypto')
+const { createHash, randomBytes } = require('node:crypto')
 const { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
@@ -617,12 +617,19 @@ function startIdlePoller(service) {
   globalThis[key].unref?.()
 }
 
-/** Имя и ручка для BotFather от ОДНОГО случайного кода: хвосты должны совпадать. */
+/**
+ * Имя и ручка для BotFather (546, владелец 2026-10-19: «после слова Fractera название элемента»; выбор «Элемент + код узла»):
+ * «Fractera-<адрес элемента>» и `Fractera_<адрес>_<код узла>_bot`. ✗ Прежде код был `Math.random` на КАЖДЫЙ запрос, а страница
+ * спрашивает дверь каждые 3 с — имена бежали на глазах. Код узла постоянный (хэш папки узла и имени машины): адрес бота один на
+ * весь Telegram, а `build`, `auth`, `root` есть у каждого узла. Ручка — только латиница, цифры и «_», не длиннее 32 знаков.
+ */
+const NODE_CODE = createHash('sha256').update(`${ROOT}|${os.hostname()}`).digest('hex').slice(0, 4)
 function suggestion(service) {
-  const ccid = Math.random().toString(16).slice(2, 6)
-  const title = service.charAt(0).toUpperCase() + service.slice(1)
-  const tail = `_Fractera_${ccid}_bot`
-  return { name: `${title}-Fractera-${ccid}`, username: `${title.replace(/[^A-Za-z0-9]/g, '').slice(0, 32 - tail.length)}${tail}` }
+  const address = readJson(path.join(ROOT, 'data', 'services', service, 'address.json'), null)?.address
+  const element = typeof address === 'string' && /^[a-z0-9-]{1,40}$/.test(address) ? address : service
+  const tail = `_${NODE_CODE}_bot`
+  const handle = element.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 32 - 'Fractera_'.length - tail.length).replace(/_+$/, '')
+  return { name: `Fractera-${element}`, username: `Fractera_${handle}${tail}` }
 }
 
 function channelState(service) {
