@@ -101,9 +101,9 @@ const DICT: Record<string, TelegramChannelWords> = {
     activateWaiting: "Waiting for the press… as soon as it happens, your node sends you a message there with the state of your terminal.",
     activated: "Connected. Your node sent you a message in Telegram with the state of your terminal.",
     msgActive:
-      "This message was sent by your node. Your terminal is active right now — write, Claude Code answers, and the whole conversation is visible in the terminal: {terminal}",
+      "This message was sent by your node. The agent is on — write and it will answer. The whole conversation is visible in the terminal: {terminal}",
     msgInactive:
-      "This message was sent by your node. Your terminal is not active right now — Claude Code will not answer. Follow the link and press «Start the agent»: {terminal}",
+      "This message was sent by your node. The agent is off right now. Just start the conversation — send a message and I will offer to turn it on. Or turn the agent on here: {terminal}",
     msgNoSubscription:
       "This message was sent by your node. Claude Code on this computer is not signed in to a subscription. First sign in: {subscription} — then start the terminal: {terminal}",
 
@@ -173,9 +173,9 @@ const DICT: Record<string, TelegramChannelWords> = {
     activateWaiting: "Жду нажатия… как только оно случится, узел пришлёт вам туда сообщение о состоянии терминала.",
     activated: "Соединение активно. Узел прислал вам в Telegram сообщение о состоянии терминала.",
     msgActive:
-      "Это сообщение отправил ваш узел. Ваш терминал сейчас активен — пишите, отвечает Claude Code, а вся переписка видна в терминале: {terminal}",
+      "Это сообщение отправил ваш узел. Агент включён — пишите, он ответит. Вся переписка видна в терминале: {terminal}",
     msgInactive:
-      "Это сообщение отправил ваш узел. Ваш терминал сейчас неактивен — Claude Code не ответит. Перейдите по ссылке и нажмите «Запустить агента»: {terminal}",
+      "Это сообщение отправил ваш узел. Агент сейчас выключен. Просто начните диалог — напишите сообщение, и я предложу его включить. Или включите агента по ссылке: {terminal}",
     msgNoSubscription:
       "Это сообщение отправил ваш узел. Claude Code на этом компьютере не вошёл в подписку. Сначала войдите в подписку: {subscription} — затем запустите терминал: {terminal}",
 
