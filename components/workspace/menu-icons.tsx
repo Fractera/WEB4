@@ -1,6 +1,6 @@
 import {
   AppWindow, Blocks, Bot, Box, Clock, Database, LayoutDashboard, FlaskConical, Hammer, House, IdCard, KeyRound, LayoutTemplate, Package, Palette,
-  Plus, Server, Settings, SlidersHorizontal, Store, ToggleRight, Wrench,
+  Network, Plus, Server, Settings, SlidersHorizontal, Store, ToggleRight, Wrench,
 } from 'lucide-react'
 
 // ЗНАЧКИ ЛЕВОГО МЕНЮ (шаг 288-2). Слово владельца 2026-09-24: «Слева от кнопок нужно нарисовать иконке … для корня
@@ -35,6 +35,8 @@ const ICONS = {
   dashboard: LayoutDashboard,
   // 388 (владелец 2026-10-04: «кнопку ядро заменим на главный агент и поставим аватарку робота»).
   bot: Bot,
+  // 540-2: элемент «Граф» — граф знаний узла.
+  network: Network,
 } as const
 
 export type MenuIconName = keyof typeof ICONS
