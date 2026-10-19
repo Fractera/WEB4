@@ -66,6 +66,8 @@ import { NodeWalletCard } from '@/components/wallet/node-wallet.client'
 import { nodeWalletUi } from '@/components/wallet/node-wallet.i18n'
 import { ProductQuizIsland } from '@/components/element-docs/product-quiz.client'
 import { productQuizUi, quizTaskUi } from '../../../_i18n/product-quiz.i18n'
+import { ReverseEngineering } from '@/components/element-docs/reverse-engineering.client'
+import { reverseEngineeringUi } from '../../../_i18n/reverse-engineering.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -421,6 +423,9 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     ? <ProductQuizIsland item={item} lang={lang} terminalHref={`/${lang}/architect/${slug}/build/terminal`} words={productQuizUi(lang)}
         task={{ ui: quizTaskUi(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref(item, lang) }} />
     : null
+  // 539-3 (владелец 2026-10-19): «Реверс-инжиниринг» — карточка «REA в ядре» (одна копия на узел, дверь `/api/node/rea`) и
+  // подробное описание в свёрнутом аккордеоне; одна страница ядра для каждого элемента.
+  const reverseEngineering = key === 'build/product-design/reverse-engineering' ? <ReverseEngineering words={reverseEngineeringUi(lang)} /> : null
   // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3. 532: Web3 — кошелёк элемента: наследует
   // кошелёк узла, свой добавляется и удаляется (снова кошелёк узла) — слово владельца в `lib/web4-items/node-wallet.ts`.
   const pw = paymentsUi(lang)
@@ -452,7 +457,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}{productQuiz}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )
