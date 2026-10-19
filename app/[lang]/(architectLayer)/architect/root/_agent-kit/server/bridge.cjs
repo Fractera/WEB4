@@ -149,6 +149,7 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
     for (const client of born.clients) if (client.readyState === client.OPEN) client.send(data)
     watchPrompt(born)
     watchTrust(born)
+    watchAsk(born)
   })
   child.onExit(() => session.exited(born))
   return { ok: true, session: born }
@@ -190,6 +191,24 @@ function watchTrust(s) {
     setTimeout(() => { try { s.proc.write('\r') } catch { /* процесс завершён */ } }, 250)
   }, PROMPT_QUIET_MS)
   s.trustTimer.unref?.()
+}
+
+/**
+ * 548 (владелец 2026-10-19: выйти за свою папку агент может, «но чтобы он это сделал он должен явно спросить разрешения у
+ * архитектора»): порог ставит `scripts/element-isolate.mjs` (`permissions.ask` элемента), и Claude Code задаёт вопрос в терминале.
+ * У агента, разбуженного из Telegram, этот вопрос иначе висел бы молча — бот зовёт человека в терминал по ссылке. Ответить за
+ * человека узел не вправе: разрешение даёт только он. Один раз на каждый вопрос.
+ */
+function watchAsk(s) {
+  if (!s.viaWake) return
+  clearTimeout(s.askTimer)
+  s.askTimer = setTimeout(() => {
+    if (session.current(s.service) !== s) return
+    const waiting = promptOnScreen(s.buffer)
+    if (waiting && !s.askNotified) { s.askNotified = true; void telegram.tellWaiting(s.service).catch(() => {}) }
+    if (!waiting) s.askNotified = false
+  }, PROMPT_QUIET_MS)
+  s.askTimer.unref?.()
 }
 
 /** Висит ли на хвосте экрана вопрос-разрешение Claude Code. */

@@ -125,5 +125,7 @@ for (let i = 0; i < 60 && port && !up; i++) {
 }
 say(up ? `сервер отвечает на ${port}` : `сервер не ответил на ${port} за 60 с`)
 save({ state: up ? 'done' : 'started-no-answer', from: source, to: target, port })
+// 548: граница агента элемента — инструкция ядра не грузится, выход за папку только с ответа человека.
+spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cwd: ROOT, windowsHide: true, stdio: 'inherit' })
 console.log(up ? '===MOVE_OK===' : '===MOVE_NO_ANSWER===')
 process.exit(up ? 0 : 1)
