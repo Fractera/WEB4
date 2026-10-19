@@ -1108,6 +1108,8 @@ if (failed > 0) {
 // `scripts/deploy-elements.mjs` сам). Узел без своего домена — ничего не запускается.
 if (!ONLY && require('../lib/web4-items/static-copy-start.cjs').startStaticCopyAll(ROOT)) say('\n  копии публичных страниц в Cloudflare обновляются в фоне — итог на «Активации домена»')
 
+// 548: граница агента элемента — инструкция ядра не грузится, выход за папку только с ответа человека.
+spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cwd: ROOT, windowsHide: true, stdio: 'inherit' })
 say('\n🛑 После установки узлу нужна ПЕРЕСБОРКА: npm run serve:rebuild — значения')
 say('   NEXT_PUBLIC_* запекаются в сборку, и без неё правка не применится.')
 say('===SERVICES_INSTALL_OK===')
