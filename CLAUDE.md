@@ -3020,3 +3020,42 @@ The owner, verbatim: «я считаю что проект должен быть
   before every `serve:rebuild` copy `.next` without `cache` outside the project and build in the foreground — a home machine may not
   free 2 GB (this one frees at most ~1.44 GB; the build passed at 1973 and 1208 MB free, broke at 324 MB); broken → put the copy back,
   passed → delete it; after the build count the page's static files, not only `/api/health`.
+
+## The main agent, the element boundary and supervision (step 548, 2026-10-19/20)
+
+Owner, verbatim (all words — `/code` `new-steps/548/548-6.md`): the element «извлечёт в контекстное окно только собственной
+инструкции»; it «физически не может получать данные из соседних элементов или из ядра» without the architect; the node, «когда в
+приложении пришёл запрос на элемент», creates it, passes the task, starts its agent, tells the architect — or leads it «без личного
+участия»; and every agent answers «быстро, компактно, с минимально достаточным расходом токенов».
+
+- **The main agent lives in its own repository folder** `data/main-agent` (outside the node's git; source `lib/main-agent/`,
+  installed by `npm run main-agent:install`, also at the end of `npm run elements:isolate`). Service `build` → `workspace:
+  main-agent` (`architect/build/agent-kit.json`, every kit copy knows it). Instruction ≈3.8k characters, skills `route-to-element`,
+  `create-element`, `supervise-element`, commands `npm run contacts · find · lagrix · create · task · state · role · supervise ·
+  person · done` (`scripts/main-agent-cli.mjs`). 🛑 Never move it back to the node root: Claude Code loads every CLAUDE.md above the
+  folder and project skills from every parent up to the repository root — at the root it carried this file (252k characters) and the
+  61 root skills: 124 786 tokens on its first request against 17 870 (`-p`) and 36 238 (terminal) in its folder (measured 2026-10-20).
+  To change the core's code, open Claude Code in the node root yourself, not the core's terminal page.
+- **Element isolation** (`scripts/element-isolate.mjs`, on birth, move and install): `claudeMdExcludes` of this file, `permissions.ask`
+  on the core's sources and the neighbours' folders, the PreToolUse hook `scripts/element-boundary-hook.mjs` (a command or a written
+  file that names a path outside the element asks the architect), foreign skills, plugins and claude.ai connectors off
+  (`lib/agent-kit/foreign-off.mjs`; `syncClaudeAi*: false` only in LOCAL settings — in user settings Claude Code trashes them machine-
+  wide), vendor skills `name-only`, `skillListingBudgetFraction` so that every own skill keeps its description. 🛑 No
+  `blockReadsOutsideWorkingDirectories`: with it every command with a subshell waits for the person, and a woken agent stopped on its
+  own «done». Measured: template 146 547 → 34 899 tokens on the first request (`-p`), 52 346 in a terminal; a read of this file by the
+  template agent is refused.
+- **The agent's own data** `data/services/<id>` is a working directory of every terminal (`--add-dir`, FIRST in the arguments: the
+  flag takes a list and at the end swallowed the first task).
+- **Roles**: `WEB4-ITEMS-REGISTRY/roles.json` (services) + `data/node/roles.json` (assigned by the main agent) → `role` in
+  `GET /api/node/projects`; `custom` there follows the passport `elementType`. Every element prints them in `npm run passport -- project`.
+- **f2f search is a simulation** until Lagrix is live: `lib/web4-items/lagrix-simulated.mjs` (main agent) and `scripts/f2f.mjs` (custom
+  template) build the request of protocol documents 17 and 20 and answer `mode: "simulation"`, `results: []`; every search is logged.
+- **Supervision**: `data/node/supervision.json` (`lib/web4-items/supervision.cjs`); `lib/agent-kit/mount.cjs` wakes the main agent
+  after a real «done» of an element it leads (a live session, not a close), at most 10 cycles; the wake door confirms a task to such
+  an element without the Telegram question (`supervised: true`). Proven end to end 2026-10-20 on a probe element (created, woken, done,
+  main agent cycle, deleted).
+- **Instruments**: `npm run qa:agent -- <id | address | build>` — the agent's last session journal without a model (instructions, own
+  skills without description, tokens per question, skills by nature, outside paths); `npm run agent:screen -- <id | build>` — its live
+  screen, read only.
+- 🛑 **Known gap**: deleting an element whose agent session is alive leaves its folder (`busy`) — close its terminal first
+  (`/code` `ANTI-PATTERNS.md`).
