@@ -26,7 +26,7 @@ const { createHash, randomBytes } = require('node:crypto')
 const { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { serviceDir } = require('./workspace.cjs')
+const { isBornItem, serviceDir } = require('./workspace.cjs')
 const session = require('./session.cjs')
 const { claudeAuthState, extraBins, resolveBin } = require('./claude-cli.cjs')
 const { tableFor } = require('./translate.cjs')
@@ -362,6 +362,39 @@ function named(service) {
   return address
 }
 
+/**
+ * 547 (владелец 2026-10-19: «ты активируешь папку также как и запускаешь агента то есть прямо из чата»): доверяет ли Claude Code
+ * папке агента. Claude Code помнит доверие на путь папки (`~/.claude.json`, `projects[<путь>].hasTrustDialogAccepted`) — у нового
+ * и переименованного элемента записи нет, и первый запуск стоит на вопросе «Is this a project you trust?». Узел файл только читает:
+ * отвечает на вопрос тем же нажатием, что человек (`bridge.cjs`). null — не известно (файла нет, формат другой).
+ */
+function folderTrusted(service) {
+  const dir = serviceDir(service)
+  if (!dir) return null
+  try {
+    const projects = JSON.parse(readFileSync(path.join(os.homedir(), '.claude.json'), 'utf8')).projects ?? {}
+    const key = dir.replace(/\\/g, '/')
+    const entry = projects[key] ?? projects[dir]
+    return entry ? entry.hasTrustDialogAccepted === true : false
+  } catch { return null }
+}
+
+/** 547: пути разделов агента без языка — у рождённого элемента они под его адресом и `build/`, у служб ядра — под `architect/`. */
+function sectionPaths(service) {
+  if (isBornItem(service)) {
+    const address = readJson(path.join(ROOT, 'data', 'services', service, 'address.json'), null)?.address
+    const a = typeof address === 'string' && /^[a-z0-9-]{1,40}$/.test(address) ? address : service
+    return { terminal: `/${a}/build/terminal`, subscription: `/${a}/build/subscription` }
+  }
+  return { terminal: `/architect/${service}/terminal`, subscription: `/architect/${service}/claude-code` }
+}
+
+/** Адрес ядра, который человек откроет с телефона: `architect.<зона>`, без своей зоны — эта машина. */
+function coreOrigin() {
+  const zone = readJson(path.join(ROOT, 'logs', 'domain.json'), null)?.zone
+  return typeof zone === 'string' && zone ? `https://architect.${zone}` : `http://localhost:${process.env.PORT || 24680}`
+}
+
 // Тексты — языком человека (владелец 2026-10-05 одобрил образец: «Агенту roman пришёл вопрос от агента gyr1i / «…» / Агент roman
 // сейчас выключен. Включить его, чтобы он ответил? / [Включить и ответить] [Не сейчас — gyr1i получит отказ]»). Кто говорит и
 // кому — словами; «терминал» — внутреннее устройство, человеку говорится «агент включён / выключен». `a` — имя агента элемента
@@ -386,6 +419,8 @@ const ASK = {
     toast: 'Turning on…',
     moved: '↓ More questions came — the updated question is below.',
     alreadyOff: (a) => `Agent ${a} is already off.`,
+    trustLine: 'Its folder is not trusted in Claude Code yet — «Turn on» trusts it as well.',
+    waitingTerminal: (a, link) => `Agent ${a} is waiting for your answer in the terminal: ${link}`,
   },
   ru: {
     oneCall: (a, c) => `Агенту ${a} пришёл вопрос от агента ${c}`,
@@ -406,6 +441,8 @@ const ASK = {
     toast: 'Включаю…',
     moved: '↓ Пришли ещё вопросы — обновлённый вопрос ниже.',
     alreadyOff: (a) => `Агент ${a} уже выключен.`,
+    trustLine: 'Его папка ещё не подтверждена в Claude Code — «Включить» подтвердит и её.',
+    waitingTerminal: (a, link) => `Агент ${a} ждёт вашего ответа в терминале: ${link}`,
   },
 }
 
@@ -459,6 +496,7 @@ function askText(service, items, t) {
   if (!calls.length) lines.push(t.offHuman(a))
   for (const it of human) lines.push(t.yourMessage(cutText(it.about, 300)))
   if (calls.length) lines.push(t.offCalls(a))
+  if (folderTrusted(service) === false) lines.push(t.trustLine ?? ASK.en.trustLine)
   return cutText(lines.join('\n'), 3500)
 }
 
@@ -646,10 +684,26 @@ function channelState(service) {
     terminalWithoutChannel: terminalWithoutChannel(service),
     stateDir: stateDir(service),
     suggestion: suggestion(service),
+    links: sectionPaths(service),
+  }
+}
+
+/**
+ * 547, запасной путь: терминал агента стоит на вопросе, на который узел ответить не вправе (агента включили не из чата) — бот
+ * зовёт человека туда, где вопрос виден. Один раз на сессию; бота нет — молчит.
+ */
+async function tellWaiting(service) {
+  const token = storedToken(service)
+  if (!token) return
+  const t = await askTable(service)
+  const a = shortName(named(service))
+  const link = `${coreOrigin()}/${personLang(service)}${sectionPaths(service).terminal}`
+  for (const chat of access(service).allowed) {
+    await tg(token, 'sendMessage', { chat_id: chat, text: (t.waitingTerminal ?? ASK.en.waitingTerminal)(a, link), disable_web_page_preview: true })
   }
 }
 
 module.exports = {
   PLUGIN, isService, stateDir, storedToken, saveToken, activationLink, saveMessages, channelLaunch,
-  running, channelState, startIdlePoller, connected, askToStart, setStarter, askToClose, personLang, setPersonLang,
+  running, channelState, startIdlePoller, connected, askToStart, setStarter, askToClose, personLang, setPersonLang, tellWaiting,
 }
