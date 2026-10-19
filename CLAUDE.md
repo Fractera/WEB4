@@ -2977,6 +2977,13 @@ The owner, verbatim: «я считаю что проект должен быть
 мне нужно … это должно вызывать процедуру … чтобы понять какие существуют зависимости и на что повлияет это новая Fitch». The page:
 «Building → Product design → Product quiz» (`build/product-design/quiz`).
 
+- **Reverse engineering (step 538, 2026-10-19):** the owner, verbatim: «замену двух этих записей на надпись Реверс инжиниринг». The two
+  pages «Move from another Next.js» and «Move from another framework» became one page `build/product-design/reverse-engineering` —
+  «Study how a finished site or app works, then build your own in the element»; title and lead only, nothing is built behind it yet.
+  The old addresses redirect (`MOVED_PAGES` in `lib/web4-items/item-tree.ts`). The tool REA (`morluto/rea`) was studied, **not
+  installed**: it needs Node ≥ 22.19 (this machine: 22.11), its default setup registers itself for every agent on the machine, and a
+  person's own project needs no reverse engineering at all. Installing it is the owner's decision.
+
 - **Where the quiz lives:** the element's `development-docs/product/` — `quiz.json` + `modules/<slug>.json`, JSON, only in the element's
   default language (owner: «only default lang»). Written by the element's agent with the person (skill `product-quiz`); guard
   `npm run check:product` (not in `prebuild`). Today in roman (18 items) and lagrix (15 items), restored by the node agent from what was
