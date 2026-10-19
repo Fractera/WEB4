@@ -51,6 +51,9 @@ export const MOVED_PAGES: Record<string, string> = {
   "build/find": "build/f2f/find",
   "build/publish": "build/f2f/publish",
   "h2a/native-chat": "messenger/h2a/native",
+  // 538: два пункта переезда свёрнуты в «Реверс-инжиниринг».
+  "build/product-design/from-nextjs": "build/product-design/reverse-engineering",
+  "build/product-design/from-framework": "build/product-design/reverse-engineering",
 }
 const MOVED_PREFIXES: [string, string][] = [
   ["h2a", "messenger/h2a"],
@@ -377,8 +380,9 @@ export const ITEM_TREE: TreePage[] = [
         words: w("Product design", "What the element should become, before its code.", "Проектирование продукта", "Каким должен стать элемент — до его кода."),
         pages: [
           { slug: "quiz", words: w("Product quiz", "Questions that shape the element.", "Продуктовый квиз", "Вопросы, из которых складывается элемент.") },
-          { slug: "from-nextjs", words: w("Move from another Next.js", "Bringing an existing Next.js project into the element.", "Переезд из другого Next.js", "Перенос существующего проекта Next.js в элемент.") },
-          { slug: "from-framework", words: w("Move from another framework", "Bringing a project built on another framework.", "Переезд из другого фреймворка", "Перенос проекта на другом фреймворке.") },
+          // 538 (владелец 2026-10-19): «замену двух этих записей на надпись Реверс инжиниринг» — «Переезд из другого Next.js» и
+          // «Переезд из другого фреймворка» свёрнуты в один пункт; прежние адреса переадресуются (`MOVED_PAGES`).
+          { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or app works, then build your own in the element.", "Реверс-инжиниринг", "Разобрать, как устроен готовый сайт или приложение, и построить своё в элементе.") },
         ],
       },
     ],
