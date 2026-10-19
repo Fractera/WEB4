@@ -48,7 +48,7 @@ import { EnvironmentPanel } from '@/components/environment/environment-panel'
 import { ElementPassport, type NodeElementRow, type PassportView } from '../../../_components/element-passport'
 import { nodeEntries } from '@/lib/a2a/node-registry'
 import { elementPassportUi } from '../../../_i18n/element-passport.i18n'
-import { elementMessengers, elementPassport, hasCatalog } from '@/lib/a2a/element-passport'
+import { elementMessengers, elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
 import { listOrders } from '@/lib/web4-items/element-orders'
 import { elementDashboardUi } from '../../../_i18n/element-dashboard.i18n'
 import { hasDoc } from '@/lib/web4-items/element-docs'
@@ -117,7 +117,7 @@ function resolve(p: Params) {
   const doc = trail[trail.length - 1].doc
   if (doc && !hasDoc(draft.id, doc)) return null
   // 472: разделы и страницы по флагам паспорта (H2A · H2H · A2A) — тот же ответ, что в левом меню; 528-1 — по всей цепочке.
-  const ctx = { catalog: hasCatalog(draft.id), messengers: elementMessengers(draft.id) }
+  const ctx = { catalog: hasCatalog(draft.id), messengers: elementMessengers(draft.id), native: isNativeElement(draft.id) }
   if (!trail.every((t) => treeVisible(t, ctx))) return null
   return { draft, trail, service: undefined }
 }
@@ -196,7 +196,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
             : <DraftCards address={address} ui={ui} port={port} />}
           {/* 495-5 (владелец 2026-10-15): «this statisk must exist in … /ru/roman (item root)» — та же карточка репутации Lagrix,
               что на главной A2A, на главной родившегося элемента. */}
-          {entry && <LagrixRating id={item} words={lagrixRatingUi(lang)} />}
+          {/* 544-3: у нативного элемента карточки Lagrix нет — он не продаётся и не связан с сетью. */}
+          {entry && !isNativeElement(item) && <LagrixRating id={item} words={lagrixRatingUi(lang)} />}
           {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} />}
         </>}
       />
@@ -222,7 +223,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       </Link>
     </li>
   )
-  const treeCtx = { catalog: hasCatalog(item), messengers: elementMessengers(item) }
+  const treeCtx = { catalog: hasCatalog(item), messengers: elementMessengers(item), native: isNativeElement(item) }
   const shown = (node.pages ?? []).filter((sp) => treeVisible(sp, treeCtx) && (!sp.doc || hasDoc(item, sp.doc)))
   const list = !r.service && shown.length > 0 ? (
     <nav aria-label={ui.sectionPages} className="flex flex-col gap-2">
@@ -435,7 +436,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       ? (entry ? <NodeWalletCard words={nodeWalletUi(lang)} note={pw.web3ElementNote} element={item} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
       : null
   // 436-3 (владелец 2026-10-09): рейтинг элемента в Lagrix; 528-1 — на главной «Рабочего процесса», куда переехал A2A.
-  const lagrix = key === 'workflow' ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
+  const lagrix = key === 'workflow' && !isNativeElement(item) ? <LagrixRating words={lagrixRatingUi(lang)} /> : null
   // 435-3: «Каталог» показывает и элементы узла — из того же реестра, по которому элементы ищут соседей (`nodeEntries`);
   // у элемента без визитки — только адрес.
   const nodeElements: NodeElementRow[] | undefined = passportView === 'catalog'

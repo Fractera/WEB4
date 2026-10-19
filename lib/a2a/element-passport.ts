@@ -142,6 +142,13 @@ export function elementMessengers(id: string): { h2a: boolean; h2h: boolean; a2a
   return { h2a: m.h2a === true, h2h: m.h2h === true, a2a: m.a2a === true }
 }
 
+/** 544-3: нативный ли элемент — поле паспорта `elementType` (шаблон `fractera-native-item-starter`). Нативный стоит в зоне «Нативные» меню,
+ *  у него нет сетевых страниц дерева и карточки репутации Lagrix. */
+export function isNativeElement(id: string): boolean {
+  const dir = elementDir(id)
+  return (dir ? (elementProps.readElementProps(dir) as { elementType?: unknown } | null)?.elementType : null) === "native"
+}
+
 /** Есть ли у элемента каталог — для пункта меню «Связи → Каталог». */
 export function hasCatalog(id: string): boolean {
   return Boolean(elementPassport(id)?.ext?.catalog)

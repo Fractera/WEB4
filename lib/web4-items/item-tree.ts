@@ -24,6 +24,8 @@ export type TreeWords = { title: string; lead: string }
 export type Messenger = "h2a" | "h2h" | "a2a"
 export type TreePage = {
   slug: string; words: Record<"en" | "ru", TreeWords>; pages?: TreePage[]; needs?: "catalog" | Messenger; unless?: Messenger
+  /** 544-3: страница сети Lagrix (заказы и работа для чужих агентов, отзывы, f2f, кошелёк, тариф первого контакта) — у нативного элемента её нет. */
+  network?: true
   doc?: { file: string; folder?: boolean; deep?: boolean }
   about?: Record<"en" | "ru", string[]>
 }
@@ -72,11 +74,12 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean> }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.needs === "catalog" && !c.catalog) return false
   if (p.needs && p.needs !== "catalog" && !c.messengers[p.needs]) return false
   if (p.unless && c.messengers[p.unless]) return false
+  if (p.network && c.native) return false
   return true
 }
 // 472: у элемента с H2A бот живёт в H2A — старый адрес ведёт туда (у элемента без H2A бот остаётся в «Строительстве»).
@@ -205,7 +208,7 @@ export const ITEM_TREE: TreePage[] = [
         ],
       },
       // 528-2 (владелец 2026-10-18): тариф первого контакта и правила агента, который ведёт диалог; хранятся в паспорте элемента.
-      { slug: "settings", words: w("Settings", "What a stranger pays for a first contact, and the rules for the agent that holds the conversation for you.", "Настройки", "Сколько незнакомец платит за первый контакт и правила для агента, который ведёт разговор за вас.") },
+      { slug: "settings", network: true, words: w("Settings", "What a stranger pays for a first contact, and the rules for the agent that holds the conversation for you.", "Настройки", "Сколько незнакомец платит за первый контакт и правила для агента, который ведёт разговор за вас.") },
     ],
   },
   // 528-1: «Рабочий процесс» — что элемент делает, когда уже работает (451-2: a2a — рабочий процесс; i2i и f2f — строительный).
@@ -237,6 +240,7 @@ export const ITEM_TREE: TreePage[] = [
       },
       {
         slug: "a2a-orders",
+        network: true,
         words: w("A2A: your orders", "Work this element orders from other agents: the deals, the conversations and a summary.", "A2A: ваши заказы", "Работа, которую элемент заказывает у других агентов: сделки, переписка и сводка."),
         about: {
           en: ["Here the element is the customer. A deal is opened by the customer, the money waits in escrow, and the provider is paid when the deal closes. The conversations and tables of each deal will appear in the native messenger."],
@@ -246,6 +250,7 @@ export const ITEM_TREE: TreePage[] = [
       },
       {
         slug: "a2a-work",
+        network: true,
         words: w("A2A: your work", "Work this element does for other agents: the deals, the conversations, a summary and the capability cards it offers.", "A2A: ваша работа", "Работа, которую элемент делает для других агентов: сделки, переписка, сводка и карточки его возможностей."),
         about: {
           en: ["Here the element is the provider. Its capability cards say what it can do, what it returns, to whom, at what price and with what limit; the deals are the work it has already done."],
@@ -259,6 +264,7 @@ export const ITEM_TREE: TreePage[] = [
       },
       {
         slug: "reviews",
+        network: true,
         words: w("Reviews", "Rate the partners of closed deals: a like or a dislike, and if you wish a review page.", "Отзывы", "Оценить партнёров по закрытым сделкам: лайк или дизлайк и, если хотите, страница отзыва."),
         about: {
           en: ["After a deal closes, both sides may leave a review: a like or a dislike. Its weight is the fee paid on that deal, so a review cannot be bought cheaper than real work. The author may attach a page of their own to the review — what happened and why; the page adds no weight and changes no place in search results."],
@@ -307,6 +313,7 @@ export const ITEM_TREE: TreePage[] = [
       },
       {
         slug: "f2f",
+        network: true,
         words: w("f2f: exchange with Fractera", "How whole elements travel between Fractera projects through Lagrix.", "f2f: обмен с Fractera", "Как элементы целиком переходят между проектами Fractera через Lagrix."),
         about: {
           en: [
@@ -418,7 +425,7 @@ export const ITEM_TREE: TreePage[] = [
         },
         pages: [
           { slug: "web2", words: w("Web2: Stripe", "Card payments on the element's site: the keys of your Stripe account.", "Web2: Stripe", "Оплата картой на сайте элемента: ключи вашего аккаунта Stripe.") },
-          { slug: "web3", words: w("Web3: wallet", "USDC through the node's wallet, or the element's own if it has one.", "Web3: кошелёк", "USDC через кошелёк узла или через свой кошелёк элемента, если он есть.") },
+          { slug: "web3", network: true, words: w("Web3: wallet", "USDC through the node's wallet, or the element's own if it has one.", "Web3: кошелёк", "USDC через кошелёк узла или через свой кошелёк элемента, если он есть.") },
         ],
       },
     ],
