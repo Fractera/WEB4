@@ -63,15 +63,25 @@ export function nodeEntries(): NodeEntry[] {
   return out
 }
 
-/** Найти: до `limit` записей, где совпали слова запроса (теги и id навыков весят больше слов описания). */
+// 548-9: служебные слова не ищутся. ✗ Замерено 2026-10-19: «remove background from product photos» нашло три элемента, которые
+// этого не умеют, — «from» совпало с «born from …» их описаний, а подстрока совпадала внутри чужих слов. Агент, получивший
+// ложного кандидата, идёт договариваться с ним вместо f2f и квиза.
+const STOP = new Set(["the", "and", "for", "from", "with", "that", "this", "into", "your", "you", "our", "its", "are", "can", "will",
+  "need", "needs", "want", "make", "get", "all", "any", "some", "who", "what", "how", "please", "element", "elements",
+  "для", "что", "как", "это", "мне", "нам", "его", "её", "или", "без", "при", "над", "под", "чтобы", "нужно", "надо", "хочу",
+  "который", "которая", "которые", "элемент", "элемента", "элементы"])
+const wordsOf = (t: string) => t.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((w) => w.length > 2 && !STOP.has(w))
+const near = (a: string, b: string) => a === b || (a.length > 3 && b.length > 3 && (a.startsWith(b) || b.startsWith(a)))
+
+/** Найти: до `limit` записей, где совпали значимые слова запроса (теги и id навыков весят больше слов описания). */
 export function findEntries(query: string, limit = 10): (NodeEntry & { score: number })[] {
-  const words = query.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((w) => w.length > 1)
+  const words = [...new Set(wordsOf(query))]
   if (!words.length) return []
   return nodeEntries()
     .map((e) => {
-      const tags = new Set(e.skills.flatMap((s) => [s.id, ...s.tags]).map((t) => t.toLowerCase()))
-      const text = `${e.name} ${e.description}`.toLowerCase()
-      const score = words.reduce((n, w) => n + (tags.has(w) ? 3 : 0) + ([...tags].some((t) => t.includes(w)) ? 1 : 0) + (text.includes(w) ? 1 : 0), 0)
+      const tags = [...new Set(e.skills.flatMap((s) => [s.id, ...s.id.split("-"), ...s.tags]).map((t) => t.toLowerCase()))]
+      const text = wordsOf(`${e.name} ${e.description}`)
+      const score = words.reduce((n, w) => n + (tags.includes(w) ? 3 : tags.some((t) => near(t, w)) ? 1 : 0) + (text.some((t) => near(t, w)) ? 1 : 0), 0)
       return { ...e, score }
     })
     .filter((e) => e.score > 0)

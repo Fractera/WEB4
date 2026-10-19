@@ -1,0 +1,16 @@
+{
+  "name": "fractera-main-agent",
+  "private": true,
+  "description": "Commands of the node's main agent (node step 548-4). Installed into data/main-agent by scripts/main-agent-install.mjs; every command is scripts/main-agent-cli.mjs of the node.",
+  "scripts": {
+    "contacts": "node ../../scripts/main-agent-cli.mjs contacts",
+    "find": "node ../../scripts/main-agent-cli.mjs find",
+    "lagrix": "node ../../scripts/main-agent-cli.mjs lagrix",
+    "create": "node ../../scripts/main-agent-cli.mjs create",
+    "task": "node ../../scripts/main-agent-cli.mjs task",
+    "state": "node ../../scripts/main-agent-cli.mjs state",
+    "role": "node ../../scripts/main-agent-cli.mjs role",
+    "supervise": "node ../../scripts/main-agent-cli.mjs supervise",
+    "person": "node ../../scripts/main-agent-cli.mjs person"
+  }
+}

@@ -12,6 +12,7 @@
 // Измерено 2026-09-22: у `node-pty@1.1.0` готовые сборки есть под Windows и macOS, под Linux — нет.
 
 const { existsSync } = require('node:fs')
+const path = require('node:path')
 const { redeemTicket } = require('./ticket.cjs')
 const session = require('./session.cjs')
 const { serviceDir } = require('./workspace.cjs')
@@ -130,6 +131,10 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
     args = launch.args
   }
   if (!wanted() || session.current(service)) return { ok: false, reason: 'gone' }
+  // 548-7: свои данные службы (`data/services/<id>`) — рабочая папка агента всегда, с ботом и без: изоляция элемента
+  // (`scripts/element-isolate.mjs`) закрывает чтение вне рабочих папок, а здесь живут его заказы, журналы и вложения.
+  const ownData = path.join(process.cwd(), 'data', 'services', service)
+  if (existsSync(ownData) && !args.includes(ownData)) args = [...args, '--add-dir', ownData]
   // 426 (✗ 2026-10-07: первое сообщение из Telegram пропало целиком — вставка по «3 с тишины» ушла раньше, чем Claude Code начал
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
