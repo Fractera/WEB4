@@ -2995,5 +2995,6 @@ The owner, verbatim: «я считаю что проект должен быть
 - **Template:** v0.3.101 carries the `humanizer` skill and the «Texts» rule; the quiz skill and format are in roman and lagrix only —
   moving them into the template is the owner's word.
 - 🛑 **A core rebuild stopped half way leaves the live core without `static/chunks`** (every script and style 500, health still 200):
-  measure free memory before `serve:rebuild` (about 2 GB here); with less, copy `.next` without `cache` outside the project and build in
-  the foreground; after the build count the page's static files, not only `/api/health`.
+  before every `serve:rebuild` copy `.next` without `cache` outside the project and build in the foreground — a home machine may not
+  free 2 GB (this one frees at most ~1.44 GB; the build passed at 1973 and 1208 MB free, broke at 324 MB); broken → put the copy back,
+  passed → delete it; after the build count the page's static files, not only `/api/health`.
