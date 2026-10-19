@@ -795,6 +795,13 @@ weight) is the owner's task saved as federal step 482 — not designed yet.
 
 ## Element birth — a draft becomes a running element (node step 319)
 
+🔒 **Two element templates (owner 2026-10-19, node steps 542–544).** **Custom** elements are born from `Fractera/fractera-custom-item-starter`
+(pinned in `WEB4-ITEMS-REGISTRY/item-template.json`) by the left menu button «Create WEB4 ITEM» — the only birth path below.
+**Native** elements — the root ones of every node — come only from `Fractera/fractera-native-item-starter`: never sold, no Lagrix
+parts (passport `visibility: node`, `messengers: { h2a: true, h2h: false, a2a: false }`, no showcase or Nostr fields, no H2H, no
+work for outside agents). The passport field `elementType` says which (`custom` | `native`). Both are mirrors of the standard
+custom element without anyone's data; their home page is one line in the centre and the yellow starter sign.
+
 **Create a microservice** → draft `<id>` (`data/web4-drafts.json`) → **Give birth to the element** (the draft's home;
 `POST /api/architect/drafts/<id>/birth` runs `scripts/item-birth.mjs <id>` detached, progress from `logs/birth-<id>.log`;
 CLI: `npm run items:birth -- <id>`). The birth clones `fractera-custom-item-starter` (renamed from `fractera-item-starter` by the owner, 2026-10-19) at the tag in
