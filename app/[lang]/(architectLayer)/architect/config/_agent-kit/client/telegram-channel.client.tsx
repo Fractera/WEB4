@@ -121,7 +121,8 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
   useEffect(() => {
     if (!configured) return
     const base = `${window.location.origin}${BASE}/${lang}`
-    const links = (state && state !== "forbidden" ? state.links : undefined) ?? { terminal: `/architect/${service}/terminal`, subscription: `/architect/${service}/claude-code` }
+    // `configured` уже сузил `state` до `State` (✗ 547: сравнение с "forbidden" здесь — ошибка типов, сборка упала).
+    const links = state.links ?? { terminal: `/architect/${service}/terminal`, subscription: `/architect/${service}/claude-code` }
     const fill = (t: string) => t.replace("{subscription}", `${base}${links.subscription}`).replace("{terminal}", `${base}${links.terminal}`)
     void fetch(door, {
       method: "POST",
