@@ -316,7 +316,15 @@ if (cmd === 'create') {
   }
 
   console.log(`===ELEMENT_CREATE_OK=== ${id}`)
-  console.log(`address: ${addressOf(id)}${ZONE ? ` · site https://${addressOf(id)}.${ZONE}` : ''}`)
+  // 551-6 (владелец 2026-10-20: «отправить ссылку чтобы пользователь мог зайти … но по факту это невозможно»): ссылка — из строки рождения,
+  // которое само подключает адрес в Cloudflare и меряет ответ снаружи; не ответил — так и печатается, а не обещается.
+  const site = log.match(/===BIRTH_OK=== \S+ port \d+ url (\S+)(?: answers (\d+))?/)
+  const siteLine = !site ? 'site: not reported by the birth'
+    : site[1] === 'local' ? 'site: only on this computer — the node has no own domain'
+      : site[1] === 'none' ? 'site: NOT connected — the element page → «Internet address» → «Connect»'
+        : site[2] && Number(site[2]) < 400 ? `site: ${site[1]} — answers ${site[2]} from the internet` : `site: ${site[1]} — connected, NOT answering yet (${site[2] ?? 'no answer'})`
+  console.log(`address: ${addressOf(id)}`)
+  console.log(siteLine)
   console.log(`role: ${role}`)
   console.log(`task: development-docs/pre-steps/${name}`)
   console.log(`agent: ${woke}`)

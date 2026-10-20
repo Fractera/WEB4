@@ -243,4 +243,37 @@ stage(`родился: порт ${port}, ${health} → ${answered}`)
 // пользователь сам решит». Новорождённый зажигает полосу «не сохранены в GitHub», репозиторий — кнопкой в его строке.
 // 548: граница агента элемента — инструкция ядра не грузится, выход за папку только с ответа человека.
 spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cwd: ROOT, windowsHide: true, stdio: 'inherit' })
-say(`===BIRTH_OK=== ${id} port ${port}`)
+// 551-6 (владелец 2026-10-20: «ты забываешь активировать эти новые элементы внутри Cloud Flyer … отправить ссылку чтобы пользователь мог
+// зайти и посмотреть … но по факту это невозможно потому что ты забываешь нажать кнопкуи не проверяешь создан или нет»; и следом: «там по
+// факту два действия подключить и проверить»). У узла со своим доменом рождение делает оба: «Подключить» — та же дверь ядра, что кнопка на
+// странице элемента (`POST /api/node/reach`: маршрут туннеля, запись DNS, копия страниц в Workers), и «Проверить» — замер снаружи
+// (`GET /api/node/reach`: DNS Cloudflare и https с настоящим именем) по факту, пока адрес не ответит, не дольше 90 с. Не вышло — рождение не
+// падает, но последняя строка говорит это вслух; своего домена нет — адрес только на этой машине.
+async function connectAddress() {
+  let domain = null
+  try { domain = JSON.parse(readFileSync(join(ROOT, 'logs', 'domain.json'), 'utf8')) } catch { /* своего домена нет */ }
+  if (!domain?.zone || !domain?.tunnelId) return { url: 'local', note: `адрес только на этой машине: http://localhost:${port} (у узла нет своего домена)` }
+  let core = null
+  try { core = JSON.parse(readFileSync(join(ROOT, 'logs', 'runtime.json'), 'utf8')).port } catch { /* ядро не запущено */ }
+  const manual = 'страница элемента → «Адрес в интернете» → «Подключить»'
+  if (!core) return { url: 'none', note: `адрес не подключён: ядро не отвечает — ${manual}` }
+  const door = `http://localhost:${core}/api/node/reach`
+  const ok = (m) => typeof m?.answers === 'number' && m.answers >= 200 && m.answers < 400
+  try {
+    const r = await fetch(door, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: id }), signal: AbortSignal.timeout(60000) })
+    let m = await r.json().catch(() => ({}))
+    if (!r.ok || m.ok === false) return { url: 'none', note: `адрес не подключён: ${m.reason ?? r.status} — ${manual}` }
+    for (let i = 0; i < 30 && !ok(m); i++) {
+      await new Promise((res) => setTimeout(res, 3000))
+      m = await fetch(`${door}?service=${id}`, { signal: AbortSignal.timeout(20000) }).then((x) => x.json()).catch(() => m)
+    }
+    return ok(m)
+      ? { url: m.url, answers: m.answers, note: `адрес в интернете: ${m.url} → ${m.answers} (маршрут и DNS на месте, проверено снаружи)` }
+      : { url: m.url ?? 'none', answers: m.answers ?? null, note: `адрес подключён (маршрут ${m.routed}, DNS ${m.dns}), но за 90 с снаружи не ответил (${m.answers ?? 'нет ответа'}) — «Проверить» на странице элемента позже` }
+  } catch (e) {
+    return { url: 'none', note: `адрес не подключён: ${e.message} — ${manual}` }
+  }
+}
+const address = await connectAddress()
+stage(address.note)
+say(`===BIRTH_OK=== ${id} port ${port} url ${address.url}${address.answers ? ` answers ${address.answers}` : ''}`)

@@ -26,8 +26,11 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
    ```
    npm run create -- --role "<one sentence>" --brief-file task-<words>.md [--supervise main] [--native]
    ```
-   Birth takes a few minutes (template clone, install, build). It prints `===ELEMENT_CREATE_OK=== <id>` and the links.
-5. **Report** to the person from those lines: the element's id and address, that its agent started with the task (or why not —
+   Birth takes a few minutes (template clone, install, build, then the address in Cloudflare is connected and checked from the
+   internet). It prints `===ELEMENT_CREATE_OK=== <id>`, `address:` and `site:`.
+5. **Report** to the person from those lines: the element's id and address; the site link only when the `site:` line says it
+   «answers … from the internet» — otherwise say what the line says (only on this computer, not connected, not answering yet) and
+   never send a link that does not open (owner of the node, 2026-10-20); that its agent started with the task (or why not —
    memory, a question in Telegram), who leads it, and how they go on: its terminal, its development documents, its Telegram bot.
 
 ## What the new element does by itself

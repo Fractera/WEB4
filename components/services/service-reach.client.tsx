@@ -66,7 +66,18 @@ export function ServiceReach({ serviceId, words }: { serviceId: string; words: S
       setKeyProblem(noTunnel)
       if (noTunnel) setConnectError(words.connectNoTunnel)
       else if (!r.ok || !body.ok) setConnectError(words.connectFailed.replace("{reason}", body.reason ?? String(r.status)))
-      else setState({ phase: "known", reach: body })
+      else {
+        setState({ phase: "known", reach: body })
+        // 551-6: сразу после записи DNS адрес снаружи ещё не отвечает, и единственный замер оставлял карточку красной до «Проверить».
+        // Проверка — продолжение нажатия человека: по факту, не дольше 30 × 3 с, и ничего не остаётся работать после.
+        let m = body
+        const answering = (x: Reach) => typeof x.answers === "number" && x.answers > 0 && x.answers < 400
+        for (let i = 0; i < 30 && !answering(m); i++) {
+          await new Promise((res) => setTimeout(res, 3000))
+          const g = await fetch(`${BASE}/api/node/reach?service=${encodeURIComponent(serviceId)}`, { cache: "no-store" }).catch(() => null)
+          if (g?.ok) { m = (await g.json()) as Reach; setState({ phase: "known", reach: m }) }
+        }
+      }
     } catch {
       setConnectError(words.connectFailed.replace("{reason}", "network"))
     } finally {
