@@ -32,6 +32,9 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const require = createRequire(import.meta.url)
 const supervision = require('../lib/web4-items/supervision.cjs')
+// 552-4: поручение главного агента элементу — строительный процесс; слово уже стоит (например, ответ ядра сессии рабочего процесса)
+// — остаётся своё. Мост ядра по слову будит сессию процесса (`lib/agent-kit/modes.cjs`).
+const modes = require('../lib/agent-kit/modes.cjs')
 const { simulatedF2fSearch } = await import('../lib/web4-items/lagrix-simulated.mjs')
 
 const readJson = (p, fallback = null) => { try { return JSON.parse(readFileSync(p, 'utf8')) } catch { return fallback } }
@@ -210,7 +213,7 @@ if (cmd === 'task') {
   if (!id || !text) fail('task <id> "<what the element agent must do>"')
   if (!registry().some((s) => s.id === id)) fail(`no element ${id} in the registry`)
   const supervised = supervision.byMain(id, ROOT)
-  const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: firstSentence(text, 300), reason: 'main-agent-task', supervised }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text: modes.withWord(text, 'build'), from: 'main agent', about: firstSentence(text, 300), reason: 'main-agent-task', supervised }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
   const b = r.body ?? {}
   // 548-20: кто включил агента — запись, а не память сессии: «закончил» будит главного агента в НОВОЙ сессии, и та не знала,
   // включала ли она элемент сама (✗ живой круг 2026-10-20: template остался включённым). `state` печатает, `close` стирает.
@@ -309,7 +312,7 @@ if (cmd === 'create') {
       : 'Ведёт тебя архитектор: три подтверждающие строки — ему, начинай после его «да».'
     // 548-14: первая сессия коротка — ✗ замерено 2026-10-20: с «опиши себя в паспорте» и «квиз и план шага» в одном поручении агент
     // нового элемента потратил 11 запросов модели и 850 тыс. токенов кэша на чтение своего кода, паспорта и сторожей до первого вопроса.
-    const text = `Тебя создал главный агент узла под задание архитектора. Твоя роль: ${role} Задание лежит в твоей приёмной: development-docs/pre-steps/${name}. Первая сессия — коротко, по своей инструкции: назови задание, пройди порядок «Before you build a new capability» (CLAUDE.md, «Steps», 1b: поиск в узле, затем в сети), затем задай первый вопрос продуктового квиза (навык product-quiz, пункт «The first session of a new element») и остановись. Код, сторожа и скрипты до утверждения квиза не читай; паспорт опишешь в первом шаге, когда квиз утверждён. ${lead}`
+    const text = `${modes.WORDS.build} Тебя создал главный агент узла под задание архитектора. Твоя роль: ${role} Задание лежит в твоей приёмной: development-docs/pre-steps/${name}. Первая сессия — коротко, по своей инструкции: назови задание, пройди порядок «Before you build a new capability» (CLAUDE.md, «Steps», 1b: поиск в узле, затем в сети), затем задай первый вопрос продуктового квиза (навык product-quiz, пункт «The first session of a new element») и остановись. Код, сторожа и скрипты до утверждения квиза не читай; паспорт опишешь в первом шаге, когда квиз утверждён. ${lead}`
     const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: role, reason: 'main-agent-create', supervised: by === 'main' }) }).catch((e) => ({ body: { ok: false, reason: e.message } }))
     const b = r.body ?? {}
     woke = b.ok ? (b.pending ? 'its person was asked in Telegram to turn it on' : 'its agent started with the task') : `not woken: ${b.reason}${b.freeMb ? ` (free ${b.freeMb} MB, needs ${b.perSessionMb} MB)` : ''} — run later: npm run task -- ${id} "<the same task>"`

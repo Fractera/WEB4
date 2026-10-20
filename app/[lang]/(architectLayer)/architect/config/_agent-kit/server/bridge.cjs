@@ -20,6 +20,9 @@ const { claudeBin, resolveBin } = require('./claude-cli.cjs')
 const telegram = require('./telegram.cjs')
 const { channelLaunch } = telegram
 const os = require('node:os')
+// 552-4: режимы сессии (первое слово запроса, группы навыков, ключ сессии) — один модуль ядра, общий с прибором `check:modes`.
+// Из корня узла, как `supervision.cjs`: у копий комплекта свой путь, а модуль один.
+const modes = require(path.join(process.cwd(), 'lib', 'agent-kit', 'modes.cjs'))
 
 const INIT_DEADLINE_MS = 10_000
 const CLOSE_POLICY = 1008
@@ -101,7 +104,10 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   if (starting.has(service)) return { ok: false, reason: 'starting' }
   const existing = session.current(service)
   if (existing) return { ok: true, session: existing, already: true }
-  const cwd = serviceDir(service)
+  // 552-4: `service` — ключ сессии; у сессии рабочего процесса это `<id>--work`, а папка, данные и бот — элемента `<id>`.
+  const element = modes.baseOf(service)
+  const mode = modes.modeOfKey(service)
+  const cwd = serviceDir(element)
   if (!cwd) {
     notice(`[папка агента не найдена: службы «${String(service ?? '').slice(0, 40)}» нет в реестре узла или на диске]`)
     return { ok: false, reason: 'no-agent-dir' }
@@ -124,7 +130,8 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   let args = []
   starting.add(service)
   notice('[запускаю агента…]')
-  const launch = await channelLaunch(service, env).catch((err) => ({ ok: false, error: err instanceof Error ? err.message : String(err) }))
+  // 552-4: бот элемента — только у сессии строительства; опрашивать бота может один процесс (409), а мессенджер до 552-6 живёт там.
+  const launch = mode === 'work' ? null : await channelLaunch(element, env).catch((err) => ({ ok: false, error: err instanceof Error ? err.message : String(err) }))
   starting.delete(service)
   if (launch && !launch.ok) {
     notice(`[бот Telegram не подключится: ${launch.error}]\r\n[агент запускается без него]`)
@@ -138,7 +145,7 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // (`scripts/element-isolate.mjs`) закрывает чтение вне рабочих папок, а здесь живут его заказы, журналы и вложения.
   // 🛑 `--add-dir` забирает ВСЕ следующие аргументы как папки: в конце списка он съел бы первое поручение агенту (✗ замерено
   // 2026-10-20 на erpxd: пустой ввод, журнала нет). Поэтому — первым, и за ним всегда другой флаг.
-  const ownData = path.join(process.cwd(), 'data', 'services', service)
+  const ownData = path.join(process.cwd(), 'data', 'services', element)
   if (existsSync(ownData) && !args.includes(ownData)) args = ['--add-dir', ownData, ...(args.length ? args : ['--permission-mode', 'auto'])]
   // 548-20 (✗ 2026-10-20: Telegram молчал у разбуженных сессий): у Claude Code ОДИН на машину кэш неудачных подключений MCP
   // (`~/.claude/mcp-needs-auth-cache.json`, ключ — имя сервера, 15 минут). Плагин канала включён у человека глобально и стартует в
@@ -146,7 +153,10 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // и живут без Telegram (замерено: падение y7jos без бота 02:30:33Z; erpxd 23:48:48Z → «Skipping» у главного агента 23:49:28Z).
   // Поэтому сессия без канала запускается с плагином, выключенным на этот запуск, — падать нечему. После `--add-dir`: тот забирает
   // папки до следующего флага, а `viaChannel` уже посчитан.
-  if (!viaChannel) args = [...args, '--settings', JSON.stringify({ enabledPlugins: { [telegram.PLUGIN]: false } })]
+  // 552-4: у элемента с группами навыков `--settings` несёт и группы режима (`lib/agent-kit/modes.cjs`); у остальных — как прежде.
+  const off = viaChannel ? {} : { [telegram.PLUGIN]: false }
+  if (modes.hasGroups(cwd)) args = [...args, '--settings', JSON.stringify(modes.modeSettings(cwd, mode, off)), '--append-system-prompt', modes.sessionNote(mode)]
+  else if (!viaChannel) args = [...args, '--settings', JSON.stringify({ enabledPlugins: off })]
   // 426 (✗ 2026-10-07: первое сообщение из Telegram пропало целиком — вставка по «3 с тишины» ушла раньше, чем Claude Code начал
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
@@ -304,8 +314,19 @@ function pasteWhenReady(s, text, { quietMs = 3000, maxMs = 120_000 } = {}) {
  * РАЗБУДИТЬ АГЕНТА СЛУЖБЫ БЕЗ БРАУЗЕРА (409-1). Сессия жива — только вставить текст. Свободной памяти меньше нормы на сессию —
  * отказ с цифрами, ничего не рождается (задача ждёт). Открытая потом страница терминала видит этот же экран.
  */
-async function wake(service, { text, from, about, declineUrl, confirmed, taskUrls = [] } = {}) {
+async function wake(element, { text, from, about, declineUrl, confirmed, taskUrls = [] } = {}) {
   const urls = [declineUrl, ...taskUrls].filter(Boolean)
+  // 552-4 (владелец 2026-10-20: «каждый из этих процессов может отправлять первое слово»): у элемента с группами навыков запрос
+  // идёт в сессию своего процесса по первому слову; слова нет — строительство, и это пишется в журнал узла. Ключ сессии
+  // рабочего процесса — `<id>--work`. У элемента без групп — одна сессия и текст как есть.
+  let service = element
+  if (text && modes.hasGroups(serviceDir(element))) {
+    const word = modes.modeOfText(text)
+    if (!word) console.log(`[agents/wake] ${element}: запрос без первого слова процесса — строительство`)
+    const mode = word ?? 'build'
+    text = modes.withWord(text, mode)
+    service = modes.sessionKey(element, mode)
+  }
   const live = session.current(service)
   if (live) {
     rememberTasks(live, urls)
@@ -313,7 +334,8 @@ async function wake(service, { text, from, about, declineUrl, confirmed, taskUrl
     return { ok: true, already: true }
   }
   // 409-3: бот элемента подключён — сначала вопрос человеку в Telegram; сессия родится по кнопке «Запустить» (`confirmed`).
-  if (!confirmed && telegram.connected(service)) return telegram.askToStart(service, { text, from, about, declineUrl })
+  // 552-4: бот и вопрос — элемента, а не ключа сессии; кнопка «Запустить» вернётся сюда с тем же текстом и тем же режимом.
+  if (!confirmed && telegram.connected(element)) return telegram.askToStart(element, { text, from, about, declineUrl })
   const freeMb = Math.floor(os.freemem() / MB)
   const per = perSessionMb()
   if (freeMb < per) return { ok: false, reason: 'memory', freeMb, perSessionMb: per }
@@ -326,8 +348,11 @@ async function wake(service, { text, from, about, declineUrl, confirmed, taskUrl
   // 409-5 (владелец: «timeout more then 60 min»): через 60 минут от пробуждения — вопрос «закрыть терминал?». Только для
   // пробуждённых сессий; сама сессия не закрывается — закрывает агент по ответу человека. Переменная — для прибора.
   const born = r.session
-  const timer = setTimeout(() => { if (session.current(service) === born) telegram.askToClose(service, 'timeout', { reviewed: Boolean(born.reviewed) }) }, wakeTimeoutMs())
-  timer.unref?.()
+  // 552-4: у сессии рабочего процесса нет канала — ответ «выключить» до неё не дойдёт; её закрывает «закончил» (см. `done`).
+  if (modes.modeOfKey(service) !== 'work') {
+    const timer = setTimeout(() => { if (session.current(service) === born) telegram.askToClose(service, 'timeout', { reviewed: Boolean(born.reviewed) }) }, wakeTimeoutMs())
+    timer.unref?.()
+  }
   return { ok: true, started: true, freeMb, perSessionMb: per }
 }
 
@@ -342,6 +367,10 @@ function finishRule(service) {
   // отказал (curl, код 7), агент нашёл адрес сам в `logs/runtime.json` (закон проекта «хост подписки — тот, что слушает сервер»).
   const base = `http://localhost:${process.env.PORT || 24680}/api/agents`
   const door = `${base}/done`
+  // 552-4 (владелец 2026-10-20: «Узел закрывает её сам»): сессия рабочего процесса без Telegram — «закончил» её и закрывает.
+  if (modes.modeOfKey(service) === 'work') {
+    return `${languageRule(modes.baseOf(service), base)} Это сессия рабочего процесса. Если это была задача A2A от другого агента (заказ) и она закрыта — до сообщения узлу сохрани сводку заказа по навыку order-summary (нет такого навыка — пропусти). Когда ответишь, сообщи узлу: POST ${door} с заголовком X-Node-Key = SETTINGS_SECRET из .env.local и телом {"service":"${service}"} — узел закроет эту сессию сам. Тело — файлом UTF-8 (curl --data-binary @файл).`
+  }
   // 412-4 (владелец 2026-10-06: «в момент закрытия … был бы обязан создать саммари по проделанной работе»): задача A2A — заказ;
   // его сводка без персональных данных пишется ДО сообщения «закончил». Навыка нет у элемента — правило к нему не относится.
   return `${languageRule(service, base)} Если это была задача A2A от другого агента (заказ) и она закрыта — до сообщения узлу сохрани сводку заказа по навыку order-summary (нет такого навыка — пропусти). Когда закончишь и ответишь, сообщи узлу: POST ${door} с заголовком X-Node-Key = SETTINGS_SECRET из .env.local и телом {"service":"${service}"} — человек получит в Telegram вопрос «выключить агента?». Если человек ответит «выключить» (или «закрыть», на любом языке) — тот же запрос с телом {"service":"${service}","close":true}. Если человек ответит «разбор» (на любом языке) — сделай разбор своей работы по навыку self-review (нет такого навыка — скажи человеку, что разбор этому агенту недоступен), предложения пришли ему в Telegram по номерам, прими ответы вида «1 да, 2 нет», а затем снова отправь первый запрос, добавив в тело "reviewed":true — вопрос «выключить?» придёт ещё раз, уже без «разбор». Тело — файлом UTF-8 (curl --data-binary @файл).`
@@ -367,7 +396,8 @@ function languageRule(service, base) {
 async function done(service, { close = false, reviewed = false } = {}) {
   const live = session.current(service)
   if (!live) return { ok: false, reason: 'no-session' }
-  if (close) {
+  // 552-4 (владелец 2026-10-20: «Узел закрывает её сам»): сессия рабочего процесса закрывается по «закончил», без вопроса.
+  if (close || modes.modeOfKey(service) === 'work') {
     const t = setTimeout(() => { if (session.current(service) === live) session.stop(service, 'closed-by-agent') }, 1500)
     t.unref?.()
     return { ok: true, closing: true }
@@ -436,7 +466,9 @@ function onConnection(ws, service) {
         started = true
         clearTimeout(deadline)
         // 409-1: запуск — общая функция с пробуждением без браузера (`spawnAgent` выше). 551-7: задача из ссылки — первым поручением.
-        const r = await spawnAgent(service, (line) => ws.send(`\r\n${line}\r\n`), () => ws.readyState === ws.OPEN, task, { answerTrust: Boolean(task) })
+        // 552-4: терминал страницы — сессия строительства; задача из ссылки у элемента с группами открывается словом своего процесса.
+        const first = task && modes.hasGroups(serviceDir(service)) ? modes.withWord(task, 'build') : task
+        const r = await spawnAgent(service, (line) => ws.send(`\r\n${line}\r\n`), () => ws.readyState === ws.OPEN, first, { answerTrust: Boolean(task) })
         if (!r.ok) {
           fail(r.reason)
           return
