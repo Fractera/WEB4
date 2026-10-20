@@ -47,12 +47,25 @@ const natureOf = (() => {
   const out = {}
   const base = join(folder, '.claude', 'skills')
   if (!existsSync(base)) return out
+  const nature = (dir) => {
+    let t = ''
+    try { t = readFileSync(join(dir, 'SKILL.md'), 'utf8') } catch { return null }
+    const desc = (t.match(/^description:\s*>?\s*\n?\s*(.*)$/m)?.[1] ?? '').trim()
+    return /^Builder skill/i.test(desc) ? 'build' : /^Work(ing)? (skill|process)/i.test(desc) ? 'work' : /^Both natures/i.test(desc) ? 'both' : existsSync(join(dir, 'SOURCE.md')) ? 'vendor' : /^Build process/i.test(desc) ? 'build' : '?'
+  }
   for (const d of readdirSync(base, { withFileTypes: true })) {
     if (!d.isDirectory()) continue
-    let t = ''
-    try { t = readFileSync(join(base, d.name, 'SKILL.md'), 'utf8') } catch { continue }
-    const desc = (t.match(/^description:\s*>?\s*\n?\s*(.*)$/m)?.[1] ?? '').trim()
-    out[d.name] = /^Builder skill/i.test(desc) ? 'build' : /^Work(ing)? (skill|process)/i.test(desc) ? 'work' : /^Both natures/i.test(desc) ? 'both' : existsSync(join(base, d.name, 'SOURCE.md')) ? 'vendor' : /^Build process/i.test(desc) ? 'build' : '?'
+    // Группа-плагин (552-2): в списке навык стоит как `<группа>:<навык>`, агент зовёт его и полным, и коротким именем.
+    if (existsSync(join(base, d.name, '.claude-plugin', 'plugin.json'))) {
+      const inner = join(base, d.name, 'skills')
+      for (const s of existsSync(inner) ? readdirSync(inner, { withFileTypes: true }) : []) {
+        const n = s.isDirectory() ? nature(join(inner, s.name)) : null
+        if (n) { out[s.name] = n; out[`${d.name}:${s.name}`] = n }
+      }
+      continue
+    }
+    const n = nature(join(base, d.name))
+    if (n) out[d.name] = n
   }
   return out
 })()

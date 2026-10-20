@@ -39,19 +39,30 @@ const HOOK = join(ROOT, 'scripts', 'element-boundary-hook.mjs').replace(/\\/g, '
 const foreign = foreignOff()
 const readText = (f) => { try { return readFileSync(f, 'utf8') } catch { return '' } }
 
-/** Свои навыки элемента: сколько знаков займут в списке с описаниями и какие из них вендорные. */
+/** Свои навыки элемента: сколько знаков займут в списке с описаниями и какие из них вендорные.
+ *  С 552-2 свои навыки шаблона лежат в группах-плагинах `.claude/skills/<группа>/skills/<навык>`: в списке они стоят как
+ *  `<группа>:<навык>`, и `skillOverrides` на них не действует — их описания бюджет обязан вместить целиком. */
 function ownSkills(dir) {
   const base = join(dir, '.claude', 'skills')
   if (!existsSync(base)) return { chars: 0, vendor: [] }
   let chars = 0
   const vendor = []
+  const described = (text, name) => name.length + 4 + `${skillField(text, 'description')} ${skillField(text, 'when_to_use')}`.trim().slice(0, 1536).length
   for (const d of readdirSync(base, { withFileTypes: true })) {
     if (!d.isDirectory()) continue
+    if (existsSync(join(base, d.name, '.claude-plugin', 'plugin.json'))) {
+      const inner = join(base, d.name, 'skills')
+      for (const s of existsSync(inner) ? readdirSync(inner, { withFileTypes: true }) : []) {
+        const text = s.isDirectory() ? readText(join(inner, s.name, 'SKILL.md')) : ''
+        if (text) chars += described(text, `${d.name}:${skillField(text, 'name') || s.name}`)
+      }
+      continue
+    }
     const text = readText(join(base, d.name, 'SKILL.md'))
     if (!text) continue
     const name = skillField(text, 'name') || d.name
     if (existsSync(join(base, d.name, 'SOURCE.md'))) { vendor.push(name); chars += name.length + 4; continue }
-    chars += name.length + 4 + `${skillField(text, 'description')} ${skillField(text, 'when_to_use')}`.trim().slice(0, 1536).length
+    chars += described(text, name)
   }
   return { chars, vendor }
 }

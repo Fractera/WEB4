@@ -54,7 +54,19 @@ function copyTemplateSkills(dir, template, git) {
       const to = join(dir, '.claude', 'skills')
       mkdirSync(to, { recursive: true })
       for (const e of readdirSync(from, { withFileTypes: true })) {
-        if (!e.isDirectory() || existsSync(join(to, e.name))) continue
+        if (!e.isDirectory()) continue
+        // Группа-плагин (552-2), которая у элемента уже есть: дописать недостающие навыки внутрь её `skills/`.
+        const group = join(from, e.name, 'skills')
+        if (existsSync(join(to, e.name)) && existsSync(join(from, e.name, '.claude-plugin', 'plugin.json')) && existsSync(group)) {
+          mkdirSync(join(to, e.name, 'skills'), { recursive: true })
+          for (const s of readdirSync(group, { withFileTypes: true })) {
+            if (!s.isDirectory() || existsSync(join(to, e.name, 'skills', s.name))) continue
+            cpSync(join(group, s.name), join(to, e.name, 'skills', s.name), { recursive: true })
+            added += 1
+          }
+          continue
+        }
+        if (existsSync(join(to, e.name))) continue
         cpSync(join(from, e.name), join(to, e.name), { recursive: true })
         added += 1
       }
