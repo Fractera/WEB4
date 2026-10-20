@@ -3168,3 +3168,23 @@ and the answers in the choice windows: «В каждый узел при уст�
 - **Measured cost of one description (2026-10-20, `npm run qa:agent`):** from the core — 13 requests, 62 852 new, 951 762 from cache,
   10 438 out (describe-element, passport-description, humanizer); from the element in own words — 13 requests, 49 695 new, 845 465 from
   cache, 7 226 out (passport-description, humanizer). The first request of an element's session is ≈ 54 000 tokens.
+
+## Element sessions by process: skill groups, the first word, the mode's laws (step 552, 2026-10-20)
+
+Owner of the node, 2026-10-20: «разделить процессы и протестировать что они не пересекаются»; on the first word: «каждый из этих
+процессов может отправлять первое слово: процесс строительства задача…»; plan 552-5 — «Подтвердить (Рекомендую)».
+- **Only for an element with skill groups** (`.claude/skills/build-skills/.claude-plugin/plugin.json`; today — template and every element
+  born from starter v0.3.120+). Every other element, the main agent and the core's services live as before: one session, no word.
+- **One module knows it all:** `lib/agent-kit/modes.cjs` — the words («Build process:», «Working process:», «Messenger:»), the groups of
+  each mode (`<group>@skills-dir` in `--settings`, foreign groups denied for Read/Edit), the session key (build — `<id>`, working process —
+  `<id>--work`, no Telegram, closed by the node on «done»), the session note and, since 552-5, the mode's laws. «Messenger:» goes to the
+  build session until step 552-6.
+- **The mode's laws come with the session (552-5):** the element's `CLAUDE.md` holds what every session needs, `.claude/modes/build.md`
+  and `.claude/modes/work.md` the laws of one mode; `modes.promptArgs` writes the session note plus the mode file into
+  `data/node/agent-prompts/<key>.md` and the bridge passes it as `--append-system-prompt-file` (a file, not a string: the build file is
+  ≈14 thousand characters and the Windows command line also carries the first task). No mode file — the note as a string, as before.
+- **Proof instruments:** `npm run check:modes` (groups do not overlap, foreign groups denied, build's prompt carries «Steps» without
+  «Cron» and work's the opposite — spoiled both ways); in the starter, `check-instruction-modes` keeps every section in exactly one
+  file and `check-skill-process` reads the group tables from all three.
+- **Measured (552-5, Haiku, same minute, template):** first request of the working-process session 30 424 → 26 296 tokens (−4 128), of the
+  build session 38 353 → 38 245; the build session still answers with the three confirming lines and names its checks first.
