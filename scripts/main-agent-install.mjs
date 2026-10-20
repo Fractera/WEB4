@@ -24,9 +24,11 @@ export function installMainAgent(root) {
   for (const old of readdirSync(join(dst, '.claude', 'skills'), { withFileTypes: true })) {
     if (old.isDirectory() && !want.includes(old.name)) rmSync(join(dst, '.claude', 'skills', old.name), { recursive: true, force: true })
   }
+  // 548-18: a SKILL.md always lands with LF. Claude Code does not parse a frontmatter with CRLF and loads the skill with empty
+  // metadata (`claude plugin validate`, measured 2026-10-20 on supervise-element); a Windows checkout gives CRLF.
   for (const name of want) {
     mkdirSync(join(dst, '.claude', 'skills', name), { recursive: true })
-    copyFileSync(join(src, 'skills', name, 'SKILL.md'), join(dst, '.claude', 'skills', name, 'SKILL.md'))
+    writeFileSync(join(dst, '.claude', 'skills', name, 'SKILL.md'), readFileSync(join(src, 'skills', name, 'SKILL.md'), 'utf8').replace(/\r\n/g, '\n'), 'utf8')
   }
   // Свой корень репозитория: навыки корня узла выше него не грузятся.
   if (!existsSync(join(dst, '.git'))) {
