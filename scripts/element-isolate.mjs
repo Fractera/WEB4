@@ -34,6 +34,7 @@ const nodePosix = posix(ROOT)
 // Исходники и документы ядра: всё в корне узла, кроме данных, журналов, зависимостей и самих элементов.
 const OPEN = new Set(['data', 'logs', 'node_modules', 'WEB4-ITEMS', '.git', '.next', 'tsconfig.tsbuildinfo'])
 const coreDirs = readdirSync(ROOT, { withFileTypes: true }).filter((d) => d.isDirectory() && !OPEN.has(d.name) && !d.name.startsWith('.next')).map((d) => d.name)
+const rootFiles = readdirSync(ROOT, { withFileTypes: true }).filter((d) => d.isFile()).map((d) => d.name)
 const HOOK = join(ROOT, 'scripts', 'element-boundary-hook.mjs').replace(/\\/g, '/')
 const foreign = foreignOff()
 const readText = (f) => { try { return readFileSync(f, 'utf8') } catch { return '' } }
@@ -83,7 +84,10 @@ for (const dir of only ? [] : elements) {
   const id = idOf(dir)
   const ask = []
   const guard = (p) => { ask.push(`Read(/${p})`, `Edit(/${p})`) }
-  guard(`${nodePosix}/*`)
+  // 548-14: файлы корня ядра — поимённо. ✗ Шаблон `<узел>/*` правила Claude Code читают как .gitignore: под него попадает папка
+  // WEB4-ITEMS целиком, а с ней и папка самого элемента — любое чтение и правка СВОИХ файлов инструментами Read, Edit и Write
+  // ждали архитектора (замерено 2026-10-20: y7jos встал на своём current-step.md, template получил отказ на его чтение).
+  for (const f of rootFiles) guard(`${nodePosix}/${f}`)
   for (const d of coreDirs) guard(`${nodePosix}/${d}/**`)
   for (const other of elements) if (other !== dir) guard(`${posix(other)}/**`)
   const file = join(dir, '.claude', 'settings.local.json')
