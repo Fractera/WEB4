@@ -366,6 +366,11 @@ async function done(service, { close = false, reviewed = false } = {}) {
   if (session.current(service) !== live) return { ok: false, reason: 'no-session' }
   // Владелец 2026-10-06: «второй раз не предлагать разбор после первого» — разбор в этой сессии был, строки «разбор» больше нет.
   if (reviewed) live.reviewed = true
+  // 548-20 (владелец 2026-10-20: «Ты что считаешь что пользователя нужно каждый раз дёргать»): элемент под надзором главного агента
+  // выключит главный агент (`npm run close`) — человеку не пишется «Выключить его?». Его «закончил» по-прежнему будит главного агента.
+  try {
+    if (require(path.join(process.cwd(), 'lib', 'web4-items', 'supervision.cjs')).byMain(service)) return { ok: true, asked: false, ledByMain: true }
+  } catch { /* нет записи надзора — спросить, как прежде */ }
   return telegram.askToClose(service, 'done', { reviewed: Boolean(live.reviewed) })
 }
 

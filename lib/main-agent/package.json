@@ -11,6 +11,7 @@
     "state": "node ../../scripts/main-agent-cli.mjs state",
     "role": "node ../../scripts/main-agent-cli.mjs role",
     "supervise": "node ../../scripts/main-agent-cli.mjs supervise",
+    "close": "node ../../scripts/main-agent-cli.mjs close",
     "person": "node ../../scripts/main-agent-cli.mjs person",
     "done": "node ../../scripts/main-agent-cli.mjs done"
   }

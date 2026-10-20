@@ -17,6 +17,7 @@
 //   state <id>               — как идёт работа элемента: роль, текущий шаг, приёмная, коммиты, надзор
 //   role <id> "<фраза>"      — назначить элементу роль (`data/node/roles.json`)
 //   supervise <id> main|architect|off [--max N] — кто ведёт элемент
+//   close <id>               — выключить агента элемента (548-20: включает поручение под надзором, выключает главный агент)
 //   person                   — как связаться с архитектором из этой сессии (Telegram главного агента или терминал ядра)
 //   done [--close]           — сказать узлу «закончил» (или закрыть свою сессию) без чтения ключей узла
 // 🔒 Ничего не делается само: каждую команду запускает главный агент по слову человека или по событию надзора.
@@ -179,6 +180,17 @@ if (cmd === 'done') {
   process.exit(r.body?.ok ? 0 : 1)
 }
 
+// 548-20 (владелец 2026-10-20: «агент ядра мог управлять включением агентов элементов и их выключением»): выключить агента элемента
+// той же дверью, которой агент закрывает свой терминал. Включает его поручение под твоим надзором (`supervise` + `task`).
+if (cmd === 'close') {
+  const [id] = rest
+  if (!id) fail('close <id>')
+  const r = await core('/api/agents/done', { method: 'POST', body: JSON.stringify({ service: id, close: true }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  const b = r.body ?? {}
+  console.log(b.ok ? `===CLOSE_OK=== ${id}: its agent is turned off` : b.reason === 'no-session' ? `===CLOSE_OK=== ${id}: its agent was already off` : `===CLOSE_FAIL=== ${id}: ${b.reason ?? r.status}`)
+  process.exit(b.ok || b.reason === 'no-session' ? 0 : 1)
+}
+
 if (cmd === 'task') {
   const [id, ...words] = rest
   const text = words.join(' ').trim()
@@ -205,6 +217,9 @@ if (cmd === 'state') {
   console.log(`Element ${id} (${addressOf(id)}) — role: ${role ?? 'none'}`)
   console.log(`Led by: ${sup?.active ? (sup.by === 'main' ? `the main agent, cycle ${sup.cycles ?? 0} of ${sup.max}` : 'the architect') : 'the architect (no supervision record)'} · reach: ${reachOf(id)}`)
   console.log(`Intake: ${intake.length ? intake.join(', ') : 'empty'}`)
+  // 548-20: результат проверки, которую ты поручил, — элемент сохраняет его `npm run reply-core` в своих данных.
+  const report = readJson(join(ROOT, 'data', 'services', id, 'core-report.json'), null)
+  console.log(`Report to you (npm run reply-core): ${report?.text ? `«${report.text}» (${report.at})` : 'none'}`)
   console.log(`Last commits:\n${(git.stdout || '(none)').trim()}`)
   console.log(`current-step.md (first 60 lines):\n${step}`)
   process.exit(0)
@@ -292,4 +307,4 @@ if (cmd === 'create') {
   process.exit(0)
 }
 
-fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | person | done`)
+fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | close | person | done`)

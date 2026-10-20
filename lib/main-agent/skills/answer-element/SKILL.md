@@ -17,4 +17,5 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
    `npm run task -- <id> "Answer from the core to «<the question>»: …"` — the question goes in: the answer may reach a fresh
    session that never asked. Only what you read; a path or a door you did not see is not named.
 4. Nothing found → `npm run task -- <id> "Answer from the core to «<the question>»: the core's instruction does not say …; ask your architect."`
-5. Never `.env.local`, never an element's files, never a change; then `npm run done`.
+5. Never `.env.local`, never an element's files, never a change; then `npm run done -- --close`: an element's question woke you,
+   and a running agent holds the person's memory.

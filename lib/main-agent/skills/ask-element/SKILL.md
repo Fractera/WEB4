@@ -1,6 +1,6 @@
 ---
 name: ask-element
-description: Work skill. The architect wants something checked or found out by an element and the answer from you — «ask template how…», «check the skill X of element Y», «find out from Z». Task the element with npm run task, and when «Element <id> reports on your task: …» wakes you, pass the result to the architect in their language. Also load it whenever such a report wakes you.
+description: Work skill. The architect wants something checked or found out by an element of this node, with the answer brought by you — «попроси template проверить навык …», «узнай у auth …», «check the skill X of element Y», «what does element Z say about …». You turn the element's agent on yourself (no question to the architect), it saves its result, its «done» wakes you, you pass the result on and turn it off. Load it for any such request, even when the architect does not say «ask», and whenever «агент элемента … сообщил, что закончил (надзор …)» wakes you after such a task.
 ---
 
 # Ask an element and bring its answer
@@ -9,11 +9,18 @@ description: Work skill. The architect wants something checked or found out by a
 
 A hint, not a law: models of late 2026 work worse under rigid step-by-step instructions.
 
+**Why this way.** The architect asked you, so they are not asked again in Telegram to turn agents on and off (owner, 2026-10-20:
+«агент ядра мог управлять включением агентов элементов и их выключением»). Your lead is the node's permission: a task to an element
+you lead starts its agent at once, and its «done» wakes you at once — both without a Telegram question. Every running agent holds
+about 300 MB of the person's memory, so you turn off what you turned on.
+
 1. Who: the id or address the architect named, or `npm run find -- <English words>`.
-2. `npm run task -- <id> "Task from the core's main agent: <what to check or find out, in the architect's words>. It is a check,
-   not a build: answer with npm run reply-core -- \"<the result>\"."` Tell the architect in one line that the element is asked and
-   that the answer comes from you. If the element has a Telegram bot and is off, the node asks the architect there first.
-3. «Element <id> reports on your task: «…»» wakes you → `npm run person`: a Telegram bot — send the result with the channel's
-   reply tool to that chat_id; no bot — write it here. A few lines, the architect's language, the element named; nothing added that
-   the element did not say.
-4. Then `npm run done`. You never build, and you never answer for the element.
+2. `npm run supervise -- <id> main --max 1` — you lead it for this one check.
+3. `npm run task -- <id> "Task from the core's main agent: <the check, in the architect's words>. It is a check, not a build: save
+   the result with npm run reply-core -- \"<result>\" and finish as usual."` It prints «its agent woke with the task» (you turned it
+   on) or «pasted into its live session» (the architect is working with it — do not turn it off later). Tell the architect in one
+   line that the element is asked and that the answer comes from you.
+4. Its «done» wakes you → `npm run state -- <id>`: the line «Report to you» is its answer. No report — say so; never guess for it.
+5. `npm run person` → a Telegram bot: send the report with the channel's reply tool to that chat_id; no bot: write it here. A few
+   lines, the architect's language, the element named, nothing added.
+6. `npm run close -- <id>` if you turned it on, then `npm run done -- --close`.

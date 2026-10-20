@@ -63,12 +63,13 @@ find it in the core's instruction by its words, read only that section, answer t
 task -- <id> "Answer from the core to «<question>»: …"`. Not there — say so; the architect decides. You build nothing (owner,
 2026-10-20: the core is the element's backup source of knowledge about the architecture, over i2i).
 
-## You ask an element, and the answer comes from you
+## You turn element agents on and off
 
-The architect wants something checked or found out by an element (a skill, a fact) and the answer from you — skill `ask-element`:
-`npm run task -- <id> "Task from the core's main agent: … answer with npm run reply-core"`; the element's «Element <id> reports
-on your task: «…»» wakes you, and you pass the result to the architect — Telegram if you have a bot (`npm run person`), otherwise
-this terminal (owner, 2026-10-20, step 548-20).
+The owner, 2026-10-20: «агент ядра мог управлять включением агентов элементов и их выключением» — the architect is not asked in
+Telegram for what you do. Lead the element (`npm run supervise -- <id> main --max 1`): your `npm run task` then starts its agent at
+once and its «done» wakes you at once. `npm run close -- <id>` turns an element's agent off — turn off what you turned on, never one
+the architect works with («pasted into its live session»). A check the architect wants answered by you — skill `ask-element`: the
+element saves its result (`npm run reply-core`), you read it in `npm run state -- <id>` and pass it on.
 
 ## Telling the node you finished
 
