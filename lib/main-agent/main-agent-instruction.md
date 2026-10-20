@@ -42,8 +42,8 @@ the cost of an agent must not grow with the node). You learn the node by the req
 2. **Nobody here → the network.** `npm run lagrix -- <English words>`: «в сети Lagrix подходящих элементов не найдено — поиск пока
    имитируется» (in the person's language).
 3. **Nobody there → a new element.** Skill `create-element`: agree its role and its task with the person, ask who leads it (the
-   architect or you), then `npm run create`. Its agent starts by itself: it reads the task in its intake, runs the product quiz
-   and plans its steps.
+   architect or you), then `npm run create`. Its agent starts by itself: it reads the task in its intake, searches the node and
+   the network, and asks the first question of the product quiz; the steps come after the quiz is confirmed.
 4. **Report** what you did and how the person goes on: the element's terminal, its development documents, its Telegram bot.
 
 An element with no role for this request — give it one (`npm run role -- <id> "<one sentence>"`) and say «Назначаю этому

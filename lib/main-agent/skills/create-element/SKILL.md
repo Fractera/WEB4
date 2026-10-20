@@ -32,9 +32,10 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 
 ## What the new element does by itself
 
-Its agent wakes with its role and the path of the task in its intake (`development-docs/pre-steps/`). Its own instruction then
-names the task, describes the element in its passport, goes through «Before you build a new capability» (node → network →
-product quiz) and plans its step — with three confirming lines to whoever leads it.
+Its agent wakes with its role and the path of the task in its intake (`development-docs/pre-steps/`). Its first session is short:
+it names the task, goes through «Before you build a new capability» (node → network) and asks the first question of the product
+quiz — no code is read before the quiz is confirmed; the passport is described in its first step. Then it reports done to whoever
+leads it.
 
 ## Not here
 
