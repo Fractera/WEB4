@@ -20,7 +20,6 @@ const telegram = require('./telegram.cjs')
 
 const { tg, readJson, writeSecret, personLang } = telegram
 const ROOT = process.cwd()
-const modes = require(path.join(ROOT, 'lib', 'agent-kit', 'modes.cjs'))
 
 /** Ячейка → слова имени: режим и ячейка (владелец: «template messenger H2H … template workspace work»). `h2a` — нынешний бот. */
 const SLOTS = { h2a: ['messenger', 'h2a'], h2h: ['messenger', 'h2h'], orders: ['workspace', 'orders'], work: ['workspace', 'work'] }
@@ -53,7 +52,7 @@ const allowed = (service, slot) => {
 }
 
 /** Есть ли у элемента группы навыков — только у такого четыре бота и новые имена (как весь шаг 552). */
-const grouped = (service) => modes.hasGroups(serviceDir(service))
+const grouped = (service) => telegram.hasSkillGroups(serviceDir(service))
 
 /** Имя и ручка для BotFather — правило одно, в `telegram.cjs` (`namedSuggestion`): ручка ≤ 32, адрес элемента обрезается. */
 const suggestion = (service, slot) => telegram.namedSuggestion(service, ...SLOTS[slot])

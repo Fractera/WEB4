@@ -30,8 +30,11 @@ const { isBornItem, serviceDir } = require('./workspace.cjs')
 const session = require('./session.cjs')
 const { claudeAuthState, extraBins, resolveBin } = require('./claude-cli.cjs')
 const { tableFor } = require('./translate.cjs')
-// 552-6: имя бота по режиму — только у элементов с группами навыков (тот же модуль режимов, что у моста).
-const modes = require(path.join(process.cwd(), 'lib', 'agent-kit', 'modes.cjs'))
+// 552-6: имя бота по режиму — только у элементов с группами навыков (тот же признак, что `hasGroups` в `lib/agent-kit/modes.cjs`).
+// 🛑 Модуль режимов здесь не подключается: этот файл импортирует дверь `agent-api/channel/route.ts`, его собирает Turbopack, и
+// `require(path.join(process.cwd(), …))` в сборке не разрешается («server relative imports are not implemented yet», ✗ 552-6 —
+// 27 ошибок сборки). Мост так делать может: его загружают при работе, а не сборкой.
+const hasSkillGroups = (dir) => Boolean(dir) && existsSync(path.join(dir, '.claude', 'skills', 'build-skills', '.claude-plugin', 'plugin.json'))
 
 const ROOT = process.cwd()
 const PLUGIN = 'telegram@claude-plugins-official'
@@ -685,7 +688,7 @@ function namedSuggestion(service, mode, cell) {
 }
 
 function suggestion(service) {
-  if (modes.hasGroups(serviceDir(service))) return namedSuggestion(service, 'messenger', 'h2a')
+  if (hasSkillGroups(serviceDir(service))) return namedSuggestion(service, 'messenger', 'h2a')
   const element = elementAddress(service)
   const tail = `_${NODE_CODE}_bot`
   const handle = element.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 32 - 'Fractera_'.length - tail.length).replace(/_+$/, '')
@@ -727,7 +730,7 @@ async function tellWaiting(service) {
 
 module.exports = {
   // 552-6: помощники и правило имени для ячеек ботов (`telegram-slots.cjs`).
-  tg, readJson, writeSecret, NODE_CODE, namedSuggestion,
+  tg, readJson, writeSecret, NODE_CODE, namedSuggestion, hasSkillGroups,
   PLUGIN, isService, stateDir, storedToken, saveToken, activationLink, saveMessages, channelLaunch,
   running, channelState, startIdlePoller, connected, askToStart, setStarter, askToClose, personLang, setPersonLang, tellWaiting,
 }
