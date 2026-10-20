@@ -1,11 +1,11 @@
 ---
 name: supervise-element
-description: Working process. Lead an element's work for the architect when they chose you (supervise main) — its «done» wakes you; read its state, answer its confirming lines or give the next task, report, stop at the end. Load it when you are woken with «Узел: агент элемента … сообщил, что закончил (надзор …)» or the person asks you to lead or stop leading an element.
+description: Build process. Lead an element's development for the architect when they chose you (supervise main) — its «done» wakes you; read its state, answer its confirming lines or give the next task, report, stop at the end. Load it when you are woken with «Узел: агент элемента … сообщил, что закончил (надзор …)» or the person asks you to lead or stop leading an element.
 ---
 
 # Lead an element for the architect
 
-**Process: working** — you change no code; you read the element's state and pass answers and tasks to its agent.
+**Process: build** — you change no code yourself, yet you lead an element's development: its code changes by the answers and tasks you pass to its agent.
 
 A hint, not a law: models of late 2026 work worse under rigid step-by-step instructions.
 

@@ -105,6 +105,8 @@ if (cmd === 'find') {
   if (!words) fail('find <plain words of the job>')
   const r = await core(`/api/node/a2a?q=${encodeURIComponent(words)}`).catch((e) => fail(`the core did not answer: ${e.message}`))
   const entries = r.body?.entries ?? []
+  // 548-6 (2026-10-20): реестр написан по-английски — «вход на сайт» не нашёл auth. Без латиницы — повтор английскими словами, не сеть.
+  if (!entries.length && !/[a-z]/i.test(words)) { console.log(`Nothing found for «${words}»: the node's registry is written in English — run npm run find again with English words (for example: sign in, remove background).`); process.exit(0) }
   if (!entries.length) { console.log(`Nobody in this node does «${words}». Next: npm run lagrix -- ${words}`); process.exit(0) }
   const role = roles()
   for (const e of entries.slice(0, 5)) {

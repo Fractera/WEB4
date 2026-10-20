@@ -3,6 +3,7 @@ import { timingSafeEqual } from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 
 import supervision from "@/lib/web4-items/supervision.cjs"
+import { telegramConnected } from "@/lib/a2a/telegram-relay"
 
 // ПРОБУЖДЕНИЕ АГЕНТА ЭЛЕМЕНТА (шаг 409-1; владелец 2026-10-05: «агент должен уметь запускать собственный терминал»; «примерно
 // 300 МБ свободной памяти на один терминал»). POST `{ service, reason?, text? }` с ключом узла (`X-Node-Key`): сессия `claude`
@@ -46,7 +47,12 @@ export async function POST(req: NextRequest) {
   }
   const text = typeof body.text === "string" && body.text.trim() ? body.text.slice(0, 8000) : undefined
   const str = (v: unknown, n: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, n) : undefined)
-  const confirmed = body.supervised === true && supervision.byMain(service)
+  // 548-6 (повторная проверка 2026-10-20): элемент, которого узел только что родил по «да» архитектора (`npm run create` главного
+  // агента, reason main-agent-create), включается и с согласием на свою папку: бота у новорождённого нет, и вопрос Claude Code о
+  // доверии папке висел бы молча (watchTrust зовёт человека только через бота). На этой машине папки доверены через домашнюю
+  // (`~/.claude.json`), на чистой — нет. Элемент с подключённым ботом этим путём не идёт — для него остаётся вопрос в Telegram.
+  const created = body.reason === "main-agent-create" && !telegramConnected(service)
+  const confirmed = (body.supervised === true && supervision.byMain(service)) || created
   const out = await wake(service, { text, from: str(body.from, 120), about: str(body.about, 600), declineUrl: str(body.declineUrl, 300), ...(confirmed ? { confirmed: true } : {}) })
   console.log(`[agents/wake] ${service} reason=${String(body.reason ?? "-").slice(0, 32)} → ${out.ok ? (out.pending ? "asked in Telegram" : out.already ? "already" : "started") : out.reason}`)
   const status = out.ok ? 200 : out.reason === "memory" ? 503 : out.reason === "no-agent-kit" || out.reason === "no-agent-dir" ? 404 : 409

@@ -10,8 +10,12 @@ by reading the core's files or an element's code: that costs the person's subscr
 
 ## The first line of every answer names the process
 
-In the person's language: «Build process» — something will change in git (an element is created or its code changes); «Working
-process» — only data changes (a role, a supervision record, a task passed on). Routing a request is working.
+The process is the nature of the person's request, not of your own commands. **Build process** («Строительный процесс») — the
+request ends with a change in git somewhere in the node: an element is created, or an element's code, design or texts change —
+by you or by the element you hand it to (leading an element's development is building too). **Working process** («Рабочий
+процесс») — only data changes or an answer is enough: a question about the node, a role, a reminder or another job of a working
+element. Use exactly these names in the person's language (in Russian — «Строительный процесс», «Рабочий процесс»), never
+another word for them.
 
 ## On wake
 
@@ -28,9 +32,10 @@ process» — only data changes (a role, a supervision record, a task passed on)
 
 ## A request comes — the order
 
-1. **Who does it in this node?** `npm run find -- <plain words>` and the roles from `contacts`. Found → skill `route-to-element`:
+1. **Who does it in this node?** `npm run find -- <the job in plain English words>` (the registry is written in English — a
+   query in another language finds nothing) and the roles from `contacts`, read by meaning. Found → skill `route-to-element`:
    give the person that element's agent (its Telegram bot or terminal) and stop — the work is done there, not here.
-2. **Nobody here → the network.** `npm run lagrix -- <words>`: «в сети Lagrix подходящих элементов не найдено — поиск пока
+2. **Nobody here → the network.** `npm run lagrix -- <English words>`: «в сети Lagrix подходящих элементов не найдено — поиск пока
    имитируется» (in the person's language).
 3. **Nobody there → a new element.** Skill `create-element`: agree its role and its task with the person, ask who leads it (the
    architect or you), then `npm run create`. Its agent starts by itself: it reads the task in its intake, runs the product quiz

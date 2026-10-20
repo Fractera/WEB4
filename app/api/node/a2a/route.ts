@@ -41,7 +41,11 @@ export async function GET(req: NextRequest) {
     const found = findEntries(q, limit)
     // Не нашлось в узле ≠ не существует. 548-9 (владелец 2026-10-19): дальше — f2f, поиск целого элемента в сети Lagrix (пока
     // имитация), затем продуктовый квиз; у нативного элемента f2f нет — сразу квиз или новый элемент через главного агента.
-    return NextResponse.json({ ok: true, entries: found.map(withTelegram), outside: found.length ? null : "not found in this node; next: a custom element searches the Lagrix network for a whole element (npm run f2f -- find <words>); then the product quiz (skill product-quiz), or ask the core's main agent for a new element" }, { headers })
+    // 548-6 (2026-10-20): реестр написан по-английски — запрос без латиницы не находит ничего, даже когда элемент есть («вход на
+    // сайт» не нашёл auth). Такому запросу — не сеть, а повтор английскими словами.
+    const next = "next: a custom element searches the Lagrix network for a whole element (npm run f2f -- find <words>); then the product quiz (skill product-quiz), or ask the core's main agent for a new element"
+    const outside = found.length ? null : /[a-z]/i.test(q) ? `not found in this node; ${next}` : `nothing found for these words: the node's registry is written in English — search again with English words (for example «sign in», «remove background»); if English finds nothing too — ${next}`
+    return NextResponse.json({ ok: true, entries: found.map(withTelegram), outside }, { headers })
   }
   return NextResponse.json({ ok: true, entries: nodeEntries().map(withTelegram) }, { headers })
 }

@@ -1,11 +1,11 @@
 ---
 name: route-to-element
-description: Working process. Give a request to the element of this node that does it — find it by its role, answer with its agent's Telegram bot or terminal, never do its work yourself. Load it whenever the person asks for something an element of the node does (sign-in, data, settings, design, a site, a custom element's job), asks who does what, or names an element.
+description: Both natures — the first line follows the request (a building request handed to an element is the build process, a job of a working element is the working process). Give a request to the element of this node that does it — find it by its role, answer with its agent's Telegram bot or terminal, never do its work yourself. Load it whenever the person asks for something an element of the node does (sign-in, data, settings, design, a site, a custom element's job), asks who does what, or names an element.
 ---
 
 # Route a request to its element
 
-**Process: working** — nothing changes in git; you pass the request on and answer in two or three lines.
+**Process: both** — you change nothing yourself and answer in two or three lines; the first line names the process of the request you pass on.
 
 A hint, not a law: models of late 2026 work worse under rigid step-by-step instructions.
 
@@ -17,7 +17,7 @@ changes without its agent knowing.
 
 ## How
 
-1. `npm run find -- <the job in plain words>` — the registry's candidates; `npm run contacts` — every element with its role.
+1. `npm run find -- <the job in plain English words>` — the registry's candidates; `npm run contacts` — every element with its role.
 2. Pick the element whose role covers the job. Two fit — ask the person one question about how they differ, then record one role
    for each (`npm run role`).
 3. Answer with the element and how to reach its agent, as `contacts` prints it:

@@ -19,7 +19,8 @@ type Entry = {
   // 472: H2A · H2H · A2A — какие способы связи есть у элемента; в выдаче всегда из живого паспорта (отпечаток считает только визитку).
   messengers?: { h2a: boolean; h2h: boolean; a2a: boolean }
 }
-export type NodeEntry = Entry & { id: string; url: string | null; state: "fresh" | "drift" | "unpublished" | "no-card" }
+// "role" — службы без визитки A2A (auth, data, config, design …): в поиске её представляет одна роль в узле (548-6).
+export type NodeEntry = Entry & { id: string; url: string | null; state: "fresh" | "drift" | "unpublished" | "no-card" | "role" }
 
 type Props = { id?: string; summary?: string; a2a?: { card?: unknown } }
 
@@ -73,16 +74,40 @@ const STOP = new Set(["the", "and", "for", "from", "with", "that", "this", "into
 const wordsOf = (t: string) => t.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((w) => w.length > 2 && !STOP.has(w))
 const near = (a: string, b: string) => a === b || (a.length > 3 && b.length > 3 && (a.startsWith(b) || b.startsWith(a)))
 
-/** Найти: до `limit` записей, где совпали значимые слова запроса (теги и id навыков весят больше слов описания). */
+// 548-6, повторная проверка (2026-10-20, замерено командой главного агента `npm run find`): «sign in» вернул graph, lagrix,
+// template и native-template и не вернул auth; «design colours» не вернул design. Две причины: службы узла без визитки A2A
+// (auth, data, config, design) в поиск не попадали вовсе, а навыки, которые стартер даёт каждому рождённому элементу
+// (current-user, follow-settings, site-shell …), совпадали с любым запросом о входе или оформлении — они есть у всех и ничего не
+// отличают. Теперь роль элемента в узле — часть поиска и весит больше описания; служба без визитки ищется по своей роли
+// (`state: "role"`); навык, который есть не меньше чем у трёх элементов и у половины всех с визиткой, не считается (у маленького
+// узла общий навык ещё может совпасть — роль и описание всё равно решают).
+function nodeRoles(): Record<string, string> {
+  // Те же два файла, что читает сводка проектов (`lib/web4-items/dashboard-rows.ts`): умолчания служб в git и назначенные на узле.
+  const read = (p: string) => { try { return JSON.parse(readFileSync(p, "utf8")) as Record<string, unknown> } catch { return {} } }
+  const all = { ...read(join(process.cwd(), "WEB4-ITEMS-REGISTRY", "roles.json")), ...read(join(process.cwd(), "data", "node", "roles.json")) }
+  return Object.fromEntries(Object.entries(all).filter(([k, v]) => !k.startsWith("_") && typeof v === "string" && v.trim()).map(([k, v]) => [k, String(v).trim()]))
+}
+
+/** Найти: до `limit` записей, где совпали значимые слова запроса (теги навыков и роль в узле весят больше слов описания). */
 export function findEntries(query: string, limit = 10): (NodeEntry & { score: number })[] {
   const words = [...new Set(wordsOf(query))]
   if (!words.length) return []
-  return nodeEntries()
+  const roles = nodeRoles()
+  const carded = nodeEntries()
+  const seen = new Set(carded.map((e) => e.id))
+  const roleOnly: NodeEntry[] = (listServices() as unknown as { id: string }[])
+    .filter((s) => !seen.has(s.id) && roles[s.id])
+    .map((s) => ({ address: addressOf(s.id), name: s.id, description: roles[s.id], skills: [], hasCatalog: false, visibility: "node", fingerprint: "", card: null, id: s.id, url: serviceUrl(s.id), state: "role" as const }))
+  const count = new Map<string, number>()
+  for (const e of carded) for (const id of new Set(e.skills.map((s) => s.id))) count.set(id, (count.get(id) ?? 0) + 1)
+  const common = (id: string) => (count.get(id) ?? 0) >= 3 && (count.get(id) ?? 0) * 2 >= carded.length
+  return [...carded, ...roleOnly]
     .map((e) => {
-      const tags = [...new Set(e.skills.flatMap((s) => [s.id, ...s.id.split("-"), ...s.tags]).map((t) => t.toLowerCase()))]
+      const tags = [...new Set(e.skills.filter((s) => !common(s.id)).flatMap((s) => [s.id, ...s.id.split("-"), ...s.tags]).map((t) => t.toLowerCase()))]
+      const role = wordsOf(roles[e.id] ?? "")
       const text = wordsOf(`${e.name} ${e.description}`)
-      const score = words.reduce((n, w) => n + (tags.includes(w) ? 3 : tags.some((t) => near(t, w)) ? 1 : 0) + (text.some((t) => near(t, w)) ? 1 : 0), 0)
-      return { ...e, score }
+      const score = words.reduce((n, w) => n + (tags.includes(w) ? 3 : tags.some((t) => near(t, w)) ? 1 : 0) + (role.some((t) => near(t, w)) ? 2 : 0) + (text.some((t) => near(t, w)) ? 1 : 0), 0)
+      return { ...e, ...(roles[e.id] ? { role: roles[e.id] } : {}), score }
     })
     .filter((e) => e.score > 0)
     .sort((a, b) => b.score - a.score)
