@@ -43,7 +43,9 @@ function pathsIn(text, cwd) {
   for (const m of t.matchAll(/(?<![\w:/])([a-zA-Z]:[\\/][^\s"'`|&;<>()]*)/g)) out.push(m[1])
   for (const m of t.matchAll(/(?<![\w:./-])(\/[a-zA-Z]\/[^\s"'`|&;<>()]*)/g)) out.push(m[1])
   for (const m of t.matchAll(/(?:~|\$HOME|\$\{HOME\}|%USERPROFILE%)([\\/][^\s"'`|&;<>()]*)/g)) out.push(HOME + m[1])
-  for (const m of t.matchAll(/(?<![\w:/])((?:\.\.[\\/])+[^\s"'`|&;<>()]*|\.\.(?=$|[\s"'`|&;<>()]))/g)) out.push(resolve(cwd || DIR, m[1]))
+  // 548-14: `..` — путь, только если перед ним нет точки: многоточие «wait...» читалось как родительская папка, и агент
+  // переписывал свою заметку, пока не убрал многоточие (замерено 2026-10-20, template).
+  for (const m of t.matchAll(/(?<![\w:/.])((?:\.\.[\\/])+[^\s"'`|&;<>()]*|\.\.(?=$|[\s"'`|&;<>()]))/g)) out.push(resolve(cwd || DIR, m[1]))
   return out.map((p) => norm(isAbsolute(p) || /^[a-z]:/i.test(p) ? p : resolve(cwd || DIR, p)))
 }
 
