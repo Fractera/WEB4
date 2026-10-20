@@ -28,9 +28,13 @@ type State = "checking" | "sleeping" | "connecting" | "running" | "stopped" | "o
 // само — его открывает «Вставить». `keyHref` — поле ключа OpenAI для голоса в окне вставки (элемент — его вкладка, служба — ядра).
 // `compact` — узкий терминал (ящик рядом с Preview): «Очистить» и «Остановить» — только значок, имя в подсказке; «Вставить»
 // сохраняет значок и текст (слово владельца 2026-09-29).
-export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, keyHref, compact = false }: { service: string; lang: string; words: AgentTerminalWords; dialogUi: AppDialogUi; initialPaste?: string; keyHref?: string; compact?: boolean }) {
+// 552-4б: `mode="work"` — сессия рабочего процесса элемента («Рабочий процесс → Терминал»): дверь состояния `?mode=work`, ключ
+// сессии и сокета — из её ответа (`<id>--work`, `lib/agent-kit/modes.cjs`), а не собирается здесь второй раз.
+export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, keyHref, compact = false, mode }: { service: string; lang: string; words: AgentTerminalWords; dialogUi: AppDialogUi; initialPaste?: string; keyHref?: string; compact?: boolean; mode?: "work" }) {
   const api = `${BASE}/${lang}/architect/${service}/agent-api`
-  const sessionUrl = `${api}/session`
+  const sessionUrl = `${api}/session${mode === "work" ? "?mode=work" : ""}`
+  const keyRef = useRef(service)
+  const [noModes, setNoModes] = useState(false)
   const [state, setState] = useState<State>("checking")
   const [note, setNote] = useState("")
   const [folder, setFolder] = useState<string | null | undefined>(undefined)
@@ -106,7 +110,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
         return
       }
       const scheme = window.location.protocol === "https:" ? "wss" : "ws"
-      const ws = new WebSocket(`${scheme}://${window.location.host}${BASE}/pty/${service}`)
+      const ws = new WebSocket(`${scheme}://${window.location.host}${BASE}/pty/${keyRef.current}`)
       wsRef.current = ws
       quietCloseRef.current = false
 
@@ -171,8 +175,13 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
           setState("forbidden")
           return
         }
-        const body = (await res.json()) as { running?: boolean; agentDir?: string | null }
+        const body = (await res.json()) as { running?: boolean; agentDir?: string | null; service?: string; reason?: string }
         if (cancelled) return
+        if (body.reason === "no-modes") {
+          setNoModes(true)
+          return
+        }
+        if (body.service) keyRef.current = body.service
         setFolder(body.agentDir ?? null)
         const task = taskForStartRef.current
         taskForStartRef.current = null
@@ -201,7 +210,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
     quietCloseRef.current = true
     try {
       await fetch(sessionUrl, {
-        body: JSON.stringify({ action: "stop" }),
+        body: JSON.stringify({ action: "stop", ...(mode === "work" ? { mode } : {}) }),
         headers: { "Content-Type": "application/json" },
         method: "POST",
       })
@@ -211,7 +220,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
     wsRef.current?.close()
     setState("stopped")
     setNote(words.stopped)
-  }, [words.stopped])
+  }, [words.stopped, sessionUrl, mode])
 
   const handleClear = useCallback(() => {
     termRef.current?.reset()
@@ -242,6 +251,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
   if (state === "forbidden") {
     return <ForbiddenWithExit reason={words.forbidden} why={words.exitWhy} open={words.exitOpen} />
   }
+  if (noModes) return <p className="my-6 text-sm text-muted-foreground" data-agent-terminal data-state="no-modes">{words.noModes}</p>
 
   const live = state === "running" || state === "connecting"
 

@@ -5,6 +5,7 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { status, stop } from "../../_agent-kit/server/session.cjs"
 import { isBornItem, serviceDir } from "../../_agent-kit/server/workspace.cjs"
+import modes from "@/lib/agent-kit/modes.cjs"
 
 // СОСТОЯНИЕ СЕССИИ АГЕНТА СЛУЖБЫ (267-1; в маршруте службы — 271).
 // 🔒 ДВЕРЬ КОПИИ КОМПЛЕКТА АГЕНТА (271): шаблон `kits/_agent-kit/api/*/route.ts.tpl`, установщик подставил
@@ -37,6 +38,10 @@ async function guard(req: NextRequest) {
 }
 
 const unknown = () => NextResponse.json({ ok: false, reason: "unknown-service" }, { status: 404 })
+// 552-4б: `mode=work` — сессия рабочего процесса (`<id>--work`, `lib/agent-kit/modes.cjs`); она есть только у элемента с
+// группами навыков, у остальных — отказ `no-modes`, и страница так и говорит.
+const noModes = () => NextResponse.json({ ok: false, reason: "no-modes" }, { status: 409 })
+const keyOf = (service: string, dir: string, mode: unknown) => (mode === "work" ? (modes.hasGroups(dir) ? modes.sessionKey(service, "work") : null) : service)
 
 export async function GET(req: NextRequest, ctx: Ctx) {
   const denied = await guard(req)
@@ -44,15 +49,20 @@ export async function GET(req: NextRequest, ctx: Ctx) {
   const service = await serviceOf(ctx)
   const dir = service ? serviceDir(service) : null
   if (!service || !dir) return unknown()
-  return NextResponse.json({ ok: true, service, agentDir: dir, ...status(service) }, noStore)
+  const key = keyOf(service, dir, req.nextUrl.searchParams.get("mode"))
+  if (!key) return noModes()
+  return NextResponse.json({ ok: true, service: key, agentDir: dir, ...status(key) }, noStore)
 }
 
 export async function POST(req: NextRequest, ctx: Ctx) {
   const denied = await guard(req)
   if (denied) return denied
   const service = await serviceOf(ctx)
-  if (!service || !serviceDir(service)) return unknown()
-  const body = (await req.json().catch(() => null)) as { action?: string } | null
+  const dir = service ? serviceDir(service) : null
+  if (!service || !dir) return unknown()
+  const body = (await req.json().catch(() => null)) as { action?: string; mode?: string } | null
   if (body?.action !== "stop") return NextResponse.json({ ok: false, reason: "unknown-action" }, { status: 400 })
-  return NextResponse.json({ ...stop(service, "stopped"), ...status(service) }, noStore)
+  const key = keyOf(service, dir, body.mode)
+  if (!key) return noModes()
+  return NextResponse.json({ ...stop(key, "stopped"), ...status(key) }, noStore)
 }

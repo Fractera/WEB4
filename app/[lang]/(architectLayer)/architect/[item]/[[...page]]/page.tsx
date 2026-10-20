@@ -102,6 +102,8 @@ const PASSPORT_TASK: Record<'en' | 'ru', string> = {
 // H2A), и в «Строительстве» (у остальных). 528-1: ключ — полный путь страницы под элементом.
 const AGENT_PAGES: Record<string, AgentKitPage | undefined> = {
   'build/subscription': 'claude-code', 'build/terminal': 'terminal', 'build/telegram': 'telegram', 'messenger/h2a/telegram': 'telegram',
+  // 552-4б: сессия рабочего процесса — свой терминал в «Рабочем процессе».
+  'workflow/terminal': 'terminal-work',
 }
 
 const SUBSCRIPTIONS = 'workflow/process/subscriptions'

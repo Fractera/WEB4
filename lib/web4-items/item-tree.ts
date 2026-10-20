@@ -236,6 +236,8 @@ export const ITEM_TREE: TreePage[] = [
       ],
     },
     pages: [
+      // 552-4б: сессия агента рабочего процесса — задачи агентов других узлов; отдельная от «Строительства», закрывается сама.
+      { slug: "terminal", words: w("Terminal", "The agent session of the working process: tasks from agents of other nodes run here, and it closes itself when the work is done.", "Терминал", "Сессия агента рабочего процесса: здесь идут задачи агентов других узлов, и она закрывается сама, когда работа сделана.") },
       {
         slug: "process",
         words: w("Process", "Outside services the element may use and the work it runs on a schedule.", "Процесс", "Внешние сервисы, которыми может пользоваться элемент, и работа, которая идёт по расписанию."),

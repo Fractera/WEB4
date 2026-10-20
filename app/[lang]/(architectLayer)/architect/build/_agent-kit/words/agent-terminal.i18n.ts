@@ -7,6 +7,8 @@
 export type AgentTerminalWords = {
   folderLabel: string
   noFolder: string
+  /** 552-4б: у элемента без групп навыков нет отдельной сессии рабочего процесса */
+  noModes: string
   /** подсказка первого запуска: выбор по умолчанию в вопросе о доверии — «No, exit» (владелец нажал Enter и вышел) */
   firstRun: string
   warnTitle: string
@@ -45,6 +47,7 @@ const DICT: Record<string, AgentTerminalWords> = {
   en: {
     folderLabel: "The agent starts in:",
     noFolder: "This service is not installed on this node, so the agent has no folder to live in.",
+    noModes: "This element has no separate working-process session: its skills are not split into groups yet. Its agent does all work in the Build terminal.",
     firstRun: "First start: Claude Code asks whether you trust this folder, and «No, exit» is selected by default. Press ↓ to choose «Yes, I trust this folder», then Enter.",
     warnTitle: "This is a real command line of this computer",
     warnBody:
@@ -82,6 +85,7 @@ const DICT: Record<string, AgentTerminalWords> = {
   ru: {
     folderLabel: "Агент запускается в папке:",
     noFolder: "На этом узле нет этой службы, и агенту негде жить.",
+    noModes: "У этого элемента нет отдельной сессии рабочего процесса: его навыки ещё не разложены по группам. Всю работу агент делает в терминале «Строительства».",
     firstRun: "Первый запуск: Claude Code спросит, доверяете ли вы этой папке, и по умолчанию выбрано «No, exit». Нажмите ↓, чтобы выбрать «Yes, I trust this folder», затем Enter.",
     warnTitle: "Это настоящая командная строка этого компьютера",
     warnBody:

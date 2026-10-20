@@ -15,7 +15,8 @@ import { getService } from '@/lib/microservices/registry'
 // 🔒 ЭТО НЕ ВИД КАТАЛОГА (до 271 были `agentTerminal`, `claudeSubscription`, `telegramChannel`): вещь живёт в
 // папке своего маршрута, и удаление маршрута уносит её целиком. На страницу она встаёт полем `widget`.
 
-export type AgentKitPage = 'claude-code' | 'terminal' | 'telegram'
+// 552-4б: `terminal-work` — терминал сессии рабочего процесса элемента («Рабочий процесс → Терминал»).
+export type AgentKitPage = 'claude-code' | 'terminal' | 'terminal-work' | 'telegram'
 
 /**
  * 336-5: поле ключа OpenAI для голоса в окне вставки. Элемент (род `user`) — его вкладка «Переменные окружения» (ключ ядра, нет —
@@ -33,6 +34,8 @@ export function agentKitWidget(page: AgentKitPage, service: string, lang: string
       return <ClaudeSubscription service={service} lang={lang} words={claudeSubscriptionWords(lang)} />
     case 'terminal':
       return <AgentTerminal service={service} lang={lang} words={agentTerminalWords(lang)} dialogUi={appDialogUi(lang)} keyHref={openAiKeyHref(service, lang)} />
+    case 'terminal-work':
+      return <AgentTerminal service={service} lang={lang} words={agentTerminalWords(lang)} dialogUi={appDialogUi(lang)} keyHref={openAiKeyHref(service, lang)} mode="work" />
     case 'telegram':
       return <TelegramChannel service={service} lang={lang} words={telegramChannelWords(lang)} />
   }
