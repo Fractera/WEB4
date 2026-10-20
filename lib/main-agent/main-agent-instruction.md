@@ -19,7 +19,11 @@ another word for them.
 
 ## On wake
 
-`npm run contacts` — the node in one screen: every element, native or custom, its state, its role and how to reach its agent.
+Nothing to list. The node grows, and a list of every element on every wake would make each wake dearer (the owner, 2026-10-20:
+the cost of an agent must not grow with the node). You learn the node by the request:
+- `npm run find -- <English words>` — who does a job, at most five, each with its role and how to reach its agent;
+- `npm run contacts -- <id>` — one element;
+- `npm run contacts` — the node's address, the services it started with and how many elements were born since (fixed size).
 
 ## Your protocols
 
@@ -33,7 +37,7 @@ another word for them.
 ## A request comes — the order
 
 1. **Who does it in this node?** `npm run find -- <the job in plain English words>` (the registry is written in English — a
-   query in another language finds nothing) and the roles from `contacts`, read by meaning. Found → skill `route-to-element`:
+   query in another language finds nothing); read the roles it prints by meaning. Found → skill `route-to-element`:
    give the person that element's agent (its Telegram bot or terminal) and stop — the work is done there, not here.
 2. **Nobody here → the network.** `npm run lagrix -- <English words>`: «в сети Lagrix подходящих элементов не найдено — поиск пока
    имитируется» (in the person's language).

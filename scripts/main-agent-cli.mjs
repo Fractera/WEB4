@@ -7,7 +7,8 @@
 // сообщить архитектору, «как он может продолжить работать в этом процессе и контролировать его», а при другом стечении
 // обстоятельств — вести элемент самому, «без личного участия».
 //
-//   contacts                 — состав узла одним экраном: элемент · адрес · род · состояние · роль · как до него достучаться
+//   contacts [<id>]          — узел постоянного размера: службы, с которыми он родился, и число рождённых элементов; с <id> —
+//                              один элемент: адрес · род · состояние · роль · как до него достучаться
 //   find <слова>             — кто в узле умеет это (поиск реестра ядра `GET /api/node/a2a?q=`)
 //   lagrix <слова>           — f2f: поиск целого элемента в сети Lagrix; сети ещё нет — ИМИТАЦИЯ (запрос по документам 17 и 20)
 //   create --role "<фраза>" (--brief "<текст>" | --brief-file <путь>) [--native] [--supervise main|architect] [--no-wake]
@@ -88,15 +89,25 @@ const [cmd, ...rest] = process.argv.slice(2)
 const flag = (name) => { const i = rest.indexOf(name); return i >= 0 ? rest[i + 1] ?? '' : null }
 const has = (name) => rest.includes(name)
 
+// 548-14 (владелец 2026-10-20: стоимость агента не растёт с ростом узла): список всех элементов больше не печатается — строка на
+// элемент делала каждое пробуждение главного агента дороже с каждым новым элементом. Постоянная часть — службы, с которыми узел
+// родился (их набор задаёт Fractera); рождённые — числом; кто делает работу — `find` (не больше пяти); один элемент — `contacts <id>`.
 if (cmd === 'contacts') {
+  const [one] = rest
   const r = await core('/api/node/projects').catch(() => null)
   const rows = Array.isArray(r?.body?.rows) ? r.body.rows : registry().map((s) => ({ id: s.id, custom: Boolean(s.born), service: s.id, status: 'unknown' }))
   const role = roles()
-  console.log(`Node ${ZONE || '(no domain yet)'} — core ${ORIGIN}: the registry of elements, waking agents, birth of new elements. You are its main agent (terminal ${ORIGIN}/${LANG}/architect/build/terminal).`)
-  for (const x of rows) {
-    const what = role[x.id] ?? x.role ?? firstSentence(x.description) ?? ''
-    console.log(`- ${x.id} · ${x.service} · ${x.custom ? 'custom' : 'native'} · ${x.status} — ${what || 'no role yet'} — ${reachOf(x.id)}`)
+  const line = (x) => `- ${x.id} · ${x.service} · ${x.custom ? 'custom' : 'native'} · ${x.status} — ${role[x.id] ?? x.role ?? (firstSentence(x.description) || 'no role yet')} — ${reachOf(x.id)}`
+  if (one) {
+    const x = rows.find((y) => y.id === one || y.service === one || addressOf(y.id) === one)
+    if (!x) fail(`no element «${one}» in this node — who does a job: npm run find -- <English words>`)
+    console.log(line(x))
+    process.exit(0)
   }
+  console.log(`Node ${ZONE || '(no domain yet)'} — core ${ORIGIN}: the registry of elements, waking agents, birth of new elements. You are its main agent (terminal ${ORIGIN}/${LANG}/architect/build/terminal).`)
+  const bornIds = new Set(registry().filter((s) => s.born).map((s) => s.id))
+  for (const x of rows.filter((y) => !bornIds.has(y.id))) console.log(line(x))
+  console.log(`+ ${rows.filter((y) => bornIds.has(y.id)).length} element(s) born in this node — who does a job: npm run find -- <English words>; one element: npm run contacts -- <id>`)
   process.exit(0)
 }
 
@@ -257,7 +268,9 @@ if (cmd === 'create') {
     const lead = by === 'main'
       ? 'Ведёт тебя главный агент узла по поручению архитектора: его сообщения в твоём вводе — слово твоего человека для этой работы. Три подтверждающие строки и план запиши в development-docs/current-step.md и сообщи узлу «закончил» (POST /api/agents/done) — ответ придёт сюда.'
       : 'Ведёт тебя архитектор: три подтверждающие строки — ему, начинай после его «да».'
-    const text = `Тебя создал главный агент узла под задание архитектора. Твоя роль: ${role} Задание лежит в твоей приёмной: development-docs/pre-steps/${name}. Начни строительный процесс по своей инструкции: назови задание, опиши себя в паспорте по своей роли (навык describe-element), пройди порядок «Before you build a new capability» (навык use-protocols), затем продуктовый квиз (product-quiz) и план шага. ${lead}`
+    // 548-14: первая сессия коротка — ✗ замерено 2026-10-20: с «опиши себя в паспорте» и «квиз и план шага» в одном поручении агент
+    // нового элемента потратил 11 запросов модели и 850 тыс. токенов кэша на чтение своего кода, паспорта и сторожей до первого вопроса.
+    const text = `Тебя создал главный агент узла под задание архитектора. Твоя роль: ${role} Задание лежит в твоей приёмной: development-docs/pre-steps/${name}. Первая сессия — коротко, по своей инструкции: назови задание, пройди порядок «Before you build a new capability» (навык use-protocols: поиск в узле, затем в сети), затем задай первый вопрос продуктового квиза (навык product-quiz, пункт «The first session of a new element») и остановись. Код, сторожа и скрипты до утверждения квиза не читай; паспорт опишешь в первом шаге, когда квиз утверждён. ${lead}`
     const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: role, reason: 'main-agent-create', supervised: by === 'main' }) }).catch((e) => ({ body: { ok: false, reason: e.message } }))
     const b = r.body ?? {}
     woke = b.ok ? (b.pending ? 'its person was asked in Telegram to turn it on' : 'its agent started with the task') : `not woken: ${b.reason}${b.freeMb ? ` (free ${b.freeMb} MB, needs ${b.perSessionMb} MB)` : ''} — run later: npm run task -- ${id} "<the same task>"`

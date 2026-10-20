@@ -12,7 +12,7 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 
 ## The order
 
-1. **The node.** `npm run find -- <English words>` found nobody and the roles in `npm run contacts` do not cover it.
+1. **The node.** `npm run find -- <English words>` found nobody whose role covers it.
 2. **The network (f2f).** `npm run lagrix -- <English words>`. Today the answer is simulated and always empty — tell the person so in
    one line: «в сети Lagrix подходящих элементов не найдено (поиск в сети пока имитируется)».
 3. **Agree three things with the person:**

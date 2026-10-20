@@ -17,10 +17,11 @@ changes without its agent knowing.
 
 ## How
 
-1. `npm run find -- <the job in plain English words>` — the registry's candidates; `npm run contacts` — every element with its role.
+1. `npm run find -- <the job in plain English words>` — the registry's candidates, at most five, each with its role and how to reach
+   its agent (`npm run contacts -- <id>` — one element again). Never list the whole node: it grows.
 2. Pick the element whose role covers the job. Two fit — ask the person one question about how they differ, then record one role
    for each (`npm run role`).
-3. Answer with the element and how to reach its agent, as `contacts` prints it:
+3. Answer with the element and how to reach its agent, as `find` prints it:
    > «Это делает элемент **auth** — вход и роли для всех элементов. Его агент: Telegram t.me/<bot>, терминал <link>. Там его
    > среда разработки — напишите ему.»
 4. The element has no bot — give its terminal and say a bot can be connected on its page «Messenger → H2A → Telegram».
