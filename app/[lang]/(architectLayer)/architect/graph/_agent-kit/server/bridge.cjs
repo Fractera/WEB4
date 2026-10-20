@@ -138,6 +138,13 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // 2026-10-20 на erpxd: пустой ввод, журнала нет). Поэтому — первым, и за ним всегда другой флаг.
   const ownData = path.join(process.cwd(), 'data', 'services', service)
   if (existsSync(ownData) && !args.includes(ownData)) args = ['--add-dir', ownData, ...(args.length ? args : ['--permission-mode', 'auto'])]
+  // 548-20 (✗ 2026-10-20: Telegram молчал у разбуженных сессий): у Claude Code ОДИН на машину кэш неудачных подключений MCP
+  // (`~/.claude/mcp-needs-auth-cache.json`, ключ — имя сервера, 15 минут). Плагин канала включён у человека глобально и стартует в
+  // любой сессии; без бота токена нет — он падает, и 15 минут ВСЕ сессии машины пишут «Skipping connection (recent failure cached…)»
+  // и живут без Telegram (замерено: падение y7jos без бота 02:30:33Z; erpxd 23:48:48Z → «Skipping» у главного агента 23:49:28Z).
+  // Поэтому сессия без канала запускается с плагином, выключенным на этот запуск, — падать нечему. После `--add-dir`: тот забирает
+  // папки до следующего флага, а `viaChannel` уже посчитан.
+  if (!viaChannel) args = [...args, '--settings', JSON.stringify({ enabledPlugins: { [telegram.PLUGIN]: false } })]
   // 426 (✗ 2026-10-07: первое сообщение из Telegram пропало целиком — вставка по «3 с тишины» ушла раньше, чем Claude Code начал
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
