@@ -3150,3 +3150,21 @@ and the answers in the choice windows: «В каждый узел при уст�
   the agent»), «Dashboard» (an empty standard table) and «Analytics» (an empty chart, no invented numbers). A payment element's own Web2 page
   shows its keys (`_components/payment-self.tsx`): Stripe keys only there — `/api/node/stripe` accepts only the Stripe payment element now. The
   main agent's Web2 lists the node's payment elements.
+- **The describe task and the passport layout (551-5):** the core's task «Describe this WEB4 element…» (`lib/web4-items/element-describe.ts`)
+  asks for the current layout — name, shortDescription, longDescription, accepts, returns and the A2A card skills, never `summary` or
+  `provides` — then humanizer, `check:passport`, the person's yes, commit, `npm run describe:publish`. A payment element is born with a name
+  and its payment identity only: no promised description, so the home alarm burns until its agent describes it.
+- **A birth connects its address (551-6):** `scripts/item-birth.mjs` after health calls the same door as «Connect» (`POST /api/node/reach`)
+  and checks the address from the internet by fact (≤ 30 × 3 s); the birth line `===BIRTH_OK=== <id> port <p> url <address> answers <code>`.
+  After «Connect» the internet-address card re-checks by itself (≤ 90 s, nothing left running). The main agent sends a site link only when
+  the birth measured an answer.
+- **A link with a task wakes a sleeping terminal (551-7):** with `?paste=` and no session the page sends the task in `init` (`task`); the bridge
+  starts the agent with it as the first request and answers Claude Code's folder-trust question (`answerTrust`, as for a Telegram wake);
+  nothing is pressed in the terminal. A running terminal keeps the paste window and the person's button; a failed start (1008) puts the task
+  back into the paste window; `already-running` reconnects. «Start the agent» without a task still leaves the trust question to the person.
+- **A description asked in the person's own words (551-8):** the agent then takes `passport-description`, not `describe-element` (measured);
+  since templates v0.3.118 / v0.1.14 it also ends with `check:passport` → yes → commit → `npm run describe:publish`. Only that command hands
+  the texts to the core: registry, passport page, the home alarm. Not yet proven by a live agent run after the fix.
+- **Measured cost of one description (2026-10-20, `npm run qa:agent`):** from the core — 13 requests, 62 852 new, 951 762 from cache,
+  10 438 out (describe-element, passport-description, humanizer); from the element in own words — 13 requests, 49 695 new, 845 465 from
+  cache, 7 226 out (passport-description, humanizer). The first request of an element's session is ≈ 54 000 tokens.
