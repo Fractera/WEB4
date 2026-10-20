@@ -51,8 +51,10 @@ function Locked({ text }: { text: string }) {
   )
 }
 
-export function TelegramChannel({ service, lang, words }: { service: string; lang: string; words: TelegramChannelWords }) {
-  const door = `${BASE}/${lang}/architect/${service}/agent-api/channel`
+// 552-6: `slot` — ещё один бот элемента (`h2h` · `orders` · `work`, `_agent-kit/server/telegram-slots.cjs`): те же ступени 1–3, а
+// ступень 4 без терминала — как с ботом работать, владелец решит потом. Без `slot` — бот H2A, как прежде.
+export function TelegramChannel({ service, lang, words, slot }: { service: string; lang: string; words: TelegramChannelWords; slot?: string }) {
+  const door = `${BASE}/${lang}/architect/${service}/agent-api/channel${slot ? `?slot=${slot}` : ""}`
   const [state, setState] = useState<State | null | "forbidden">(null)
   const [token, setToken] = useState("")
   const [busy, setBusy] = useState<string | null>(null)
@@ -69,7 +71,7 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
     } catch {
       setError(words.errors.network)
     }
-  }, [words.errors.network])
+  }, [door, words.errors.network])
 
   useEffect(() => {
     load()
@@ -83,7 +85,7 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
         const res = await fetch(door, {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({ action, ...extra }),
+          body: JSON.stringify({ action, ...extra, ...(slot ? { slot } : {}) }),
         })
         const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string } & Record<string, unknown>
         if (!data.ok) setError(words.errors[data.error ?? ""] ?? words.errors.network)
@@ -95,7 +97,7 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
         setBusy(null)
       }
     },
-    [words.errors],
+    [door, slot, words.errors],
   )
 
   const configured = state !== null && state !== "forbidden" && state.configured && !!state.botUsername
@@ -108,18 +110,19 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
       const r = await fetch(door, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ action: "activation-link" }),
+        body: JSON.stringify({ action: "activation-link", ...(slot ? { slot } : {}) }),
       }).catch(() => null)
       const j = (await r?.json().catch(() => null)) as { ok?: boolean; url?: string } | null
       if (j?.ok && j.url) setActivationUrl(j.url)
     })()
-  }, [configured, activated, activationUrl])
+  }, [configured, activated, activationUrl, door, slot])
 
   // Адреса разделов — от адреса, на котором открыта страница: на своём домене это публичная ссылка, которую
   // человек откроет с телефона.
   // Узел хранит тексты системного сообщения: он отвечает боту и тогда, когда эта страница закрыта.
   useEffect(() => {
-    if (!configured) return
+    // 552-6: тексты системного сообщения — только бота H2A; бот ячейки отвечает своей строкой (`telegram-slots.cjs`).
+    if (!configured || slot) return
     const base = `${window.location.origin}${BASE}/${lang}`
     // `configured` уже сузил `state` до `State` (✗ 547: сравнение с "forbidden" здесь — ошибка типов, сборка упала).
     const links = state.links ?? { terminal: `/architect/${service}/terminal`, subscription: `/architect/${service}/claude-code` }
@@ -133,7 +136,7 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
         messages: { active: fill(words.msgActive), inactive: fill(words.msgInactive), noSubscription: fill(words.msgNoSubscription), lang },
       }),
     }).catch(() => null)
-  }, [configured, door, service, lang, words.msgActive, words.msgInactive, words.msgNoSubscription])
+  }, [configured, door, slot, service, lang, words.msgActive, words.msgInactive, words.msgNoSubscription])
 
   // Допуск делает узел сам; страница каждые 3 с спрашивает состояние — и нажатие START, и запуск или
   // остановку терминала человек видит здесь без перезагрузки.
@@ -257,6 +260,21 @@ export function TelegramChannel({ service, lang, words }: { service: string; lan
       <Step n={4} title={words.step4Title}>
         {!activated ? (
           <Locked text={words.locked} />
+        ) : slot ? (
+          <div className="flex flex-col gap-3" data-tg-slot={slot}>
+            <p className="text-muted-foreground text-sm">{words.slotStep4Text}</p>
+            {state.botUsername && (
+              <div>
+                <a href={`https://t.me/${state.botUsername}`} target="_blank" rel="noreferrer" className={buttonVariants({})} data-open-bot>
+                  <Send className="size-4" aria-hidden />
+                  {words.openChat} @{state.botUsername}
+                </a>
+              </div>
+            )}
+            <Small className="text-muted-foreground" data-allowed>
+              {words.allowedCount.replace("{n}", String(state.allowed))}
+            </Small>
+          </div>
         ) : (
           <div className="flex flex-col gap-3">
             <p className="text-muted-foreground text-sm">{words.step4Text}</p>

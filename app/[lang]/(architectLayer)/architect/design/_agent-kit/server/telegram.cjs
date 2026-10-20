@@ -30,6 +30,8 @@ const { isBornItem, serviceDir } = require('./workspace.cjs')
 const session = require('./session.cjs')
 const { claudeAuthState, extraBins, resolveBin } = require('./claude-cli.cjs')
 const { tableFor } = require('./translate.cjs')
+// 552-6: имя бота по режиму — только у элементов с группами навыков (тот же модуль режимов, что у моста).
+const modes = require(path.join(process.cwd(), 'lib', 'agent-kit', 'modes.cjs'))
 
 const ROOT = process.cwd()
 const PLUGIN = 'telegram@claude-plugins-official'
@@ -665,9 +667,26 @@ function startIdlePoller(service) {
  * весь Telegram, а `build`, `auth`, `root` есть у каждого узла. Ручка — только латиница, цифры и «_», не длиннее 32 знаков.
  */
 const NODE_CODE = createHash('sha256').update(`${ROOT}|${os.hostname()}`).digest('hex').slice(0, 4)
-function suggestion(service) {
+const elementAddress = (service) => {
   const address = readJson(path.join(ROOT, 'data', 'services', service, 'address.json'), null)?.address
-  const element = typeof address === 'string' && /^[a-z0-9-]{1,40}$/.test(address) ? address : service
+  return typeof address === 'string' && /^[a-z0-9-]{1,40}$/.test(address) ? address : service
+}
+
+/**
+ * 552-6 (владелец 2026-10-20: имена ботов без слова Fractera, с режимом; ручка — «Полностью, обрезая адрес»): у элемента с группами
+ * навыков имя `<Элемент>-<режим>-<ячейка>` и ручка `<адрес>_<режим>_<ячейка>_<код узла>_bot`; слова режима полностью, адрес элемента
+ * обрезается, чтобы ручка была ≤ 32 знаков (`templa_workspace_orders_d897_bot`). Зовут этот модуль (бот H2A) и `telegram-slots.cjs`.
+ */
+function namedSuggestion(service, mode, cell) {
+  const element = elementAddress(service)
+  const tail = `_${mode}_${cell}_${NODE_CODE}_bot`
+  const handle = element.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 32 - tail.length).replace(/_+$/, '')
+  return { name: `${element.charAt(0).toUpperCase()}${element.slice(1)}-${mode}-${cell}`, username: `${handle || 'e'}${tail}` }
+}
+
+function suggestion(service) {
+  if (modes.hasGroups(serviceDir(service))) return namedSuggestion(service, 'messenger', 'h2a')
+  const element = elementAddress(service)
   const tail = `_${NODE_CODE}_bot`
   const handle = element.replace(/[^A-Za-z0-9]+/g, '_').slice(0, 32 - 'Fractera_'.length - tail.length).replace(/_+$/, '')
   return { name: `Fractera-${element}`, username: `Fractera_${handle}${tail}` }
@@ -707,6 +726,8 @@ async function tellWaiting(service) {
 }
 
 module.exports = {
+  // 552-6: помощники и правило имени для ячеек ботов (`telegram-slots.cjs`).
+  tg, readJson, writeSecret, NODE_CODE, namedSuggestion,
   PLUGIN, isService, stateDir, storedToken, saveToken, activationLink, saveMessages, channelLaunch,
   running, channelState, startIdlePoller, connected, askToStart, setStarter, askToClose, personLang, setPersonLang, tellWaiting,
 }

@@ -28,7 +28,8 @@ export function openAiKeyHref(service: string, lang: string): string {
     : `/${lang}/architect/build/environment#OPENAI_API_KEY`
 }
 
-export function agentKitWidget(page: AgentKitPage, service: string, lang: string): ReactNode {
+/** 552-6: `slot` — ещё один бот элемента для страницы `telegram` (`h2h` · `orders` · `work`); без него — бот H2A. */
+export function agentKitWidget(page: AgentKitPage, service: string, lang: string, slot?: string): ReactNode {
   switch (page) {
     case 'claude-code':
       return <ClaudeSubscription service={service} lang={lang} words={claudeSubscriptionWords(lang)} />
@@ -37,6 +38,6 @@ export function agentKitWidget(page: AgentKitPage, service: string, lang: string
     case 'terminal-work':
       return <AgentTerminal service={service} lang={lang} words={agentTerminalWords(lang)} dialogUi={appDialogUi(lang)} keyHref={openAiKeyHref(service, lang)} mode="work" />
     case 'telegram':
-      return <TelegramChannel service={service} lang={lang} words={telegramChannelWords(lang)} />
+      return <TelegramChannel service={service} lang={lang} words={telegramChannelWords(lang)} slot={slot} />
   }
 }

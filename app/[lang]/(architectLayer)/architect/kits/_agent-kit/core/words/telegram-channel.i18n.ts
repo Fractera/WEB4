@@ -49,6 +49,8 @@ export type TelegramChannelWords = {
   // Ступень 4 — только состояние; запуск и остановка — во вкладке «Терминал» (решение владельца 2026-09-22).
   step4Title: string
   step4Text: string
+  /** 552-6: ступень 4 ещё одного бота элемента (H2H, заказы, работа) — без терминала. */
+  slotStep4Text: string
   cardActive: string
   cardInactive: string
   /** терминал запущен до того, как бот был подключён: `claude` в нём без канала */
@@ -109,6 +111,7 @@ const DICT: Record<string, TelegramChannelWords> = {
 
     step4Title: "Write to the bot",
     step4Text: "The bot works inside the Claude Code session of the terminal. You start and stop it in the «Terminal» tab.",
+    slotStep4Text: "The bot is connected to this element. How it will work is still being built: for now it answers every message with one line, and the node's main agent can write to you through it.",
     cardActive:
       "Everything you type in the Telegram chat is shown in your terminal — you can continue the conversation there at any moment.",
     cardInactive: "Your terminal is not active — Telegram cannot work. Press the button to open the terminal.",
@@ -128,6 +131,8 @@ const DICT: Record<string, TelegramChannelWords> = {
       "empty-token": "Paste the token first.",
       "bad-format": "That does not look like a bot token: digits, a colon, then a long line of letters.",
       "token-rejected": "Telegram does not recognise this token. Copy it from BotFather again.",
+      "token-used-by-another-bot": "This token already belongs to another bot of this element. Create a separate bot at BotFather.",
+      "unknown-slot": "This page has no such bot.",
       "telegram-unreachable": "Telegram did not answer. Check the internet on this computer.",
       "telegram-refused": "Telegram refused the request.",
       "no-bot-username": "Save the token first.",
@@ -181,6 +186,7 @@ const DICT: Record<string, TelegramChannelWords> = {
 
     step4Title: "Пишите боту",
     step4Text: "Бот работает внутри сессии Claude Code терминала. Запускаете и останавливаете её вы во вкладке «Терминал».",
+    slotStep4Text: "Бот подключён к этому элементу. Как он будет работать, ещё строится: пока он отвечает на каждое сообщение одной строкой, а главный агент узла может писать вам через него.",
     cardActive:
       "Всё, что вы печатаете в чате Telegram, отображается в вашем терминале — в нём вы можете продолжить общение в любой момент.",
     cardInactive: "Ваш терминал неактивен — Telegram не сможет работать. Нажмите кнопку, чтобы открыть терминал.",
@@ -200,6 +206,8 @@ const DICT: Record<string, TelegramChannelWords> = {
       "empty-token": "Сначала вставьте токен.",
       "bad-format": "Это не похоже на токен бота: цифры, двоеточие, затем длинная строка букв.",
       "token-rejected": "Telegram не узнаёт этот токен. Скопируйте его у BotFather заново.",
+      "token-used-by-another-bot": "Этот токен уже у другого бота этого элемента. Создайте у BotFather отдельного бота.",
+      "unknown-slot": "У этой страницы нет такого бота.",
       "telegram-unreachable": "Telegram не ответил. Проверьте интернет на этом компьютере.",
       "telegram-refused": "Telegram отклонил запрос.",
       "no-bot-username": "Сначала сохраните токен.",

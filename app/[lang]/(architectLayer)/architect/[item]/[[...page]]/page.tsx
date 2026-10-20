@@ -1,3 +1,5 @@
+import { existsSync } from 'node:fs'
+import { join } from 'node:path'
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
@@ -104,6 +106,16 @@ const AGENT_PAGES: Record<string, AgentKitPage | undefined> = {
   'build/subscription': 'claude-code', 'build/terminal': 'terminal', 'build/telegram': 'telegram', 'messenger/h2a/telegram': 'telegram',
   // 552-4б: сессия рабочего процесса — свой терминал в «Рабочем процессе».
   'workflow/terminal': 'terminal-work',
+}
+
+// 552-6 (владелец 2026-10-20: «поднимем четыре телеграмма … такой же подключение телеграмма но подставим эти названия»): ещё три бота
+// элемента — то же окно с ячейкой; только у элемента с группами навыков, у остальных страница остаётся текстом «ещё решается».
+const SLOT_PAGES: Record<string, 'h2h' | 'orders' | 'work' | undefined> = {
+  'messenger/h2h/telegram': 'h2h', 'workflow/a2a-orders/telegram': 'orders', 'workflow/a2a-work/telegram': 'work',
+}
+const hasSkillGroups = (id: string) => {
+  const dir = elementDir(id)
+  return Boolean(dir && existsSync(join(dir, '.claude', 'skills', 'build-skills', '.claude-plugin', 'plugin.json')))
 }
 
 const SUBSCRIPTIONS = 'workflow/process/subscriptions'
@@ -254,7 +266,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   ) : null
   // 435-2/3: абзацы под заголовком. 528-1 (владелец 2026-10-18: «описание длинной ленты не показывать скрывать их в аккордеона») —
   // свёрнуты в общий аккордеон продукта (shadcn), под ним список страниц.
-  const aboutText = r.service ? undefined : node.about?.[l]
+  const slot = SLOT_PAGES[key] && entry && hasSkillGroups(item) ? SLOT_PAGES[key] : undefined
+  const aboutText = r.service || slot ? undefined : node.about?.[l]
   const about = aboutText?.length ? (
     <div className="mb-4 max-w-3xl" data-tree-about>
       <AccordionSection
@@ -278,7 +291,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // Claude Code живёт в папке элемента `WEB4-ITEMS/user/<id>`. У черновика — объяснение.
   // 472: Telegram-бот — и в H2A (у элементов с флагом H2A), и в «Строительстве» (у остальных).
   const kitPage = AGENT_PAGES[key]
-  const agent = kitPage
+  const agent = slot ? agentKitWidget('telegram', item, lang, slot) : kitPage
     ? (entry ? agentKitWidget(kitPage, item, lang) : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).agentNotBorn}</p>)
     : null
 

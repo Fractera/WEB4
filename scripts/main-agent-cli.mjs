@@ -20,6 +20,7 @@
 //   close <id>               — выключить агента элемента (548-20: включает поручение под надзором, выключает главный агент)
 //   person                   — как связаться с архитектором из этой сессии (Telegram главного агента или терминал ядра)
 //   done [--close]           — сказать узлу «закончил» (или закрыть свою сессию) без чтения ключей узла
+//   telegram <id> [<ячейка> "<текст>"] — боты элемента (h2a · h2h · orders · work) или сообщение допущенным одного из них (552-6)
 // 🔒 Ничего не делается само: каждую команду запускает главный агент по слову человека или по событию надзора.
 
 import { appendFileSync, existsSync, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from 'node:fs'
@@ -205,6 +206,29 @@ if (cmd === 'close') {
   const b = r.body ?? {}
   console.log(b.ok ? `===CLOSE_OK=== ${id}: its agent is turned off` : b.reason === 'no-session' ? `===CLOSE_OK=== ${id}: its agent was already off` : `===CLOSE_FAIL=== ${id}: ${b.reason ?? r.status}`)
   process.exit(b.ok || b.reason === 'no-session' ? 0 : 1)
+}
+
+// 552-6 (владелец 2026-10-20: «если ядро решила написать человеку через Messenger она должна сумме это сделать»): боты элемента и
+// сообщение тем, кто допущен к одному из них по ссылке. Ячейки: h2a — разговор человека с агентом элемента, h2h — люди через агентов,
+// orders — заказы элемента у других агентов, work — работа элемента для других агентов.
+if (cmd === 'telegram') {
+  const [one, slot, ...words] = rest
+  if (!one) fail('telegram <id> [h2a|h2h|orders|work "<text>"]')
+  const e = registry().find((s) => s.id === one || addressOf(s.id) === one)
+  if (!e) fail(`no element ${one} in the registry`)
+  const text = words.join(' ').trim()
+  if (slot && !text) fail('telegram <id> <slot> "<text>" — the text is missing')
+  const r = await core('/api/agents/telegram', { method: 'POST', body: JSON.stringify({ service: e.id, ...(text ? { slot, text } : {}) }) }).catch((err) => fail(`the core did not answer: ${err.message}`))
+  const b = r.body ?? {}
+  if (!text) {
+    const bots = Object.entries(b.bots ?? {})
+    if (!b.ok) fail(`${one}: ${b.error ?? r.status}`)
+    if (!bots.length) console.log(`${one}: no Telegram bot is connected — the architect connects them on the element's pages Messenger → H2A / H2H → Telegram bot and Working process → A2A → Telegram`)
+    for (const [s, x] of bots) console.log(`${s.padEnd(6)} @${x.username} — ${x.people ? `${x.people} activated` : 'nobody activated yet: no one to write to'}`)
+    process.exit(0)
+  }
+  console.log(b.ok ? `===TELEGRAM_OK=== ${one} ${slot}: sent to ${b.sent}` : `===TELEGRAM_FAIL=== ${one} ${slot}: ${b.error ?? r.status}`)
+  process.exit(b.ok ? 0 : 1)
 }
 
 if (cmd === 'task') {

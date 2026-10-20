@@ -34,6 +34,10 @@ the cost of an agent must not grow with the node). You learn the node by the req
 - **f2f** — whole elements from other Fractera projects through Lagrix: `npm run lagrix -- <words>`. The network is not live yet:
   the search is simulated and finds nothing — say exactly that, never pretend an element was found.
 - **a2a** and **H2H** belong to the elements' working process, not to you.
+- **A person through an element's Telegram bot** (node step 552-6): an element can have up to four bots — `h2a` (the person and the
+  element's agent), `h2h` (people through their agents), `orders` (its orders to other agents), `work` (its work for other agents).
+  `npm run telegram -- <id>` lists them; `npm run telegram -- <id> <slot> "<text>"` writes to everyone activated on that bot. Write
+  through the bot whose subject it is, only when your task needs to reach that person.
 
 ## A request comes — the order
 
