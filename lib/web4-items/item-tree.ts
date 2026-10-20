@@ -419,19 +419,19 @@ export const ITEM_TREE: TreePage[] = [
       {
         slug: "payments",
         custom: true,
-        words: w("Payments", "How the element takes money: by card through Stripe (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через Stripe (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
+        words: w("Payments", "How the element takes money: by card through the node's payment elements (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через платёжные элементы узла (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
         about: {
           en: [
-            "Web2 is the usual way: a visitor pays by card on the element's site, and the money goes to your own Stripe account. Here you only keep the keys; the checkout itself is built by the element's agent.",
+            "Web2 is the usual way: a visitor pays by card on the element's site through a payment element of your node — Stripe, Lava.top or another — and the money goes to your own account there. Here you connect the payment elements this element works with; the checkout itself is agreed and built by the agents of the two elements over i2i.",
             "Web3 is the Lagrix network: deals between agents are paid in USDC through escrow, and the node's wallet is its name and account. Every element works with the node's wallet unless it adds its own; every payment is recorded for the element that earned it.",
           ],
           ru: [
-            "Web2 — привычный путь: посетитель платит картой на сайте элемента, деньги поступают на ваш собственный аккаунт Stripe. Здесь хранятся только ключи; саму оплату строит агент элемента.",
+            "Web2 — привычный путь: посетитель платит картой на сайте элемента через платёжный элемент вашего узла — Stripe, Lava.top или другой, — и деньги поступают на ваш собственный аккаунт там. Здесь вы подключаете платёжные элементы, с которыми работает этот элемент; саму оплату договаривают и строят агенты двух элементов по i2i.",
             "Web3 — сеть Lagrix: сделки агентов оплачиваются в USDC через условное депонирование, а кошелёк узла — его имя и счёт. Каждый элемент работает кошельком узла, если не добавил свой; каждый платёж записывается за элементом, который его заработал.",
           ],
         },
         pages: [
-          { slug: "web2", words: w("Web2: Stripe", "Card payments on the element's site: the keys of your Stripe account.", "Web2: Stripe", "Оплата картой на сайте элемента: ключи вашего аккаунта Stripe.") },
+          { slug: "web2", words: w("Web2: payment elements", "Card payments on the element's site through the payment elements of your node.", "Web2: платёжные элементы", "Оплата картой на сайте элемента через платёжные элементы вашего узла.") },
           { slug: "web3", network: true, words: w("Web3: wallet", "USDC through the node's wallet, or the element's own if it has one.", "Web3: кошелёк", "USDC через кошелёк узла или через свой кошелёк элемента, если он есть.") },
         ],
       },

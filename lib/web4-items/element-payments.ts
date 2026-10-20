@@ -32,7 +32,9 @@ const amount = (v: unknown): number | null =>
     ? Math.round(v * 100) / 100
     : null
 
-export type CardInput = { name: string; consultation: number; usage: number; commission: boolean }
+/** `web2` — инструменты подключённых платёжных элементов, через которые карточку можно оплатить картой (551-5); нет — не меняется. */
+export type CardInput = { name: string; consultation: number; usage: number; commission: boolean; web2?: string[] }
+const TOOL = /^[a-z][a-z0-9-]{0,39}$/
 
 /** Проверка карточки из тела двери; отказ называет род — `bad-card`, `bad-amount`, `bad-switch`. */
 export function parseCard(body: unknown): { ok: true; value: CardInput } | { ok: false; error: "bad-card" | "bad-amount" | "bad-switch" } {
@@ -42,7 +44,8 @@ export function parseCard(body: unknown): { ok: true; value: CardInput } | { ok:
   const usage = amount(c.usage)
   if (consultation === null || usage === null) return { ok: false, error: "bad-amount" }
   if (typeof c.commission !== "boolean") return { ok: false, error: "bad-switch" }
-  return { ok: true, value: { name: c.name, consultation, usage, commission: c.commission } }
+  if (c.web2 !== undefined && !(Array.isArray(c.web2) && c.web2.every((t) => typeof t === "string" && TOOL.test(t)))) return { ok: false, error: "bad-card" }
+  return { ok: true, value: { name: c.name, consultation, usage, commission: c.commission, ...(Array.isArray(c.web2) ? { web2: [...new Set(c.web2 as string[])] } : {}) } }
 }
 
 const asObject = (v: unknown): Record<string, unknown> => (v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : {})
@@ -75,13 +78,49 @@ export async function readPayments(id: string): Promise<{ payments: ElementPayme
   return { payments, sample: cardOf(payments, SAMPLE_CARD) }
 }
 
-/** Сохранить цены карточки; описание (его пишет агент) и остальные части `payments` не трогаются. */
-export async function saveCard(id: string, v: CardInput): Promise<boolean> {
+/** Сохранить цены карточки; описание (его пишет агент) и остальные части `payments` не трогаются. `web2` (551-5) — отметки «оплата
+ *  картой» у подключённых инструментов: отмеченный получает `web2[<инструмент>]["a2a-card"][<имя>] = {}`, снятый теряет эту запись;
+ *  неподключённый инструмент — отказ `not-connected`, файл не меняется. */
+export async function saveCard(id: string, v: CardInput): Promise<"ok" | "no-passport" | "not-connected"> {
   const raw = await readPassport(id)
-  if (!raw) return false
+  if (!raw) return "no-passport"
   const p = paymentsOf(raw)
   const cards = { ...(p.web3?.["a2a-card"] ?? {}) }
   const prev = cards[v.name] ?? {}
   cards[v.name] = { description: typeof prev.description === "string" ? prev.description : "", consultation: v.consultation, usage: v.usage, commission: v.commission }
-  return writePassportField(id, "payments", { ...p, web3: { ...(p.web3 ?? {}), "a2a-card": cards } })
+  let web2 = p.web2
+  if (v.web2) {
+    const connected = Object.keys(p.web2 ?? {})
+    if (v.web2.some((t) => !connected.includes(t))) return "not-connected"
+    web2 = Object.fromEntries(connected.map((t) => {
+      const tool = { ...(p.web2?.[t] ?? {}) }
+      const byCard = { ...(tool["a2a-card"] ?? {}) }
+      if (v.web2!.includes(t)) byCard[v.name] = {}
+      else delete byCard[v.name]
+      return [t, { ...tool, "a2a-card": byCard }]
+    }))
+  }
+  const ok = await writePassportField(id, "payments", { ...p, web3: { ...(p.web3 ?? {}), "a2a-card": cards }, ...(web2 ? { web2 } : {}) })
+  return ok ? "ok" : "no-passport"
+}
+
+export type ConnectInput = { tool: string; on: boolean }
+
+/** Проверка подключения из тела двери: `{ connect: { tool, on } }`, иначе `bad-connect`. */
+export function parseConnect(body: unknown): { ok: true; value: ConnectInput } | { ok: false; error: "bad-connect" } {
+  const c = (body as { connect?: Record<string, unknown> } | null)?.connect
+  return c && typeof c.tool === "string" && TOOL.test(c.tool) && typeof c.on === "boolean"
+    ? { ok: true, value: { tool: c.tool, on: c.on } }
+    : { ok: false, error: "bad-connect" }
+}
+
+/** Подключить платёжный элемент (`web2[<инструмент>].element`) или снять подключение вместе с отметками карточек. */
+export async function saveConnect(id: string, v: ConnectInput, element: string): Promise<boolean> {
+  const raw = await readPassport(id)
+  if (!raw) return false
+  const p = paymentsOf(raw)
+  const web2 = { ...(p.web2 ?? {}) }
+  if (v.on) web2[v.tool] = { ...(web2[v.tool] ?? {}), element }
+  else delete web2[v.tool]
+  return writePassportField(id, "payments", { ...p, web2 })
 }

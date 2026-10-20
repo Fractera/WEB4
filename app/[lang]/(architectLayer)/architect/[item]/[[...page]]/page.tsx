@@ -60,7 +60,11 @@ import { LagrixRating } from '@/components/element-docs/lagrix-rating'
 import { lagrixRatingUi } from '../../../_i18n/lagrix-rating.i18n'
 import { ElementMessengerSettings } from '../../../_components/element-messenger-settings.client'
 import { messengerSettingsUi } from '../../../_i18n/element-messenger-settings.i18n'
-import { StripeKeys } from '@/components/payments/stripe-keys.client'
+import { PaymentElements } from '../../../_components/payment-elements.client'
+import { PaymentSelf } from '../../../_components/payment-self'
+import { paymentElementsUi } from '../../../_i18n/payment-elements.i18n'
+import { paymentOf } from '@/lib/web4-items/payment-elements'
+import { tableUi } from '@/sections/table.i18n'
 import { paymentsUi } from '@/components/payments/payments.i18n'
 import { NodeWalletCard } from '@/components/wallet/node-wallet.client'
 import { nodeWalletUi } from '@/components/wallet/node-wallet.i18n'
@@ -446,7 +450,12 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // кошелёк узла, свой добавляется и удаляется (снова кошелёк узла) — слово владельца в `lib/web4-items/node-wallet.ts`.
   const pw = paymentsUi(lang)
   const payments = key === 'settings/payments/web2'
-    ? (entry ? <StripeKeys target={item} words={pw.stripe} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
+    // 551-5 (владелец 2026-10-20): Web2 — платёжные элементы узла аккордеоном с «Подключить»; у самого платёжного элемента — его ключи.
+    ? (entry
+      ? (paymentOf(item)
+        ? <PaymentSelf item={item} tool={paymentOf(item)!.tool} lang={lang} ui={paymentElementsUi(lang)} />
+        : <PaymentElements item={item} address={slug} lang={lang} ui={paymentElementsUi(lang)} table={tableUi(lang)} />)
+      : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
     : key === 'settings/payments/web3'
       ? (entry ? <NodeWalletCard words={nodeWalletUi(lang)} note={pw.web3ElementNote} element={item} /> : <p className="my-4 text-sm text-muted-foreground">{pw.notBorn}</p>)
       : null
@@ -470,7 +479,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const cardUi = capabilityCardUi(lang)
   const capabilities = key === 'workflow/a2a-work/capabilities'
     ? (entry
-      ? <CapabilityCards item={item} ui={cardUi} describeHref={terminalLink({ lang, service: `${slug}/build`, text: cardUi.describeTask })} />
+      ? <CapabilityCards item={item} ui={cardUi} describeHref={terminalLink({ lang, service: `${slug}/build`, text: cardUi.describeTask })} web2Href={`/${lang}${dir}/settings/payments/web2`} />
       : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).notBorn}</p>)
     : null
 

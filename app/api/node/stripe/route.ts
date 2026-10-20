@@ -6,8 +6,11 @@ import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { isBornElement } from "@/lib/web4-items/element-delete"
 import { idOfAddress } from "@/lib/web4-items/element-address"
 import { parseStripe, probeStripe, saveStripe, stripeState } from "@/lib/stripe-keys"
+import { paymentOf } from "@/lib/web4-items/payment-elements"
 
-// КЛЮЧИ STRIPE (530-1): `?target=core` или адрес/id рождённого элемента.
+// КЛЮЧИ STRIPE (530-1): адрес/id платёжного элемента Stripe узла. 551-5 (владелец 2026-10-20: «Web два … не должен как скопировать
+// только на страйп а вместо этого должен … показывать с какими платёжными элементами он интегрирован»): ключи живут в самом элементе
+// Stripe (паспорт `payment.tool = "stripe"`); 🪦 цель «ядро» и любой другой элемент сняты — их ключи никто не читал.
 //   GET  — какие ключи заданы и режим (test/live). Значений в ответе нет никогда.
 //   POST `{ target, secretKey?, publishableKey?, webhookSecret? }` — формат каждого, один режим у пары, секретный ключ — настоящим вызовом
 //        Stripe; отказ — 400/422/502 с родом, `.env.local` не тронут.
@@ -17,9 +20,8 @@ export const dynamic = "force-dynamic"
 const NO_STORE = { "Cache-Control": "no-store" }
 
 function targetOf(raw: string): string | null {
-  if (raw === "core") return "core"
   const id = idOfAddress(raw)
-  return id && isBornElement(id) ? id : null
+  return id && isBornElement(id) && paymentOf(id)?.tool === "stripe" ? id : null
 }
 
 async function gate(req: NextRequest): Promise<NextResponse | null> {

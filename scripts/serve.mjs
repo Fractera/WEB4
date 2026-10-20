@@ -144,6 +144,10 @@ async function start() {
   let ownDomain = null
   try { ownDomain = JSON.parse(readFileSync(path.join(root, 'logs', 'domain.json'), 'utf8')).hostname || null } catch { /* домена нет */ }
   if (!ownDomain && !readTunnel()?.unpublished) await publish({ quietPrice: true })
+  // 551-5 (владелец 2026-10-20: «мы установим внутрь проекта по умолчанию два платёжных кастомных элем : Stripe Lava.top», «В каждый
+  // узел при установке»): рождаются платёжные элементы, которых в узле ещё не было; удалённый человеком не возвращается (отметка
+  // `data/node/payment-elements.json`). У узла, где оба уже есть, шаг ничего не делает. Рождение — минуты: сайт уже в интернете.
+  spawnSync(process.execPath, [path.join(here, 'payment-elements.mjs')], { cwd: root, stdio: 'inherit', windowsHide: true })
   await refreshPages(url)
   await printAddresses(url, freshInstall)
 }

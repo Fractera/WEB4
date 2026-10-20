@@ -1,0 +1,17 @@
+{
+  "_": "Node step 551-5 (owner of the node, 2026-10-20: «Так как у нас в данный момент f2f пока ещё не работает мы установим внутрь проекта по умолчанию два платёжных кастомных элем : Stripe Lava.top»; where — «В каждый узел при установке»). The payment elements every node gets: born from the custom template (WEB4-ITEMS-REGISTRY/item-template.json) by scripts/payment-elements.mjs, the same way as the button «Create WEB4 ITEM», then given their passport identity `payment: { tool, name }`. Their payment code (checkout, hooks) is built later by agents over i2i. A payment element the person removed is not born again (data/node/payment-elements.json remembers the births). Roles — WEB4-ITEMS-REGISTRY/roles.json.",
+  "elements": [
+    {
+      "id": "stripe",
+      "name": "Stripe",
+      "tool": "stripe",
+      "shortDescription": "Card payments through Stripe for the elements of this node: a visitor pays on an element's site, and the money goes to your own Stripe account."
+    },
+    {
+      "id": "lavatop",
+      "name": "Lava.top",
+      "tool": "lava-top",
+      "shortDescription": "Payments through Lava.top for the elements of this node: a visitor pays on an element's site, and the money goes to your own Lava.top account."
+    }
+  ]
+}

@@ -23,6 +23,10 @@ export type CapabilityCardUi = {
   commission: string
   commissionHint: string[]
   commissionDocs: LagrixDoc[]
+  web2Title: string
+  web2Lead: string
+  web2None: string
+  web2Open: string
   hint: string
   save: string
   saving: string
@@ -68,6 +72,10 @@ const DICT: Record<"en" | "ru", CapabilityCardUi> = {
       "On by default, and we recommend leaving it on.",
     ],
     commissionDocs: ["26-developer-share", "09-fee-distribution"],
+    web2Title: "Card payments (Web2)",
+    web2Lead: "Through which connected payment elements a person can pay for this card by card.",
+    web2None: "No payment element is connected to this element yet.",
+    web2Open: "Settings → Payments → Web2",
     hint: "What it means",
     save: "Save",
     saving: "Saving…",
@@ -78,6 +86,7 @@ const DICT: Record<"en" | "ru", CapabilityCardUi> = {
       "bad-amount": "A price is a number from 0 to 10,000 with at most two decimals.",
       "bad-switch": "The developer share is on or off.",
       "bad-card": "The card has no valid name.",
+      "not-connected": "That payment element is not connected to this element.",
       "no-passport": "The element has no passport.",
     },
     describeTask: "Now you write the description of this element's capability card «sample» for other agents, using the user's text below. Use skill passport-description, section «Capability card description»: write it into OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json, field payments.web3.a2a-card.sample.description, and change nothing else; show me the text before saving.\nUser's text:\n",
@@ -115,6 +124,10 @@ const DICT: Record<"en" | "ru", CapabilityCardUi> = {
       "По умолчанию включено — рекомендуем так и оставить.",
     ],
     commissionDocs: ["26-developer-share", "09-fee-distribution"],
+    web2Title: "Оплата картой (Web2)",
+    web2Lead: "Через какие подключённые платёжные элементы человек может оплатить эту карточку картой.",
+    web2None: "К этому элементу пока не подключён ни один платёжный элемент.",
+    web2Open: "Настройки → Платежи → Web2",
     hint: "Что это значит",
     save: "Сохранить",
     saving: "Сохраняю…",
@@ -125,6 +138,7 @@ const DICT: Record<"en" | "ru", CapabilityCardUi> = {
       "bad-amount": "Цена — число от 0 до 10 000, не больше двух знаков после запятой.",
       "bad-switch": "Доля разработчика — включена или выключена.",
       "bad-card": "У карточки нет верного имени.",
+      "not-connected": "Этот платёжный элемент не подключён к элементу.",
       "no-passport": "У элемента нет паспорта.",
     },
     describeTask: "Сейчас ты пишешь описание карточки возможностей «sample» этого элемента для других агентов, используя текст пользователя ниже. Используй навык passport-description, раздел «Capability card description»: запиши его в OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json, поле payments.web3.a2a-card.sample.description, и больше ничего не меняй; покажи мне текст до сохранения.\nТекст пользователя:\n",

@@ -4,6 +4,7 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
 import { Field, FieldDescription, FieldLabel } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
@@ -26,14 +27,22 @@ import type { CapabilityCardUi } from "../_i18n/capability-card.i18n"
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 type Card = { description: string; consultation: number; usage: number; commission: boolean }
+type Web2 = { tool: string; name: string; on: boolean }
+type PaymentsReply = {
+  ok?: boolean
+  sample?: { card: Card }
+  payments?: { web2?: Record<string, { "a2a-card"?: Record<string, unknown> }> }
+  paymentElements?: { tool: string; name: string; connected: boolean }[]
+}
 
-export function CapabilityCards({ item, ui, describeHref }: { item: string; ui: CapabilityCardUi; describeHref: string }) {
+export function CapabilityCards({ item, ui, describeHref, web2Href }: { item: string; ui: CapabilityCardUi; describeHref: string; web2Href: string }) {
   const [open, setOpen] = useState(false)
   const [state, setState] = useState<"loading" | "ready" | "failed">("loading")
   const [description, setDescription] = useState("")
   const [consultation, setConsultation] = useState("0")
   const [usage, setUsage] = useState("0")
   const [commission, setCommission] = useState(true)
+  const [web2, setWeb2] = useState<Web2[]>([])
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -41,13 +50,14 @@ export function CapabilityCards({ item, ui, describeHref }: { item: string; ui: 
     let live = true
     fetch(`${BASE}/api/node/payments?item=${encodeURIComponent(item)}`, { cache: "no-store" })
       .then((r) => r.json())
-      .then((j: { ok?: boolean; sample?: { card: Card } }) => {
+      .then((j: PaymentsReply) => {
         if (!live) return
         if (!j.ok || !j.sample) { setState("failed"); return }
         setDescription(j.sample.card.description)
         setConsultation(String(j.sample.card.consultation))
         setUsage(String(j.sample.card.usage))
         setCommission(j.sample.card.commission)
+        setWeb2((j.paymentElements ?? []).filter((e) => e.connected).map((e) => ({ tool: e.tool, name: e.name, on: Boolean(j.payments?.web2?.[e.tool]?.["a2a-card"]?.sample) })))
         setState("ready")
       })
       .catch(() => live && setState("failed"))
@@ -62,7 +72,7 @@ export function CapabilityCards({ item, ui, describeHref }: { item: string; ui: 
       const r = await fetch(`${BASE}/api/node/payments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item, card: { name: "sample", consultation: num(consultation), usage: num(usage), commission } }),
+        body: JSON.stringify({ item, card: { name: "sample", consultation: num(consultation), usage: num(usage), commission, web2: web2.filter((w) => w.on).map((w) => w.tool) } }),
       })
       const j = (await r.json().catch(() => null)) as { ok?: boolean; error?: string } | null
       setNote(r.ok && j?.ok ? { ok: true, text: ui.saved } : { ok: false, text: ui.errors[j?.error ?? ""] ?? ui.failed })
@@ -128,6 +138,18 @@ export function CapabilityCards({ item, ui, describeHref }: { item: string; ui: 
                       </div>
                       <DocLinks lang={ui.lang} docs={ui.commissionDocs} />
                     </div>
+                    <section className="flex flex-col gap-2" data-card-web2={web2.length}>
+                      <span className="text-sm font-medium">{ui.web2Title}</span>
+                      <p className="text-xs text-muted-foreground">{ui.web2Lead}</p>
+                      {web2.length
+                        ? web2.map((w) => (
+                          <div key={w.tool} className="flex items-center gap-2">
+                            <Checkbox id={`card-web2-${w.tool}`} checked={w.on} onCheckedChange={(v) => setWeb2((xs) => xs.map((x) => (x.tool === w.tool ? { ...x, on: v === true } : x)))} data-card-web2-tool={w.tool} />
+                            <Label htmlFor={`card-web2-${w.tool}`}>{w.name}</Label>
+                          </div>
+                        ))
+                        : <p className="text-sm text-muted-foreground">{ui.web2None} <Link className="text-primary underline-offset-4 hover:underline" href={web2Href}>{ui.web2Open}</Link></p>}
+                    </section>
                     <div className="flex flex-wrap items-center gap-3">
                       <Button type="button" onClick={save} disabled={busy} data-card-save>{busy ? ui.saving : ui.save}</Button>
                       {note && <p className={`text-sm ${note.ok ? "text-muted-foreground" : "text-destructive"}`} role={note.ok ? "status" : "alert"}>{note.text}</p>}
