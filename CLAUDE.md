@@ -3057,5 +3057,13 @@ Owner, verbatim (all words — `/code` `new-steps/548/548-6.md`): the element «
 - **Instruments**: `npm run qa:agent -- <id | address | build>` — the agent's last session journal without a model (instructions, own
   skills without description, tokens per question, skills by nature, outside paths); `npm run agent:screen -- <id | build>` — its live
   screen, read only.
+- **Registry search (repeat QA 2026-10-20).** `findEntries` (`lib/a2a/node-registry.ts`, door `GET /api/node/a2a?q=`, `npm run find` of the
+  main agent, `npm run a2a -- find` of elements) finds services by their role (`roles.json`), including those without an A2A card (auth,
+  data, config, design — `state: "role"`); skills every born element shares do not count; a prefix matches only an almost whole word;
+  a query without Latin letters answers «search again in English». Before: «sign in» gave four wrong elements and no auth.
+- **An element the main agent just created** wakes with consent to its folder (`reason: main-agent-create`, no bot): on a fresh machine
+  the trust question would hang silently. Not live-proven here — this machine trusts the home folder.
+- `npm run passport -- me` of both templates (v0.3.108, v0.1.4) carries `role` and `languages`; the main agent names the process by the
+  request, in Russian «Строительный процесс» / «Рабочий процесс»; `supervise-element` is the build process, `route-to-element` both.
 - 🛑 **Known gap**: deleting an element whose agent session is alive leaves its folder (`busy`) — close its terminal first
   (`/code` `ANTI-PATTERNS.md`).
