@@ -155,7 +155,8 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // папки до следующего флага, а `viaChannel` уже посчитан.
   // 552-4: у элемента с группами навыков `--settings` несёт и группы режима (`lib/agent-kit/modes.cjs`); у остальных — как прежде.
   const off = viaChannel ? {} : { [telegram.PLUGIN]: false }
-  if (modes.hasGroups(cwd)) args = [...args, '--settings', JSON.stringify(modes.modeSettings(cwd, mode, off)), '--append-system-prompt', modes.sessionNote(mode)]
+  // 552-5: системная подсказка сессии — фраза режима и, если у элемента есть `.claude/modes/<режим>.md`, законы режима (одним файлом).
+  if (modes.hasGroups(cwd)) args = [...args, '--settings', JSON.stringify(modes.modeSettings(cwd, mode, off)), ...modes.promptArgs(cwd, mode, path.join(process.cwd(), 'data', 'node', 'agent-prompts'), service)]
   else if (!viaChannel) args = [...args, '--settings', JSON.stringify({ enabledPlugins: off })]
   // 426 (✗ 2026-10-07: первое сообщение из Telegram пропало целиком — вставка по «3 с тишины» ушла раньше, чем Claude Code начал
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в

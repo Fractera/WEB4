@@ -5,9 +5,11 @@
 //   - строительство не видит `workspace-skills` и `messenger-skills`;
 //   - каждая группа-папка элемента названа в модуле: у групп `defaultEnabled: true`, и неназванная группа осталась бы включённой
 //     во ВСЕХ режимах;
-//   - вне строительства каждый вендорный навык выключен.
+//   - вне строительства каждый вендорный навык выключен;
+//   - (552-5) у элемента с `.claude/modes/` подсказка сессии — фраза и законы своего режима: build несёт «Steps» без «Cron», work — наоборот.
 // Владелец 2026-10-20 (552): «разделить процессы и протестировать что они не пересекаются». Нарушение — код 1.
-import { existsSync, readdirSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { createRequire } from 'node:module'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -46,6 +48,21 @@ for (const { name, dir } of elements) {
       const both = [...seen[MODES[i]]].filter((g) => g !== modes.COMMON && seen[MODES[j]].has(g))
       if (both.length) problems.push(`${name}: режимы ${MODES[i]} и ${MODES[j]} оба видят ${both.join(', ')}`)
     }
+  }
+  // 552-5: законы режима доходят до своей сессии и только до неё — тот же вызов, что у моста, во временную папку.
+  if (modes.modeFile(dir, 'build') || modes.modeFile(dir, 'work')) {
+    const out = mkdtempSync(join(tmpdir(), 'check-modes-'))
+    for (const [mode, own, foreign] of [['build', '## Steps', '## Cron automations'], ['work', '## Cron automations', '## Steps']]) {
+      const args = modes.promptArgs(dir, mode, out, `${name}-${mode}`)
+      if (args[0] !== '--append-system-prompt-file') { problems.push(`${name} ${mode}: нет файла .claude/modes/${mode}.md — законы режима не дойдут`); continue }
+      const text = readFileSync(args[1], 'utf8')
+      if (!text.startsWith(modes.sessionNote(mode))) problems.push(`${name} ${mode}: подсказка не начинается с фразы сессии`)
+      if (!text.includes(own)) problems.push(`${name} ${mode}: в подсказке нет «${own}»`)
+      if (text.includes(foreign)) problems.push(`${name} ${mode}: в подсказке чужой раздел «${foreign}»`)
+    }
+    rmSync(out, { recursive: true, force: true })
+  } else if (modes.promptArgs(dir, 'build', tmpdir(), 'unused')[0] !== '--append-system-prompt') {
+    problems.push(`${name}: без файлов режима мост обязан передавать фразу строкой, как до 552-5`)
   }
   const skills = join(dir, '.claude', 'skills')
   for (const g of dirs(skills).filter((d) => existsSync(join(skills, d, '.claude-plugin', 'plugin.json')))) {
