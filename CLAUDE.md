@@ -3095,3 +3095,19 @@ Owner, verbatim (all words — `/code` `new-steps/548/548-6.md`): the element «
 - **548-15.** `npm run supervise` keeps the brief of the record; the Telegram wake text of a person's message asks only
   `npm run passport -- me`. The agent kit is required from disk at start (`server.js` → `lib/agent-kit/mount.cjs`): a change of
   `_agent-kit/core/server/*.cjs` needs `npm run agent-kit:update -- <group>` for every copy and a core restart, not a rebuild.
+- **The main agent turns element agents on and off itself (548-20; owner 2026-10-20: «я хочу чтобы агент включался автоматически …
+  агент ядра мог управлять включением агентов элементов и их выключением»).** To have an element check or find out one thing:
+  `npm run supervise -- <id> main --max 1`, then `npm run task -- <id> "<what to check>"` — the wake door starts it without the Telegram
+  question. The element saves its answer with `npm run reply-core -- "<result>"` (`SERVICE_DATA_DIR/core-report.json`) and says «done»
+  as usual; the node wakes the main agent without a question and without «Turn it off?» to the person. The main agent reads
+  `npm run state -- <id>` («Report to you», «Turned on by you: yes»), writes the architect with the Telegram `reply` tool (chat from
+  `npm run person`), turns the element off with `npm run close -- <id>` and itself with `npm run done -- --close`. Skill `ask-element`.
+  Proven live 2026-10-20: no tap, the answer in Telegram, both agents off (16 requests, ≈0.61 M tokens). 🛑 A question of an element
+  to the core (`ask-core`) still asks the person when the main agent has a bot: the consent rule in `bridge.cjs` was refused by the
+  auto-mode classifier — the owner decides.
+- **A session without the Telegram channel starts with the channel plugin off (548-20).** Claude Code keeps ONE machine-wide cache of
+  failed MCP connections (`~/.claude/mcp-needs-auth-cache.json`, keyed by server name, 15 minutes). The plugin is enabled for the user
+  and starts in every `claude`; without a bot it has no token and fails, and for 15 minutes every session on the machine — elements and
+  the main agent — skips it («Skipping connection (recent failure cached…)») and has no Telegram. `bridge.cjs` adds
+  `--settings {"enabledPlugins":{"telegram@claude-plugins-official":false}}` when the session has no channel. 🔒 Any `claude -p` run in
+  an element folder for a check gets the same flag. A `claude` the person opens elsewhere can still silence the channel for 15 minutes.
