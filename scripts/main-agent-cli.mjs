@@ -35,6 +35,14 @@ const supervision = require('../lib/web4-items/supervision.cjs')
 const { simulatedF2fSearch } = await import('../lib/web4-items/lagrix-simulated.mjs')
 
 const readJson = (p, fallback = null) => { try { return JSON.parse(readFileSync(p, 'utf8')) } catch { return fallback } }
+// 548-20: элементы, чьего агента включил главный агент (`task` → «woke»), — данные узла, вне git.
+const WOKEN = join(ROOT, 'data', 'node', 'woken-by-main.json')
+function markWoken(id, on) {
+  const j = readJson(WOKEN, {})
+  if (on) j[id] = new Date().toISOString()
+  else delete j[id]
+  try { mkdirSync(dirname(WOKEN), { recursive: true }); writeFileSync(WOKEN, JSON.stringify(j, null, 2) + '\n', 'utf8') } catch { /* запись не обязательна */ }
+}
 const env = (() => {
   const out = {}
   try {
@@ -150,8 +158,12 @@ if (cmd === 'role') {
 }
 
 if (cmd === 'supervise') {
-  const [id, by] = rest
-  if (!id || !['main', 'architect', 'off'].includes(by)) fail('supervise <id> main|architect|off [--max N]')
+  const [name, by] = rest
+  if (!name || !['main', 'architect', 'off'].includes(by)) fail('supervise <id> main|architect|off [--max N]')
+  // 548-20: адрес вместо id принимался молча и заводил пустую запись надзора (✗ живой круг 2026-10-20: «supervise template main»).
+  const entry = registry().find((s) => s.id === name || s.address === name || addressOf(s.id) === name)
+  if (!entry) fail(`no element ${name} in the registry — give its id (npm run find)`)
+  const id = entry.id
   const max = Number(flag('--max')) || supervision.DEFAULT_MAX
   const r = supervision.set(id, by, { max, root: ROOT })
   console.log(`===SUPERVISE_OK=== ${id}: ${by === 'off' ? 'not supervised' : by === 'main' ? `the main agent leads it, up to ${max} cycles` : 'the architect leads it'}${r ? ` (cycles so far ${r.cycles ?? 0})` : ''}`)
@@ -186,6 +198,7 @@ if (cmd === 'close') {
   const [id] = rest
   if (!id) fail('close <id>')
   const r = await core('/api/agents/done', { method: 'POST', body: JSON.stringify({ service: id, close: true }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  markWoken(id, false)
   const b = r.body ?? {}
   console.log(b.ok ? `===CLOSE_OK=== ${id}: its agent is turned off` : b.reason === 'no-session' ? `===CLOSE_OK=== ${id}: its agent was already off` : `===CLOSE_FAIL=== ${id}: ${b.reason ?? r.status}`)
   process.exit(b.ok || b.reason === 'no-session' ? 0 : 1)
@@ -199,6 +212,9 @@ if (cmd === 'task') {
   const supervised = supervision.byMain(id, ROOT)
   const r = await core('/api/agents/wake', { method: 'POST', body: JSON.stringify({ service: id, text, from: 'main agent', about: firstSentence(text, 300), reason: 'main-agent-task', supervised }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
   const b = r.body ?? {}
+  // 548-20: кто включил агента — запись, а не память сессии: «закончил» будит главного агента в НОВОЙ сессии, и та не знала,
+  // включала ли она элемент сама (✗ живой круг 2026-10-20: template остался включённым). `state` печатает, `close` стирает.
+  if (b.ok && !b.pending) markWoken(id, !b.already)
   console.log(b.ok ? (b.pending ? `===TASK_OK=== ${id}: asked its person in Telegram to turn the agent on` : b.already ? `===TASK_OK=== ${id}: pasted into its live session` : `===TASK_OK=== ${id}: its agent woke with the task`) : `===TASK_FAIL=== ${id}: ${b.reason ?? r.status}${b.freeMb ? ` (free ${b.freeMb} MB, needs ${b.perSessionMb} MB — try later)` : ''}`)
   process.exit(b.ok ? 0 : 1)
 }
@@ -220,6 +236,8 @@ if (cmd === 'state') {
   // 548-20: результат проверки, которую ты поручил, — элемент сохраняет его `npm run reply-core` в своих данных.
   const report = readJson(join(ROOT, 'data', 'services', id, 'core-report.json'), null)
   console.log(`Report to you (npm run reply-core): ${report?.text ? `«${report.text}» (${report.at})` : 'none'}`)
+  const woken = readJson(WOKEN, {})[id]
+  console.log(`Turned on by you: ${woken ? `yes (${woken}) — turn it off when its job is done: npm run close -- ${id}` : 'no — leave it running'}`)
   console.log(`Last commits:\n${(git.stdout || '(none)').trim()}`)
   console.log(`current-step.md (first 60 lines):\n${step}`)
   process.exit(0)
