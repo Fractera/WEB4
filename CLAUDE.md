@@ -3075,3 +3075,23 @@ Owner, verbatim (all words — `/code` `new-steps/548/548-6.md`): the element «
   request, in Russian «Строительный процесс» / «Рабочий процесс»; `supervise-element` is the build process, `route-to-element` both.
 - 🛑 **Known gap**: deleting an element whose agent session is alive leaves its folder (`busy`) — close its terminal first
   (`/code` `ANTI-PATTERNS.md`).
+- **Doors between elements (548-16).** A node door of an element is `/api/<name>`, called by a neighbour on the machine's loopback
+  (`http://127.0.0.1:<port>/api/<name>`) with the header `X-Node-Key` = the element's `SETTINGS_SECRET` (the node key, the same for
+  every element; not the GitHub token, also called «node key» above). The gate of the element's `proxy.ts` lets the loopback through
+  (`lib/auth/owner-at-machine.ts`); from the internet it asks for a session. Both templates (v0.3.111, v0.1.7): `lib/node-key.ts`
+  (`nodeKeyOk`, `needNodeKey`) and `npm run door:add -- <name> --says "<6-12 words>" [--method GET]` — the route with the key,
+  `handle()` in `<name>.mjs`, samples, the line in `scripts/check-routes.mjs`, `test:<name>`, the door and its skill in the A2A card;
+  skill `add-door`. ✗ Before: one small door cost an element 65 requests (9.4 M tokens), about 17 of them finding this out.
+- **Building costs less (548-17, owner 2026-10-20).** Element instruction: a small task (one door, one fix) goes the short way — a
+  line in `current-step.md`, the build, `steps-done` and one commit, no `steps-new`, no quiz modules; a clear request (input and
+  output named) is built without the product quiz; `humanizer` only for published texts; the element's own files, `package.json`
+  and `proxy.ts` too, are read without asking.
+- **An element asks the core (548-18).** `npm run ask-core -- "<question>"` of an element → `POST /api/agents/wake` service `build`
+  (node key) → the main agent, skill `answer-element`: `grep` this file by the words of the question, read only the section found,
+  answer in at most 10 lines with `npm run task -- <id> "Answer from the core: …"`; nothing found — «the core does not know, the
+  architect decides». 🔒 This file is what the core can tell an element about the node: keep it findable by English words. The
+  main agent's skills install with LF (`scripts/main-agent-install.mjs`, `.gitattributes`): with a Windows CRLF checkout Claude Code
+  dropped their frontmatter — every main-agent skill had loaded without name and description since 548-4.
+- **548-15.** `npm run supervise` keeps the brief of the record; the Telegram wake text of a person's message asks only
+  `npm run passport -- me`. The agent kit is required from disk at start (`server.js` → `lib/agent-kit/mount.cjs`): a change of
+  `_agent-kit/core/server/*.cjs` needs `npm run agent-kit:update -- <group>` for every copy and a core restart, not a rebuild.
