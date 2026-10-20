@@ -158,9 +158,15 @@ if (cmd === 'supervise') {
 }
 
 if (cmd === 'person') {
-  const p = readJson(join(ROOT, 'data', 'services', 'build', 'channel', 'telegram', 'person.json'), null)
+  const tg = join(ROOT, 'data', 'services', 'build', 'channel', 'telegram')
+  const p = readJson(join(tg, 'person.json'), null)
+  // 548-20: чат архитектора живёт в access.json (allowFrom) после первого сообщения боту; person.json хранит только язык —
+  // прежняя строка печатала «chat_id (see person.json)», и главный агент не мог ответить архитектору в Telegram.
+  const allow = readJson(join(tg, 'access.json'), null)?.allowFrom
+  const chat = p?.chatId ?? p?.chat_id ?? p?.id ?? (Array.isArray(allow) && allow.length ? allow[0] : null)
   const bot = botOf('build')
-  if (bot && p) console.log(`Telegram bot @${bot} is yours: write to the architect with the reply tool, chat_id ${p.chatId ?? p.chat_id ?? p.id ?? '(see person.json)'}, language ${p.lang ?? LANG}.`)
+  if (bot && chat) console.log(`Telegram bot @${bot} is yours: write to the architect with the reply tool, chat_id ${chat}, language ${p?.lang ?? LANG}.`)
+  else if (bot) console.log(`Telegram bot @${bot} is yours, but the architect has not written to it yet — answer in the core's terminal ${ORIGIN}/${LANG}/architect/build/terminal.`)
   else console.log(`No Telegram bot for the main agent: the architect reads you in the core's terminal ${ORIGIN}/${LANG}/architect/build/terminal — answer there.`)
   process.exit(0)
 }

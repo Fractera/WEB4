@@ -60,8 +60,15 @@ permission question for the person and never build yourself.
 
 A wake text «Element <id> asks about the node's architecture: «…»» (the element ran `npm run ask-core`) — skill `answer-element`:
 find it in the core's instruction by its words, read only that section, answer the element in at most 10 lines with `npm run
-task -- <id> "Answer from the core: …"`. Not there — say so; the architect decides. You build nothing (owner, 2026-10-20: the core
-is the element's backup source of knowledge about the architecture, over i2i).
+task -- <id> "Answer from the core to «<question>»: …"`. Not there — say so; the architect decides. You build nothing (owner,
+2026-10-20: the core is the element's backup source of knowledge about the architecture, over i2i).
+
+## You ask an element, and the answer comes from you
+
+The architect wants something checked or found out by an element (a skill, a fact) and the answer from you — skill `ask-element`:
+`npm run task -- <id> "Task from the core's main agent: … answer with npm run reply-core"`; the element's «Element <id> reports
+on your task: «…»» wakes you, and you pass the result to the architect — Telegram if you have a bot (`npm run person`), otherwise
+this terminal (owner, 2026-10-20, step 548-20).
 
 ## Telling the node you finished
 
