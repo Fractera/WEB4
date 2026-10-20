@@ -4,6 +4,8 @@ import type { A2ADoor, A2AOffer, ElementPassport as Passport } from "@/lib/a2a/e
 import type { ElementPassportUi } from "../_i18n/element-passport.i18n"
 import { SubscriptionsView } from "./subscriptions-view.client"
 import { CronCalendar } from "./cron-calendar.client"
+import { CronSwitch } from "./cron-switch.client"
+import { cronSwitchUi } from "../_i18n/cron-switch.i18n"
 
 // СТРАНИЦЫ МЕНЮ ЭЛЕМЕНТА ПОКАЗЫВАЮТ ЕГО ПАСПОРТ (шаг 406-4; карта меню 406-2 — решение владельца «удалить всё предложенное,
 // остальное как предложил»). Серверный компонент: читает уже прочитанный паспорт, своих данных не держит.
@@ -81,13 +83,15 @@ function NodeElements({ rows, ui }: { rows: NodeElementRow[]; ui: ElementPasspor
   )
 }
 
-export function ElementPassport({ view, passport, ui, lang = "en", nodeElements, service, subscriptionsHref }: { view: PassportView; passport: Passport | null; ui: ElementPassportUi; lang?: string; nodeElements?: NodeElementRow[]; service?: string; subscriptionsHref?: string }) {
+export function ElementPassport({ view, passport, ui, lang = "en", nodeElements, service, subscriptionsHref, item }: { view: PassportView; passport: Passport | null; ui: ElementPassportUi; lang?: string; nodeElements?: NodeElementRow[]; service?: string; subscriptionsHref?: string; item?: string }) {
   if (view === "find") return <p className="my-4 text-sm text-muted-foreground" data-passport-view="find">{ui.networkSoon}</p>
   // 465: календарь крона не зависит от визитки A2A — он про рабочий процесс элемента (CRON.json), а не про его описание для сети.
   // 🪦 Владелец 2026-10-12: здесь стоял список `process` паспорта («что элемент делает сам») — заменён календарём.
   if (view === "cron") {
     return (
       <div className="my-4 flex flex-col gap-3" data-passport-view="cron">
+        {/* 551-3: «Использовать автоматизацию» — поле `automation.cron` паспорта; у черновика (без паспорта) переключателя нет. */}
+        {item && passport ? <CronSwitch item={item} ui={cronSwitchUi(lang)} /> : null}
         {passport?.cron
           ? <CronCalendar plan={passport.cron} lang={lang} ui={ui.cron} />
           : <p className="text-sm text-muted-foreground" data-cron-empty>{ui.cron.empty}</p>}

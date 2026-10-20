@@ -1,9 +1,5 @@
 import "server-only"
-import { existsSync } from "node:fs"
-import { readFile, rename, writeFile } from "node:fs/promises"
-import { join } from "node:path"
-import { elementDir } from "@/lib/web4-items/element-github"
-import elementProps from "@/lib/web4-items/element-props.cjs"
+import { readPassport, writePassportField } from "@/lib/web4-items/passport-file"
 
 // НАСТРОЙКИ MESSENGER ЭЛЕМЕНТА (528-2). Владелец 2026-10-18: «на вкладке настройки будет: установить дополнительную стоимость
 // которую должен заплатить новый пользователь который пытается установить контакт, здесь будет переключать активировать
@@ -28,17 +24,6 @@ export const MESSENGER_DEFAULTS: MessengerSettings = { firstContact: { enabled: 
 const MAX_USD = 10000
 const MAX_RULES = 30
 const MAX_RULE = 300
-
-/** Файл паспорта элемента: новая раскладка (`OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json`), иначе прежний файл в корне. */
-function passportFile(id: string): string | null {
-  const dir = elementDir(id)
-  if (!dir) return null
-  for (const rel of [elementProps.PASSPORT, elementProps.OLD]) {
-    const p = join(dir, rel)
-    if (existsSync(p)) return p
-  }
-  return null
-}
 
 const strings = (v: unknown): string[] | null => {
   if (!Array.isArray(v)) return null
@@ -66,28 +51,13 @@ export function parseMessengerSettings(body: unknown): { ok: true; value: Messen
 
 /** Сохранённые настройки или умолчание; `saved` — есть ли они в паспорте. Паспорта нет — `null`. */
 export async function readMessengerSettings(id: string): Promise<{ settings: MessengerSettings; saved: boolean } | null> {
-  const file = passportFile(id)
-  if (!file) return null
-  try {
-    const raw = JSON.parse(await readFile(file, "utf8")) as { messengerSettings?: unknown }
-    const parsed = raw.messengerSettings ? parseMessengerSettings(raw.messengerSettings) : null
-    return parsed?.ok ? { settings: parsed.value, saved: true } : { settings: MESSENGER_DEFAULTS, saved: false }
-  } catch {
-    return null
-  }
+  const raw = await readPassport(id)
+  if (!raw) return null
+  const parsed = raw.messengerSettings ? parseMessengerSettings(raw.messengerSettings) : null
+  return parsed?.ok ? { settings: parsed.value, saved: true } : { settings: MESSENGER_DEFAULTS, saved: false }
 }
 
 /** Пишет `messengerSettings` в паспорт, остальные поля и их порядок не трогает; переводы строк файла сохраняются. */
 export async function saveMessengerSettings(id: string, value: MessengerSettings): Promise<boolean> {
-  const file = passportFile(id)
-  if (!file) return false
-  const text = await readFile(file, "utf8")
-  const raw = JSON.parse(text) as Record<string, unknown>
-  raw.messengerSettings = value
-  let out = `${JSON.stringify(raw, null, 2)}\n`
-  if (text.includes("\r\n")) out = out.replace(/\n/g, "\r\n")
-  const tmp = `${file}.tmp-${process.pid}`
-  await writeFile(tmp, out, "utf8")
-  await rename(tmp, file)
-  return true
+  return writePassportField(id, "messengerSettings", value)
 }

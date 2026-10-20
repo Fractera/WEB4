@@ -64,6 +64,9 @@ import { StripeKeys } from '@/components/payments/stripe-keys.client'
 import { paymentsUi } from '@/components/payments/payments.i18n'
 import { NodeWalletCard } from '@/components/wallet/node-wallet.client'
 import { nodeWalletUi } from '@/components/wallet/node-wallet.i18n'
+import { ElementHome } from '../../../_components/element-home.client'
+import { ElementDiscoveryAlarm } from '../../../_components/element-discovery-alarm'
+import { elementHomeUi } from '../../../_i18n/element-home.i18n'
 import { ProductQuizIsland } from '@/components/element-docs/product-quiz.client'
 import { productQuizUi, quizTaskUi } from '../../../_i18n/product-quiz.i18n'
 import { ReverseEngineering } from '@/components/element-docs/reverse-engineering.client'
@@ -197,7 +200,17 @@ export default async function Page({ params }: { params: Promise<Params> }) {
           {/* 495-5 (владелец 2026-10-15): «this statisk must exist in … /ru/roman (item root)» — та же карточка репутации Lagrix,
               что на главной A2A, на главной родившегося элемента. */}
           {/* 544-3: у нативного элемента карточки Lagrix нет — он не продаётся и не связан с сетью. */}
-          {entry && !isNativeElement(item) && <LagrixRating id={item} words={lagrixRatingUi(lang)} />}
+          {/* 551-2 (владелец 2026-10-20): рядом с репутацией — «Кошелёк» элемента и тревога, пока элемент не описан в ядре или без
+              визитки A2A; образец выдуманных отзывов 517 снят («Везде»). */}
+          {entry && !isNativeElement(item) && (() => {
+            const described = registryDescription(item) !== null
+            const card = elementPassport(item)?.published != null
+            const hu = elementHomeUi(lang)
+            const alarm = described && card
+              ? null
+              : <ElementDiscoveryAlarm ui={hu} described={described} card={card} orderHref={terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK })} />
+            return <ElementHome id={item} rating={lagrixRatingUi(lang)} wallet={nodeWalletUi(lang)} alarm={alarm} alarmMark={hu.alarmMark} />
+          })()}
           {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} />}
         </>}
       />
@@ -449,7 +462,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       })()
     : undefined
   // 463: страница одного внешнего сервиса — `service`; ссылки списка «Подписки» строятся от `subscriptionsHref`.
-  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${SUBSCRIPTIONS}`} /> : null
+  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${SUBSCRIPTIONS}`} item={item} /> : null
 
   return (
     <ArchitectPage

@@ -40,8 +40,6 @@ export type NodePassportWords = {
   rating: LagrixRatingWords
   /** Hints of the node's card: «… этого узла, включая все его элементы» (495-5). */
   nodeHints: LagrixRatingWords["hints"]
-  /** Hint of the node's «Reviews» card: «… of all elements of this node» (517-1). */
-  nodeReviewsHint: string[]
   nodeTitle: string
   nodeLead: string
   nodeNote: string
@@ -74,7 +72,7 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
   }, [lang])
 
   const node = (
-    <LagrixRating id="node" item="node" words={{ ...words.rating, hints: words.nodeHints, note: words.nodeNote, reviews: { ...words.rating.reviews, hint: words.nodeReviewsHint } }} title={words.nodeTitle} lead={words.nodeLead} />
+    <LagrixRating id="node" item="node" words={{ ...words.rating, hints: words.nodeHints, note: words.nodeNote }} title={words.nodeTitle} lead={words.nodeLead} />
   )
 
   const walletCard = (

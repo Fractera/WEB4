@@ -26,6 +26,10 @@ export type TreePage = {
   slug: string; words: Record<"en" | "ru", TreeWords>; pages?: TreePage[]; needs?: "catalog" | Messenger; unless?: Messenger
   /** 544-3: страница сети Lagrix (заказы и работа для чужих агентов, отзывы, f2f, кошелёк, тариф первого контакта) — у нативного элемента её нет. */
   network?: true
+  /** 551-1 (владелец 2026-10-20: «всю вкладку рабочие процесс мы должны немедленно удалить из native element, он не может на техническом
+   *  уровне иметь подобные решения»; «относятся только к custom элементу»): раздел только кастомного элемента — рабочий процесс и платежи
+   *  не все про сеть, поэтому отдельный флаг, а не `network`. */
+  custom?: true
   doc?: { file: string; folder?: boolean; deep?: boolean }
   about?: Record<"en" | "ru", string[]>
 }
@@ -80,6 +84,7 @@ export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.needs && p.needs !== "catalog" && !c.messengers[p.needs]) return false
   if (p.unless && c.messengers[p.unless]) return false
   if (p.network && c.native) return false
+  if (p.custom && c.native) return false
   return true
 }
 // 472: у элемента с H2A бот живёт в H2A — старый адрес ведёт туда (у элемента без H2A бот остаётся в «Строительстве»).
@@ -214,6 +219,7 @@ export const ITEM_TREE: TreePage[] = [
   // 528-1: «Рабочий процесс» — что элемент делает, когда уже работает (451-2: a2a — рабочий процесс; i2i и f2f — строительный).
   {
     slug: "workflow",
+    custom: true,
     words: w("Working process", "What the running element does: its scheduled work, the work it orders and does over A2A, and reviews.", "Рабочий процесс", "Что делает уже работающий элемент: работа по расписанию, заказы и работа по A2A, отзывы."),
     about: {
       en: [
@@ -412,6 +418,7 @@ export const ITEM_TREE: TreePage[] = [
       // два и web3 в одной у нас будет настраиваться страйп , в другой у нас будет настраиваться кошелёк».
       {
         slug: "payments",
+        custom: true,
         words: w("Payments", "How the element takes money: by card through Stripe (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через Stripe (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
         about: {
           en: [
