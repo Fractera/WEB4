@@ -773,7 +773,7 @@ text for both. The whole page is ONE single-open accordion: node · wallet · ev
 toggles, the title link stays a link); the node card is open on entry, opening any card closes all others; «Full description» and the
 wallet's before/after are their own nested accordions. The same rating card stands on the element home `/<lang>/<element>` of every
 born element (owner: «this statisk must exist in … /ru/roman (item root)»).
-**Step 517-1 (owner 2026-10-17) — «Reviews» under the violation line.** Every `LagrixRating` (passport node and element cards, element
+🪦 *(the «Reviews» mockup below is removed everywhere in step 551-2 — owner 2026-10-20: «По умолчанию и быть не должно», «Везде»)* **Step 517-1 (owner 2026-10-17) — «Reviews» under the violation line.** Every `LagrixRating` (passport node and element cards, element
 home, A2A home) carries a collapsible «Reviews · N %» card (`components/element-docs/lagrix-reviews.client.tsx`): N = closed orders with
 a review ÷ closed orders (open orders cannot be reviewed — Lagrix 17.5). Open: one card per order — green dot + «Review page» link, red dot
 + «Recall and review» (a dialog: why, the order number with Copy, `/review-order <number>` for the terminal, a phrase for Telegram), grey
@@ -2934,7 +2934,8 @@ Owner, verbatim (all words — `/code` `current-steps.md`, records «528 — …
 Owner, verbatim — `/code` `current-steps.md`, record «530 — ЗАДАЧА ВЛАДЕЛЬЦА». Built from Lagrix documents 05 §5.6, 06, 09, 14, 15, 17.9,
 18.4, 19, 24 and entries 32, 45, 52.
 - **Settings → Payments → Web2 / Web3** for every element (`settings/payments/web2|web3` in `item-tree.ts`) and the main agent
-  (`build/settings/payments/web2|web3`). Web2: Stripe keys of the target (`core` or an element) in its `.env.local` via
+  (`build/settings/payments/web2|web3`). 🪦 *(Web2 below is replaced by step 551-5: the node's payment elements; Stripe keys live only in
+  the Stripe payment element, the `core` target is gone.)* Web2: Stripe keys of the target (`core` or an element) in its `.env.local` via
   `GET/POST /api/node/stripe` (`lib/stripe-keys.ts`): format, one mode for the pair, the secret key checked with a real Stripe call
   (`GET /v1/balance`, 401 → 422) before writing; values never come back; only this door writes `STRIPE_*` (`STRIPE_NAMES` in
   `lib/env-file.ts`, not in `EDITABLE`). Checkout code is the element's own. Web3: the node wallet — one island
@@ -3111,3 +3112,41 @@ Owner, verbatim (all words — `/code` `new-steps/548/548-6.md`): the element «
   the main agent — skips it («Skipping connection (recent failure cached…)») and has no Telegram. `bridge.cjs` adds
   `--settings {"enabledPlugins":{"telegram@claude-plugins-official":false}}` when the session has no channel. 🔒 Any `claude -p` run in
   an element folder for a check gets the same flag. A `claude` the person opens elsewhere can still silence the channel for 15 minutes.
+
+## The custom element prepared: payment elements, Web2, wallet and alarm on the home, the cron switch, capability cards; the native element without a working process (step 551, 2026-10-20)
+
+Owner, verbatim — `/code` `development-docs/development-steps/completed-steps/551-main.md` (his Telegram messages of 2026-10-20 8:54–9:05
+and the answers in the choice windows: «В каждый узел при установке», «Убрать только со страницы (Рекомендую)», «Стоимость консультации
+(Рекомендую)», «must use web3 , web4 is another technology», «Подтвердить, до конца (Рекомендую)», «Везде (Рекомендую)»).
+- **Native elements have no working process** (owner: «он не может на техническом уровне иметь подобные решения»): the tree flag `custom: true`
+  on `workflow` and on `settings/payments` (`lib/web4-items/item-tree.ts`, one `treeVisible` for menu, route and lists) — for a native element
+  both answer 404 and are not in the menu. The native template (v0.1.10, v0.1.11) has no cron runner, no event catalog, no subscriptions and
+  no schedule or subscription skills.
+- **The element home** (custom only): one single-open accordion — the Lagrix reputation card and the element wallet (the same island and door
+  as Payments → Web3, `_components/element-home.client.tsx`). While the element has no description in the core (`described`) or no A2A card
+  (`published`), the wallet item holds a red alarm in the owner's words with «Order a description» (`_components/element-discovery-alarm.tsx`)
+  and a red dot in its header. 🪦 The 517 mockup of invented reviews is removed everywhere (element home, Passport, Working process home).
+- **One shared passport writer** — `lib/web4-items/passport-file.ts` (`passportFile`, `readPassport`, `writePassportField`: other fields kept,
+  CRLF kept, temp file + rename). Writers: Messenger settings, automation, payments. Every such field is a git-tracked file of the element:
+  live at once (the element reads its passport on each request, the cron runner every minute), uncommitted in Deployments until the next commit.
+- **Cron switch** «Use automation» above the calendar (`_components/cron-switch.client.tsx`, door `GET/POST /api/node/automation`): passport
+  field `automation.cron`; `false` — the element's runner skips every entry (template v0.3.114, `lib/cron/runner.ts`); no field — on. The
+  element's `CLAUDE.md` section «Cron automations» and its cron skill say who turns it on and off (the person by the switch or the agent on
+  their word — the working process, no commit, no rebuild), who changes the entries (`data/cron.json`), and that entries are in the element's
+  default language.
+- **Capability cards** (`workflow/a2a-work/capabilities`, `_components/capability-cards.client.tsx`): one orange (`--warning`) card «Sample»
+  that opens down and wide — the description by the element's agent («Describe with AI» → terminal task, skill `passport-description`), the
+  consultation price, the usage price and the developer share switch (default on), each with a hint linked to Lagrix documents (23, 17 · 04, 09
+  · 26), and «Card payments» per connected payment element. Data — passport field `payments` (`lib/web4-items/element-payments.ts`, door
+  `GET/POST /api/node/payments`): `web3["a2a-card"].sample` and `web2[<tool>]["a2a-card"].sample`. The nine doors of the template's A2A card
+  stay in the card and in Build → i2i → API. 🪦 The showcase view and `A2A-OFFERS.json` (435-4) are gone.
+- **Payment elements** (`WEB4-ITEMS-REGISTRY/payment-elements.json`: `stripe` — Stripe, `lavatop` — Lava.top): born from the custom template
+  by `scripts/payment-elements.mjs` (`npm run items:payments`, `--dry-run`), which `scripts/serve.mjs` calls on every start after the
+  temporary address: an element not yet born is born once; one the person removed is not reborn (`data/node/payment-elements.json`). The
+  passport carries `payment: { tool, name }` (read by `readElementProps`); roles — `WEB4-ITEMS-REGISTRY/roles.json`.
+- **Settings → Payments → Web2** of an element (`_components/payment-elements.client.tsx`): the node's payment elements as an accordion —
+  «Connect» writes `payments.web2.<tool>.element` (only a record: no agent wakes, i2i does not start by itself); tabs (shadcn `components/ui/tabs.tsx`
+  on `radix-ui`) «API and Hook» (what links the two: this element's `consumes` from the payment element and back; nothing — «Give the task to
+  the agent»), «Dashboard» (an empty standard table) and «Analytics» (an empty chart, no invented numbers). A payment element's own Web2 page
+  shows its keys (`_components/payment-self.tsx`): Stripe keys only there — `/api/node/stripe` accepts only the Stripe payment element now. The
+  main agent's Web2 lists the node's payment elements.

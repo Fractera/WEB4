@@ -8,9 +8,11 @@ import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // ОПИСАНИЕ ВОЗМОЖНОСТЕЙ WEB4 ЭЛЕМЕНТА → ЗАПИСЬ В ЯДРЕ (325-2). Решение владельца 2026-09-27: описание пишет «Агент элемента».
 //
-// 🔒 ПИШЕТ АГЕНТ, ЗАБИРАЕТ ЧЕЛОВЕК. Агент элемента (Claude Code в его папке) по заданию из терминала пишет в паспорт
-// `OWN-SERVICE-PROPS.json` поля `summary` и `provides`; кнопка «Забрать в ядро» зовёт `takeDescription`, и только она меняет
-// запись реестра. Само ядро паспорт не читает и реестр не трогает — таймеров и слежки за файлом нет.
+// 🔒 ПИШЕТ АГЕНТ, ЗАБИРАЕТ ЧЕЛОВЕК. Агент элемента (Claude Code в его папке) по заданию из терминала пишет тексты паспорта
+// (`OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json`: `shortDescription` и соседние) и навыки визитки (`A2A-CARD.json`); ядро читает их через
+// `readElementProps` (`summary` = `shortDescription`, `provides` = навыки визитки). 🪦 Прежняя раскладка — поля `summary` и `provides` в
+// корневом файле паспорта; задача, велевшая их писать, оставляла честный текст агента мимо реестра (проба Stripe, 551-5). «Забрать в
+// ядро» зовёт `takeDescription`, и только она меняет запись реестра. Само ядро паспорт не читает — таймеров и слежки за файлом нет.
 // 🔒 ФОРМА ПРОВЕРЯЕТСЯ ДО ЗАПИСИ: пустой `provides`, шаблонный или рождённый (325-1) `summary` — отказ словом, реестр не
 // тронут. Так в ядро не попадает описание, которого агент не писал.
 // 🔒 В РЕЕСТРЕ ОПИСАНИЕ ЗАМЕНЯЕТ `provides` РОЖДЕНИЯ (`element-site`) и получает `described` — когда и с какого коммита
@@ -22,14 +24,11 @@ import elementProps from "@/lib/web4-items/element-props.cjs"
 // она отдаёт паспорт в ядро той же дверью, что и кнопка «Забрать в ядро» (кнопка остаётся запасной).
 export const TASK = [
   "Describe this WEB4 element for the node's core.",
-  "If the skill describe-element exists in .claude/skills of this folder, follow it; otherwise do the steps below.",
-  "Read the code of this folder (pages, API routes, lib) and find out what the element does for a person.",
-  "Then edit only two fields of OWN-SERVICE-PROPS.json in this folder:",
-  "- \"summary\": 2-3 plain sentences: what the element does and for whom. No step numbers, no words about templates.",
-  "- \"provides\": 1-20 short names of its capabilities, lowercase words joined by hyphens (for example \"order-form\", \"price-list\").",
-  "Change nothing else in the file or in the folder. Commit this one file with the message \"describe: summary and provides\".",
-  "Then run: npm run describe:publish — it hands the description to the node's core registry. If it prints DESCRIBE_FAILED, fix what it names and run it again.",
-  "Finish by printing the two fields and the line the command printed.",
+  "Follow the skill describe-element of this folder; the passport texts are written by the skill passport-description.",
+  "Write only what the code of this folder does today: name, shortDescription, longDescription, accepts and returns in OWN-SERVICE-PROPS/OWN-SERVICE-PROPS.json, and the skills of OWN-SERVICE-PROPS/A2A-CARD.json. The passport has no fields summary or provides: never add them.",
+  "Run the texts through humanizer, then npm run check:passport until it is clean.",
+  "Show me the texts and wait for my yes; then commit and run: npm run describe:publish — it hands the description to the node's core. If it prints DESCRIBE_FAILED, fix what it names and run it again.",
+  "Finish by printing the short description and the line the command printed.",
 ].join("\n")
 
 const TEMPLATE_SUMMARY = /^The template of a node element/i
