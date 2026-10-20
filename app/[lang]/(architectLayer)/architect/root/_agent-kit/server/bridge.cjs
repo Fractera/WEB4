@@ -23,6 +23,8 @@ const os = require('node:os')
 
 const INIT_DEADLINE_MS = 10_000
 const CLOSE_POLICY = 1008
+/** 551-7: длина задачи из ссылки — та же, что у окна вставки (`core/client/terminal-paste.mjs`, PASTE_LIMIT). */
+const TASK_LIMIT = 20_000
 
 let pty = null
 let ptyLoadError = ''
@@ -91,7 +93,7 @@ function shellEnv(shell) {
  * владелец: «агент должен уметь запускать собственный терминал»). `notice` — строки человеку (в окно терминала или никуда),
  * `wanted` — нужен ли ещё запуск после установки плагина канала (окно закрыли — не рождать).
  */
-async function spawnAgent(service, notice = () => {}, wanted = () => true, firstPrompt = '') {
+async function spawnAgent(service, notice = () => {}, wanted = () => true, firstPrompt = '', { answerTrust = false } = {}) {
   if (!pty) {
     notice(`[терминал недоступен: node-pty не загружен — ${ptyLoadError}]`)
     return { ok: false, reason: 'pty-unavailable' }
@@ -149,7 +151,8 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // принимать ввод, пока грузился плагин каналов): первое поручение новой сессии — аргументом запуска. `claude "<запрос>"` в
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
   // кириллицей доходит через node-pty байт в байт (замерено тем же днём).
-  if (firstPrompt) args = [...args, firstPrompt]
+  // 551-7: поручение, начатое с «-», `claude` прочёл бы флагом — пробел впереди оставляет его текстом.
+  if (firstPrompt) args = [...args, firstPrompt.startsWith('-') ? ` ${firstPrompt}` : firstPrompt]
   let child
   try {
     child = pty.spawn(bin, args, { cols: 120, rows: 32, cwd, env, name: 'xterm-256color' })
@@ -160,6 +163,11 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // 548-13: канал — это аргументы плагина Telegram, а не любые аргументы (поручение и `--add-dir` каналом не делают).
   const born = session.register({ service, pid: child.pid, proc: child, cwd, channel: viaChannel })
   born.taskUrls = new Set()
+  // 551-7: запуск со страницы с задачей из ссылки — вопрос доверия папке отвечает мост; согласие — нажатие, которое привело сюда.
+  if (answerTrust) {
+    born.answerTrust = true
+    born.trustOk = true
+  }
   child.onData((data) => {
     session.remember(born, data)
     for (const client of born.clients) if (client.readyState === client.OPEN) client.send(data)
@@ -194,10 +202,12 @@ function trustOnScreen(buffer) {
  * 547 (владелец 2026-10-19: «ты активируешь папку также как и запускаешь агента то есть прямо из чата»): у пробуждённого агента
  * вопрос доверия папке отвечается так, как ответил бы человек, — стрелка вниз на «Yes, I trust this folder» и Enter, — но только
  * когда включение подтверждено кнопкой в Telegram (`trustOk`; вопрос с кнопками говорит и о папке). Иначе бот зовёт человека в
- * терминал (`telegram.tellWaiting`). Один раз на сессию; запуск со страницы терминала не трогается — человек видит вопрос сам.
+ * терминал (`telegram.tellWaiting`). Один раз на сессию; запуск со страницы терминала кнопкой не трогается — человек видит вопрос
+ * сам. 551-7 (владелец 2026-10-20: «при таком переходе активировать терминал и подтверждается папка»): у запуска со страницы с
+ * задачей из ссылки (`answerTrust`) вопрос отвечается так же, без Telegram.
  */
 function watchTrust(s) {
-  if (!s.viaWake || s.trustDone) return
+  if (!(s.viaWake || s.answerTrust) || s.trustDone) return
   clearTimeout(s.trustTimer)
   s.trustTimer = setTimeout(() => {
     if (session.current(s.service) !== s || s.trustDone || !trustOnScreen(s.buffer)) return
@@ -405,7 +415,7 @@ function onConnection(ws, service) {
      * 🛑 Подключение без `start` к спящей сессии ничего не рождает и закрывается с причиной `not-running`:
      * страница, открытая «просто посмотреть», не имеет права поднять процесс.
      */
-    async function startAgent(service, wantStart) {
+    async function startAgent(service, wantStart, task = '') {
       if (!pty) {
         ws.send(`\r\n[терминал недоступен: node-pty не загружен — ${ptyLoadError}]\r\n`)
         fail('pty-unavailable')
@@ -425,13 +435,19 @@ function onConnection(ws, service) {
         }
         started = true
         clearTimeout(deadline)
-        // 409-1: запуск — общая функция с пробуждением без браузера (`spawnAgent` ниже).
-        const r = await spawnAgent(service, (line) => ws.send(`\r\n${line}\r\n`), () => ws.readyState === ws.OPEN)
+        // 409-1: запуск — общая функция с пробуждением без браузера (`spawnAgent` выше). 551-7: задача из ссылки — первым поручением.
+        const r = await spawnAgent(service, (line) => ws.send(`\r\n${line}\r\n`), () => ws.readyState === ws.OPEN, task, { answerTrust: Boolean(task) })
         if (!r.ok) {
           fail(r.reason)
           return
         }
         s = r.session
+      } else if (task) {
+        // 551-7: агент успел запуститься другим путём — задача не вставляется сама (на экране может стоять вопрос, Enter ответил бы
+        // на него): браузер подключится заново, задача ждёт в окне вставки.
+        started = true
+        fail('already-running')
+        return
       } else if (s.buffer) {
         // Возврат на страницу показывает прежний экран: сначала накопленное, потом живой поток.
         ws.send(s.buffer)
@@ -496,7 +512,11 @@ function onConnection(ws, service) {
           return
         }
         if (msg.mode === 'agent') {
-          startAgent(service, msg.start === true)
+          // 551-7: задача приходит только с запуском; предел и чистка — как у окна вставки (`terminal-paste.mjs`, PASTE_LIMIT).
+          const task = msg.start === true && typeof msg.task === 'string'
+            ? msg.task.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').slice(0, TASK_LIMIT).trim()
+            : ''
+          startAgent(service, msg.start === true, task)
           return
         }
         if (msg.mode === 'login') {

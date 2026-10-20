@@ -41,7 +41,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
   // Закрытие, которое сделали мы сами, не должно читаться как обрыв связи.
   const quietCloseRef = useRef(false)
   // 316: окно вставки. Текст приходит кнопкой «Вставить» или ссылкой `?paste=` (адрес блока из подсветки Preview);
-  // в терминал он уходит ТОЛЬКО кнопкой человека в окне.
+  // в работающий терминал он уходит ТОЛЬКО кнопкой человека в окне (спящему — вместе с запуском, 551-7 ниже).
   const [pasteOpen, setPasteOpen] = useState(false)
   const [pasteText, setPasteText] = useState(initialPaste ?? "")
 
@@ -49,14 +49,18 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
 
   // Владелец 2026-10-06: окно с поручением, открытое ссылкой, само будит агента — как вопрос в Telegram; иначе кнопки
   // «Вставить» серые, пока человек не найдёт кнопку запуска.
-  const startForPasteRef = useRef(false)
+  // 551-7 (владелец 2026-10-20: «если терминал не активен автоматически при таком переходе активировать терминал и подтверждается
+  // папка в которой находится агент и потом запускается этот процесс»): СПЯЩЕМУ терминалу задача уходит мосту вместе с запуском —
+  // первым поручением агента, и вопрос доверия папке мост отвечает сам. Работающему — как прежде: окно вставки, кнопка человека.
+  const taskForStartRef = useRef<string | null>(null)
+  // Задача ушла с запуском, а сессия ещё не подтвердилась: отказ запуска (код 1008) возвращает её в окно вставки — не теряется.
+  const taskPendingRef = useRef<string | null>(null)
+  const [taskAtStart, setTaskAtStart] = useState(false)
 
   useEffect(() => {
     const incoming = pasteFromSearch(window.location.search)
     if (incoming === null) return
-    startForPasteRef.current = true
-    setPasteText(incoming)
-    setPasteOpen(true)
+    taskForStartRef.current = incoming
     // Параметр убирается сразу: перезагрузка страницы не откроет окно второй раз.
     const url = new URL(window.location.href)
     url.searchParams.delete("paste")
@@ -85,9 +89,10 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
   }, [])
 
   const connect = useCallback(
-    async (wantStart: boolean) => {
+    async (wantStart: boolean, task?: string) => {
       setState("connecting")
       setNote("")
+      setTaskAtStart(false)
       let ticket = ""
       try {
         const res = await fetch(`${api}/ticket`, { method: "POST" })
@@ -108,7 +113,11 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
       ws.onopen = () => {
         // 🛑 `init` ПЕРВЫМ ДЕЙСТВИЕМ: любое исключение до него съело бы его целиком, и мост закрыл бы
         // молчащее соединение — человек увидел бы чёрный экран (оплачено у чата, 157-3).
-        ws.send(JSON.stringify({ mode: "agent", start: wantStart, ticket, type: "init" }))
+        ws.send(JSON.stringify({ mode: "agent", start: wantStart, ticket, type: "init", ...(task ? { task } : {}) }))
+        if (task) {
+          taskPendingRef.current = task
+          setTaskAtStart(true)
+        }
         ws.send(JSON.stringify({ type: "resize", ...sizeRef.current }))
         mouseRef.current = createMouseFilter()
         setState("running")
@@ -123,6 +132,18 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
       ws.onclose = (event) => {
         if (wsRef.current === ws) wsRef.current = null
         if (quietCloseRef.current) return
+        const lost = taskPendingRef.current
+        taskPendingRef.current = null
+        if (lost !== null && event.code === 1008) {
+          setTaskAtStart(false)
+          setPasteText(lost)
+          setPasteOpen(true)
+          // Агент успел запуститься другим путём (пробуждение): подключиться к нему, задача ждёт в окне вставки.
+          if (event.reason === "already-running") {
+            void connect(false)
+            return
+          }
+        }
         if (event.reason === "not-running") {
           setState("sleeping")
         } else if (event.reason === "stopped") {
@@ -153,8 +174,16 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
         const body = (await res.json()) as { running?: boolean; agentDir?: string | null }
         if (cancelled) return
         setFolder(body.agentDir ?? null)
-        if (body.running) await connect(false)
-        else if (startForPasteRef.current) await connect(true)
+        const task = taskForStartRef.current
+        taskForStartRef.current = null
+        if (body.running) {
+          await connect(false)
+          // 551-7: работающему терминалу задача — окном вставки, отправляет человек.
+          if (task !== null) {
+            setPasteText(task)
+            setPasteOpen(true)
+          }
+        } else if (task !== null) await connect(true, task)
         else setState("sleeping")
       } catch {
         if (!cancelled) setState("offline")
@@ -291,6 +320,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
               </Button>
             </div>
           </div>
+          {taskAtStart && <p className="text-muted-foreground text-xs" data-agent-task-at-start>{words.taskAtStart}</p>}
           <div className="h-[70dvh] min-h-[420px] overflow-hidden rounded-lg bg-[#0b0b0c] p-2">
             <XtermTerminal onData={handleData} onResize={handleResize} ref={termRef} autoFocus={!pasteOpen} />
           </div>

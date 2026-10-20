@@ -37,6 +37,8 @@ export type AgentTerminalWords = {
   pasteNeedsRun: string
   pasteCancel: string
   pasteKeyLink: string
+  /** 551-7: задача из ссылки ушла спящему терминалу вместе с запуском. */
+  taskAtStart: string
 }
 
 const DICT: Record<string, AgentTerminalWords> = {
@@ -75,6 +77,7 @@ const DICT: Record<string, AgentTerminalWords> = {
     pasteNeedsRun: "Start the agent first — the text is kept here.",
     pasteCancel: "Cancel",
     pasteKeyLink: "Add the OpenAI key",
+    taskAtStart: "The task from the link went to the agent with the start, as its first request. If Claude Code asks whether you trust this folder, the node answers it.",
   },
   ru: {
     folderLabel: "Агент запускается в папке:",
@@ -111,6 +114,7 @@ const DICT: Record<string, AgentTerminalWords> = {
     pasteNeedsRun: "Сначала запустите агента — текст останется здесь.",
     pasteCancel: "Отмена",
     pasteKeyLink: "Добавить ключ OpenAI",
+    taskAtStart: "Задача из ссылки ушла агенту вместе с запуском — первым поручением. Если Claude Code спросит, доверяете ли вы этой папке, узел ответит сам.",
   },
 }
 
