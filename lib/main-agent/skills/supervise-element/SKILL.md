@@ -21,6 +21,11 @@ back at any time (`npm run supervise -- <id> architect`).
 2. Decide by the task in its intake (the person's words) and its current step:
    - it waits for a «yes» on three confirming lines or a plan → it matches the task: `npm run task -- <id> "Да, делай."`; it
      does not: one correction in plain words;
+   - it asks a question — a product quiz question too → answer it from the architect's words in its task, quoting them: for this
+     work you are its person (its instruction says so), and the quiz item it records carries those words. Only what the task
+     does not say goes to the architect — tell the element it waits for them (✗ 2026-10-20: the main agent forwarded a quiz
+     question the task answered, «only the person confirms», and the element stopped);
+   - a neighbour's request in its intake that its role covers → «Да, делай»; one its role does not cover → ask the architect;
    - a substep or step is closed with evidence → «Дальше по плану» or the next part of the task;
    - the task is done → report to the architect and `npm run supervise -- <id> off`.
 3. Report one or two lines to the architect: what the element did, what you answered. `npm run person` tells where — Telegram
