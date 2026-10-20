@@ -70,6 +70,8 @@ import { elementHomeUi } from '../../../_i18n/element-home.i18n'
 import { ProductQuizIsland } from '@/components/element-docs/product-quiz.client'
 import { productQuizUi, quizTaskUi } from '../../../_i18n/product-quiz.i18n'
 import { ReverseEngineering } from '@/components/element-docs/reverse-engineering.client'
+import { CapabilityCards } from '../../../_components/capability-cards.client'
+import { capabilityCardUi } from '../../../_i18n/capability-card.i18n'
 import { reverseEngineeringUi } from '../../../_i18n/reverse-engineering.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
@@ -410,7 +412,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 406-4 (карта меню 406-2, решение владельца): эти страницы показывают разделы паспорта элемента, своей копии у них нет.
   // 528-1: ключ — полный путь; витрина A2A стала «Карточками возможностей» в «A2A: ваша работа».
   const PASSPORT_VIEWS: Record<string, PassportView> = {
-    'build/i2i/api': 'api', 'build/i2i/mcp': 'mcp', 'workflow/a2a-work/capabilities': 'a2a', 'build/i2i/catalog': 'catalog',
+    'build/i2i/api': 'api', 'build/i2i/mcp': 'mcp', 'build/i2i/catalog': 'catalog',
     'build/f2f/publish': 'publish', 'build/f2f/find': 'find', [SUBSCRIPTIONS]: 'subscriptions', 'workflow/process/cron': 'cron',
   }
   const passportView = PASSPORT_VIEWS[key]
@@ -463,6 +465,14 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     : undefined
   // 463: страница одного внешнего сервиса — `service`; ссылки списка «Подписки» строятся от `subscriptionsHref`.
   const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${SUBSCRIPTIONS}`} item={item} /> : null
+  // 551-4 (владелец 2026-10-20): «Карточки возможностей» — одна оранжевая «Образец»: описание через ИИ (задача в терминал элемента) и три
+  // цены; хранятся в паспорте элемента (`payments.web3["a2a-card"].sample`). Девять дверей визитки шаблона живут в визитке и в i2i → API.
+  const cardUi = capabilityCardUi(lang)
+  const capabilities = key === 'workflow/a2a-work/capabilities'
+    ? (entry
+      ? <CapabilityCards item={item} ui={cardUi} describeHref={terminalLink({ lang, service: `${slug}/build`, text: cardUi.describeTask })} />
+      : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).notBorn}</p>)
+    : null
 
   return (
     <ArchitectPage
@@ -471,7 +481,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

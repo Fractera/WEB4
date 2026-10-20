@@ -33,24 +33,15 @@ export type ElementPassport = {
   warnings: string[]
   published: unknown
   registry: unknown
-  offers: A2AOffers | null
   subscriptions: ExternalServices | null
   cron: CronPlan | null
 }
 
-// 435-4 (владелец 2026-10-08): витрина «Связи (A2A) → A2A» — что элемент предлагает, по какой цене, кому и с каким лимитом.
-// Отдельный файл `OWN-SERVICE-PROPS/A2A-OFFERS.json`, а не поле визитки: в публичную `/.well-known/agent-card.json` не попадает.
-// Сегодня у roman — пример (`example: true`), вызвать его нельзя.
-export type A2AOffer = {
-  id: string; name: string; description: string; inputModes: string[]; outputModes: string[]
-  price: { amount: string; currency: string; unit: "request" | "message" }
-  access: "registered" | "everyone"
-  limit: { count: number; per: "day" | "hour" } | null
-}
-export type A2AOffers = { example: boolean; offers: A2AOffer[] }
+// 🪦 435-4: здесь жила витрина «Связи (A2A) → A2A» — отдельный файл предложений элемента с ценой, доступом и лимитом (пример). Снята в
+// 551-4: карточки возможностей и их цены живут в паспорте элемента, поле `payments` (`lib/web4-items/element-payments.ts`).
 
 // 463 (владелец 2026-10-12): вкладка «Процесс → Подписки» — внешние платные сервисы элемента. Отдельный файл
-// `OWN-SERVICE-PROPS/SUBSCRIPTIONS.json` (как A2A-OFFERS.json): в публичную визитку не попадает; ключи — только ИМЕНА переменных.
+// `OWN-SERVICE-PROPS/SUBSCRIPTIONS.json`: в публичную визитку не попадает; ключи — только ИМЕНА переменных.
 // Сегодня у roman — пример «AI search machine» (`example: true`): ничего не сохраняется и не вызывается. Навык элемента —
 // `connect-external-service`.
 export type ExternalPayment = { date: string; description: string; amount: string; currency: string; status: string }
@@ -104,15 +95,6 @@ function readSubscriptions(dir: string): ExternalServices | null {
   }
 }
 
-function readOffers(dir: string): A2AOffers | null {
-  try {
-    const raw = JSON.parse(readFileSync(join(dir, "OWN-SERVICE-PROPS", "A2A-OFFERS.json"), "utf8")) as Partial<A2AOffers>
-    return Array.isArray(raw.offers) && raw.offers.length ? { example: raw.example !== false, offers: raw.offers } : null
-  } catch {
-    return null
-  }
-}
-
 export function elementPassport(id: string): ElementPassport | null {
   const dir = elementDir(id)
   if (!dir) return null
@@ -129,7 +111,6 @@ export function elementPassport(id: string): ElementPassport | null {
     warnings,
     published: ok ? publishedCard(props) : null,
     registry: ok ? registryEntryOf(props, { address: id }) : null,
-    offers: readOffers(dir),
     subscriptions: readSubscriptions(dir),
     cron: readCron(dir),
   }

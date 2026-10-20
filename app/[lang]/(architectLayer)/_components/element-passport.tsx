@@ -1,6 +1,6 @@
 import Link from "next/link"
 import { Badge } from "@/components/ui/badge"
-import type { A2ADoor, A2AOffer, ElementPassport as Passport } from "@/lib/a2a/element-passport"
+import type { A2ADoor, ElementPassport as Passport } from "@/lib/a2a/element-passport"
 import type { ElementPassportUi } from "../_i18n/element-passport.i18n"
 import { SubscriptionsView } from "./subscriptions-view.client"
 import { CronCalendar } from "./cron-calendar.client"
@@ -10,7 +10,7 @@ import { cronSwitchUi } from "../_i18n/cron-switch.i18n"
 // СТРАНИЦЫ МЕНЮ ЭЛЕМЕНТА ПОКАЗЫВАЮТ ЕГО ПАСПОРТ (шаг 406-4; карта меню 406-2 — решение владельца «удалить всё предложенное,
 // остальное как предложил»). Серверный компонент: читает уже прочитанный паспорт, своих данных не держит.
 
-export type PassportView = "api" | "mcp" | "a2a" | "catalog" | "publish" | "find" | "subscriptions" | "cron"
+export type PassportView = "api" | "mcp" | "catalog" | "publish" | "find" | "subscriptions" | "cron"
 
 function Example({ label, value }: { label: string; value: unknown }) {
   if (value === undefined) return null
@@ -38,27 +38,6 @@ function Door({ d, ui }: { d: A2ADoor; ui: ElementPassportUi }) {
       <Example label={ui.output} value={d.output} />
       {errors && <p className="text-xs text-muted-foreground">{ui.errors}: {errors}</p>}
     </section>
-  )
-}
-
-// 435-4: карточка витрины — что делает, что возвращает, цена, кому, лимит; у примера пометка, чтобы его не приняли за продажу.
-function Offer({ o, example, ui }: { o: A2AOffer; example: boolean; ui: ElementPassportUi }) {
-  const unit = o.price.unit === "message" ? ui.perMessage : ui.perRequest
-  const limit = o.limit ? `${o.limit.count} ${o.limit.per === "hour" ? ui.perHour : ui.perDay}` : ui.unlimited
-  return (
-    <div className="flex flex-col gap-2 rounded-lg border border-border px-4 py-3 text-sm" data-passport-offer={o.id}>
-      <p className="flex flex-wrap items-center gap-2">
-        <span className="font-medium">{o.name}</span>
-        {example && <Badge variant="outline" className="text-muted-foreground">{ui.example}</Badge>}
-      </p>
-      <p>{o.description}</p>
-      <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-xs">
-        <dt className="text-muted-foreground">{ui.price}</dt><dd className="font-medium">${o.price.amount} {unit}</dd>
-        <dt className="text-muted-foreground">{ui.access}</dt><dd>{o.access === "everyone" ? ui.accessEveryone : ui.accessRegistered}</dd>
-        <dt className="text-muted-foreground">{ui.limit}</dt><dd>{limit}</dd>
-        <dt className="text-muted-foreground">{ui.accepts} · {ui.returns}</dt><dd>{o.inputModes.join(", ")} → {o.outputModes.join(", ")}</dd>
-      </dl>
-    </div>
   )
 }
 
@@ -120,39 +99,6 @@ export function ElementPassport({ view, passport, ui, lang = "en", nodeElements,
     body = doors.length
       ? <div className="flex flex-col gap-3"><p className="text-sm font-medium">{ui.doors}</p>{doors.map((d) => <Door key={`${d.method} ${d.path}`} d={d} ui={ui} />)}</div>
       : <p className="text-sm text-muted-foreground">{view === "api" ? ui.noHttp : ui.noMcp}</p>
-  } else if (view === "a2a") {
-    const offers = passport!.offers
-    body = (
-      <div className="flex flex-col gap-4">
-        <p className="text-sm">{card.description}</p>
-        {offers && (
-          <section className="flex flex-col gap-3" data-passport-offers={offers.offers.length}>
-            <p className="text-sm font-medium">{ui.offers}</p>
-            <p className="text-xs text-muted-foreground">{ui.offersLead}</p>
-            <div className="grid gap-3 sm:grid-cols-2">{offers.offers.map((o) => <Offer key={o.id} o={o} example={offers.example} ui={ui} />)}</div>
-          </section>
-        )}
-        <section className="flex flex-col gap-3">
-          <p className="text-sm font-medium">{offers ? ui.forNeighbours : ui.can}</p>
-          {offers && <p className="text-xs text-muted-foreground">{ui.forNeighboursLead}</p>}
-          {card.skills.map((c) => (
-            <div key={c.id} className="flex flex-col gap-1 rounded-lg border border-border px-4 py-3 text-sm" data-passport-capability={c.id}>
-              <p><span className="font-medium">{c.name}</span> <span className="font-mono text-xs text-muted-foreground">{c.id}</span></p>
-              <p>{c.description}</p>
-              <p className="text-xs text-muted-foreground">{ui.accepts}: {(c.inputModes ?? card.defaultInputModes).join(", ")} · {ui.returns}: {(c.outputModes ?? card.defaultOutputModes).join(", ")}</p>
-              {c.examples?.length ? <p className="text-xs text-muted-foreground">{ui.examples}: «{c.examples.join("» · «")}»</p> : null}
-              <p>{c.tags.map((t) => <Badge key={t} variant="secondary" className="mr-1">{t}</Badge>)}</p>
-            </div>
-          ))}
-        </section>
-        <section className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{ui.needs}</p>
-          {x.consumes?.length
-            ? <ul className="flex flex-col gap-1.5">{x.consumes.map((c) => <li key={`${c.from}-${c.skill}`} className="text-sm"><span className="font-mono">{c.skill}</span>{c.from ? <> {ui.from} <span className="font-mono">{c.from}</span></> : null} — {c.why}</li>)}</ul>
-            : <p className="text-sm text-muted-foreground">{ui.noNeeds}</p>}
-        </section>
-      </div>
-    )
   } else if (view === "catalog") {
     const own = x.catalog
       ? (
