@@ -450,13 +450,15 @@ const ASK = {
  * 426 (владелец 2026-10-07: «нативно наша архитектура даже не знает о том, что у нас есть Telegram»): первой строкой — «узнай себя и
  * узел», как у задачи A2A (`lib/a2a/executor.ts` элемента): поручение в руках сильнее правила в инструкции. Только элементу, у
  * которого есть `npm run passport` (паспорт нового вида) — остальным такой команды нет.
+ * 548-15: только `passport -- me` — тем же словом, что задача A2A элемента (548-14): блок `node` в нём постоянного размера, а
+ * `passport -- project` на пробуждении рос бы с числом элементов узла; соседа агент ищет по нужде.
  */
 function knowYourself(service) {
   try {
     const pkg = JSON.parse(readFileSync(path.join(serviceDir(service), 'package.json'), 'utf8'))
     if (!pkg?.scripts?.passport) return ''
   } catch { return '' }
-  return 'Сначала узнай себя и узел: npm run passport -- me, затем npm run passport -- project (навыки own-service-props-detection и node-elements-detection; вывод читай целиком, не режь head). Как отвечать человеку — навык telegram-channel. '
+  return 'Сначала узнай себя: npm run passport -- me (навык own-service-props-detection; вывод читай целиком, не режь head; блок node — где ты живёшь). Соседа ищи только по нужде: npm run a2a -- find <английские слова>. Как отвечать человеку — навык telegram-channel. '
 }
 
 /** 409-4: что вставить агенту из сообщения человека — кто, откуда и как ответить (инструмент reply канала Telegram). */
@@ -465,7 +467,8 @@ function humanPrompt(service, chatId, who, said) {
 }
 
 /** «Выключи» и его родня целиком, без другого текста: выключенному агенту это не поручение, а просьба, которая уже исполнена. */
-const OFF_WORDS = /^s*(выключи(ть|сь)?|выключай|закрой|закрыть|стоп|off|turn( it)? off|switch off|stop|close)s*[.!]*s*$/i
+// 548-15: `\s` вместо `s` — обратные косые были потеряны (найдено в 545), и «выключи .» с пробелом не узнавалось.
+const OFF_WORDS = /^\s*(выключи(ть|сь)?|выключай|закрой|закрыть|стоп|off|turn( it)? off|switch off|stop|close)\s*[.!]*\s*$/i
 
 const allHuman = (items) => items.length > 0 && items.every((it) => it.kind === 'human')
 
