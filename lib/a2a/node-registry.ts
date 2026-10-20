@@ -71,8 +71,14 @@ const STOP = new Set(["the", "and", "for", "from", "with", "that", "this", "into
   "need", "needs", "want", "make", "get", "all", "any", "some", "who", "what", "how", "please", "element", "elements",
   "для", "что", "как", "это", "мне", "нам", "его", "её", "или", "без", "при", "над", "под", "чтобы", "нужно", "надо", "хочу",
   "который", "которая", "которые", "элемент", "элемента", "элементы"])
-const wordsOf = (t: string) => t.toLowerCase().split(/[^\p{L}\p{N}-]+/u).filter((w) => w.length > 2 && !STOP.has(w))
-const near = (a: string, b: string) => a === b || (a.length > 3 && b.length > 3 && (a.startsWith(b) || b.startsWith(a)))
+// 548-6 (2026-10-20): начало слова совпадает, только если покрывает его почти целиком — «sign» не совпадает с «signals» (config и
+// design всплывали на «sign in» тем же счётом, что auth); части слова через дефис ищутся и по отдельности («sign-in» → «sign»).
+const wordsOf = (t: string) => t.toLowerCase().split(/[^\p{L}\p{N}-]+/u).flatMap((w) => (w.includes("-") ? [w, ...w.split("-")] : [w])).filter((w) => w.length > 2 && !STOP.has(w))
+const near = (a: string, b: string) => {
+  if (a === b) return true
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a]
+  return s.length > 3 && l.startsWith(s) && s.length / l.length >= 0.7
+}
 
 // 548-6, повторная проверка (2026-10-20, замерено командой главного агента `npm run find`): «sign in» вернул graph, lagrix,
 // template и native-template и не вернул auth; «design colours» не вернул design. Две причины: службы узла без визитки A2A
@@ -103,7 +109,7 @@ export function findEntries(query: string, limit = 10): (NodeEntry & { score: nu
   const common = (id: string) => (count.get(id) ?? 0) >= 3 && (count.get(id) ?? 0) * 2 >= carded.length
   return [...carded, ...roleOnly]
     .map((e) => {
-      const tags = [...new Set(e.skills.filter((s) => !common(s.id)).flatMap((s) => [s.id, ...s.id.split("-"), ...s.tags]).map((t) => t.toLowerCase()))]
+      const tags = [...new Set(e.skills.filter((s) => !common(s.id)).flatMap((s) => [s.id, ...s.id.split("-"), ...s.tags, ...s.tags.flatMap((t) => t.split("-"))]).map((t) => t.toLowerCase()))]
       const role = wordsOf(roles[e.id] ?? "")
       const text = wordsOf(`${e.name} ${e.description}`)
       const score = words.reduce((n, w) => n + (tags.includes(w) ? 3 : tags.some((t) => near(t, w)) ? 1 : 0) + (role.some((t) => near(t, w)) ? 2 : 0) + (text.some((t) => near(t, w)) ? 1 : 0), 0)
