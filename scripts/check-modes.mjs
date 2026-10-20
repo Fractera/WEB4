@@ -32,6 +32,10 @@ for (const { name, dir } of elements) {
     const s = modes.modeSettings(dir, mode)
     seen[mode] = new Set(Object.entries(s.enabledPlugins).filter(([k, v]) => v === true && k.endsWith('@skills-dir')).map(([k]) => k.replace(/@skills-dir$/, '')))
     if (!seen[mode].has(modes.COMMON)) problems.push(`${name} ${mode}: нет группы обнаружения ${modes.COMMON}`)
+    // Выключенная группа закрыта и для чтения файлом (✗ 552-4а: агент прочёл SKILL.md чужой группы инструментом Read).
+    for (const g of modes.ALL.filter((x) => !seen[mode].has(x))) {
+      if (!(s.permissions?.deny ?? []).includes(`Read(./.claude/skills/${g}/**)`)) problems.push(`${name} ${mode}: папка чужой группы ${g} не закрыта для чтения`)
+    }
     if (mode !== 'build') {
       for (const v of modes.vendored(dir)) if (s.skillOverrides?.[v] !== 'off') problems.push(`${name} ${mode}: вендорный навык ${v} не выключен`)
     }
