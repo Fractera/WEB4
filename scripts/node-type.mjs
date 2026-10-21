@@ -6,13 +6,15 @@
 // вопреки умолчанию типа, и как переключить каждый (`look` — та же дверь, что карточки связей на странице элемента).
 
 import { readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
 const { TYPES, readNodeType, writeNodeType, mismatches, ownWallets } = require('../lib/web4-items/node-type.cjs')
 
-const ROOT = process.cwd()
+// Корень узла — от расположения скрипта: команду зовёт и главный агент из своей папки (data/main-agent).
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const fail = (m) => { console.log(`NODE_TYPE_FAILED: ${m}`); process.exit(1) }
 
 const MEANING = {

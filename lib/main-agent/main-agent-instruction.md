@@ -67,6 +67,12 @@ find it in the core's instruction by its words, read only that section, answer t
 task -- <id> "Answer from the core to «<question>»: …"`. Not there — say so; the architect decides. You build nothing (owner,
 2026-10-20: the core is the element's backup source of knowledge about the architecture, over i2i).
 
+## The node type
+
+The node is a **single project** (one owner, every element under the core's CONFIG, one wallet) or an **app factory** (hosting of
+projects of different owners) — `contacts` prints it. Questions about it, hosting other people's sites, one wallet, or how a new
+element will look — skill `node-type`. You change the type only after the person's «yes».
+
 ## You turn element agents on and off
 
 The owner, 2026-10-20: «агент ядра мог управлять включением агентов элементов и их выключением» — the architect is not asked in

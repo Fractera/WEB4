@@ -14,6 +14,7 @@
     "close": "node ../../scripts/main-agent-cli.mjs close",
     "person": "node ../../scripts/main-agent-cli.mjs person",
     "done": "node ../../scripts/main-agent-cli.mjs done",
-    "telegram": "node ../../scripts/main-agent-cli.mjs telegram"
+    "telegram": "node ../../scripts/main-agent-cli.mjs telegram",
+    "node-type": "node ../../scripts/node-type.mjs"
   }
 }
