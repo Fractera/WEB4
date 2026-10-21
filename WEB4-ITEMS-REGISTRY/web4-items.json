@@ -44,18 +44,45 @@
     {
       "id": "data",
       "repo": "https://github.com/Fractera/fractera-data-starter.git",
-      "version": "v1.3.17",
+      "version": "v2.0.0",
       "port": 24682,
       "provides": [
         "tables",
-        "media",
-        "vectors",
+        "deploy-runs",
+        "a2a-log",
+        "panel-settings",
         "service-routing"
       ],
       "required": true,
-      "note": "Единственная дверь к данным. Узел не открывает файл базы сам.",
+      "note": "База данных узла (550): единственная дверь к таблицам; прежние адреса /media/* и /vectors/* пересылает элементам storage и vectors. Узел не открывает файл базы сам.",
       "kind": "core",
       "address": "data"
+    },
+    {
+      "id": "storage",
+      "repo": "https://github.com/Fractera/fractera-storage-starter.git",
+      "version": "v1.0.0",
+      "port": 24693,
+      "provides": [
+        "media"
+      ],
+      "required": true,
+      "note": "Объектное хранилище узла (550): файлы и картинки элементов, миниатюры, обрезка видео, значки сайта. Потребители зовут /media у data — та пересылает сюда.",
+      "kind": "core",
+      "address": "storage"
+    },
+    {
+      "id": "vectors",
+      "repo": "https://github.com/Fractera/fractera-vectors-starter.git",
+      "version": "v1.0.0",
+      "port": 24694,
+      "provides": [
+        "vectors"
+      ],
+      "required": true,
+      "note": "Векторное хранилище узла (550): поиск по смыслу на индексе sqlite-vec. Потребители зовут /vectors у data — та пересылает сюда.",
+      "kind": "core",
+      "address": "vectors"
     },
     {
       "id": "config",
