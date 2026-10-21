@@ -64,7 +64,7 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     // «Рабочий процесс → Процесс»).
     const services = elementPassport(d.id)?.subscriptions?.services ?? []
     // 472: разделы H2A/H2H и страницы по флагам паспорта элемента (`messengers`); одна функция и для маршрута.
-    const native = isNativeElement(d.id)
+    const native = builtIn || isNativeElement(d.id)
     const ctx = { ...treeContextOf(d.id), catalog, native }
     // 412-2: пункт документа — только пока его файл есть в папке элемента.
     const shownOf = (pages?: TreePage[]) => (pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
