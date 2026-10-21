@@ -52,7 +52,11 @@ for (const { name, dir } of elements) {
   // 552-5: законы режима доходят до своей сессии и только до неё — тот же вызов, что у моста, во временную папку.
   if (modes.modeFile(dir, 'build') || modes.modeFile(dir, 'work')) {
     const out = mkdtempSync(join(tmpdir(), 'check-modes-'))
-    for (const [mode, own, foreign] of [['build', '## Steps', '## Cron automations'], ['work', '## Cron automations', '## Steps']]) {
+    // 552-7: у нативного элемента рабочего процесса нет — только `build.md`; его подсказка не несёт «Cron», а `work.md` не нужен.
+    let native = false
+    try { native = JSON.parse(readFileSync(join(dir, 'OWN-SERVICE-PROPS', 'OWN-SERVICE-PROPS.json'), 'utf8')).elementType === 'native' } catch { /* нет паспорта */ }
+    const pairs = [['build', '## Steps', '## Cron automations'], ['work', '## Cron automations', '## Steps']]
+    for (const [mode, own, foreign] of native ? pairs.slice(0, 1) : pairs) {
       const args = modes.promptArgs(dir, mode, out, `${name}-${mode}`)
       if (args[0] !== '--append-system-prompt-file') { problems.push(`${name} ${mode}: нет файла .claude/modes/${mode}.md — законы режима не дойдут`); continue }
       const text = readFileSync(args[1], 'utf8')
