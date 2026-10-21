@@ -61,6 +61,11 @@ if (!Array.isArray(reg.services)) {
   process.exit(1)
 }
 
+// ── 1а. node-type (553-1). Порча: поставить "nodeType": "bogus". Тип узла — project | factory; нет поля — project.
+if ('nodeType' in reg && reg.nodeType !== 'project' && reg.nodeType !== 'factory') {
+  fail('node-type', `nodeType обязан быть project или factory — получено «${reg.nodeType}»`)
+}
+
 const ids = new Map()
 const ports = new Map()
 

@@ -67,6 +67,7 @@ for (const el of list) {
     drafts.drafts.push({ id: el.id, createdAt: new Date().toISOString() })
     writeJson(DRAFTS_FILE, drafts)
   }
+  // 553: платёжный элемент служит узлу — облик «как проект» при любом типе узла (D2).
   const birth = spawnSync(process.execPath, [join(ROOT, 'scripts', 'item-birth.mjs'), el.id, '--look', 'project'], { cwd: ROOT, stdio: 'inherit', windowsHide: true })
   const after = readJson(REGISTRY_FILE, { services: [] }).services?.find((s) => s.id === el.id)
   if (!after) { say(`  рождение «${el.id}» не дошло до реестра (код ${birth.status}) — повтор: npm run items:payments`); failed++; continue }

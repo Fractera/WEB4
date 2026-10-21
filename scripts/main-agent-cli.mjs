@@ -33,6 +33,7 @@ import { fileURLToPath } from 'node:url'
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const require = createRequire(import.meta.url)
 const supervision = require('../lib/web4-items/supervision.cjs')
+const nodeType = require('../lib/web4-items/node-type.cjs')
 // 552-4: поручение главного агента элементу — строительный процесс; слово уже стоит (например, ответ ядра сессии рабочего процесса)
 // — остаётся своё. Мост ядра по слову будит сессию процесса (`lib/agent-kit/modes.cjs`).
 const modes = require('../lib/agent-kit/modes.cjs')
@@ -118,6 +119,9 @@ if (cmd === 'contacts') {
     process.exit(0)
   }
   console.log(`Node ${ZONE || '(no domain yet)'} — core ${ORIGIN}: the registry of elements, waking agents, birth of new elements. You are its main agent (terminal ${ORIGIN}/${LANG}/architect/build/terminal).`)
+  // 553-1: тип узла — одной строкой постоянного размера (548-14: пробуждение не растёт с узлом).
+  const type = nodeType.readNodeType(ROOT)
+  console.log(`Node type: ${type} — ${type === 'factory' ? 'an app factory: hosting of projects of different owners; new custom elements are born on their own settings' : 'a single project: one owner, every element under the core\'s CONFIG'} (npm run node-type -- get)`)
   const bornIds = new Set(registry().filter((s) => s.born).map((s) => s.id))
   for (const x of rows.filter((y) => !bornIds.has(y.id))) console.log(line(x))
   console.log(`+ ${rows.filter((y) => bornIds.has(y.id)).length} element(s) born in this node — who does a job: npm run find -- <English words>; one element: npm run contacts -- <id>`)
@@ -295,8 +299,8 @@ if (cmd === 'create') {
   renameSync(tmp, draftsFile)
   console.log(`draft ${id} — birth starts (clone of the template, install, build: a few minutes)`)
 
-  // 2. Рождение — тот же путь, что кнопка «Родить элемент».
-  const birth = spawnSync(process.execPath, [join(ROOT, 'scripts', 'item-birth.mjs'), id, '--look', 'project', ...(has('--native') ? ['--native'] : [])], { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: 20 * 60_000 })
+  // 2. Рождение — тот же путь, что кнопка «Родить элемент». 553-1: облик выбирает `item-birth.mjs` по типу узла.
+  const birth = spawnSync(process.execPath, [join(ROOT, 'scripts', 'item-birth.mjs'), id, ...(has('--native') ? ['--native'] : [])], { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: 20 * 60_000 })
   const log = `${birth.stdout ?? ''}${birth.stderr ?? ''}`
   if (!/===BIRTH_OK===/.test(log)) fail(`birth of ${id} failed: ${log.trim().split(/\r?\n/).slice(-3).join(' | ')}`)
   const dir = itemDir(id)

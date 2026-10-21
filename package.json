@@ -64,6 +64,7 @@
     "elements:isolate": "node scripts/element-isolate.mjs",
     "items:birth": "node scripts/item-birth.mjs",
     "items:payments": "node scripts/payment-elements.mjs",
+    "node-type": "node scripts/node-type.mjs",
     "check:lang-delivery": "node scripts/check-lang-delivery.mjs",
     "check:case": "node scripts/check-case.mjs",
     "registry:map": "node lib/web4-items/registry-map.mjs",

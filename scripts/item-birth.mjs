@@ -46,10 +46,19 @@ function git(args, cwd) {
 
 const id = process.argv[2]
 if (!id || !ID.test(id)) fail(`имя «${id ?? ''}» — не имя черновика (буква, затем 4–23 строчных латинских или цифр)`)
-// 367: облик — ответ человека в окне рождения (`--look project|own`); вызов из командной строки без него — «как проект» (как до 367).
+// 367: облик — ответ человека в окне рождения (`--look project|own`).
+// 553-1: без `--look` облик выбирает тип узла (`lib/web4-items/node-type.cjs`): завод — самостоятельный, единый проект — как проект;
+// нативный — как проект всегда; элемент из своего репозитория (`--repo`) бывает только самостоятельным.
 const lookAt = process.argv.indexOf('--look')
-const look = lookAt > 0 ? process.argv[lookAt + 1] : 'project'
+const look = lookAt > 0
+  ? process.argv[lookAt + 1]
+  : process.argv.includes('--repo') ? 'own' : require('../lib/web4-items/node-type.cjs').birthLook({ native: process.argv.includes('--native') }, ROOT)
 if (look !== 'project' && look !== 'own') fail(`облик «${look ?? ''}» — не из списка: project | own`)
+// 553-1: проба выбора облика — до чтения черновиков и любой записи.
+if (process.argv.includes('--print-look')) {
+  say(`look: ${look} (node type ${require('../lib/web4-items/node-type.cjs').readNodeType(ROOT)})`)
+  process.exit(0)
+}
 
 // 1. Черновик существует и ещё не родился.
 let drafts = []

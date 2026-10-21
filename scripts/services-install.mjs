@@ -123,6 +123,13 @@ const restoreToken = githubToken('')
 if (!existsSync(join(ROOT, 'data', 'services')) && existsSync(SNAPSHOT_FILE)) {
   let snap = null
   try { snap = JSON.parse(readFileSync(SNAPSHOT_FILE, 'utf8')) } catch { say('  снимок карты не прочитан — восстанавливать нечего') }
+  // 553-1: тип узла едет в снимке и возвращается в реестр (место — сразу после `_`, как пишет `node-type.cjs`); реестр сохраняется ниже.
+  if (snap?.nodeType === 'project' || snap?.nodeType === 'factory') {
+    const { _: comment, nodeType: _old, ...rest } = registry
+    for (const k of Object.keys(registry)) delete registry[k]
+    Object.assign(registry, comment === undefined ? {} : { _: comment }, { nodeType: snap.nodeType }, rest)
+    say(`  карта узла: тип узла — ${snap.nodeType}`)
+  }
   const pending = []
   for (const s of Array.isArray(snap?.services) ? snap.services : []) {
     if (!s || typeof s.id !== 'string') continue
