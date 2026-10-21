@@ -179,13 +179,38 @@ export async function projectRows(lang: string): Promise<ProjectRow[]> {
 /** Запись каталога — та же форма, что `CatalogEntry` шаблона элемента (`lib/project-settings.ts`). */
 export type CatalogEntry = { id: string; title: string; description: string; href: string | null; local: string | null; kind: "custom" | "native" }
 
+/**
+ * Главная элемента на ЯЗЫКЕ каталога. ✗ 553-5 (замерено 2026-10-21): общий `probe` при отказе `/<язык>` за 3 с переходит на `/`, а `/`
+ * ведёт на `/en` — на русской странице ядра карточки выходили английскими, когда элементы были заняты. Здесь — только `/<язык>`,
+ * предел дольше; не ответила главная — элемент жив, если отвечает `/api/health`, и карточка берёт имя из паспорта или адреса.
+ */
+async function catalogProbe(port: number, lang: string): Promise<{ up: boolean; title: string | null; description: string | null }> {
+  try {
+    const r = await fetch(`http://127.0.0.1:${port}/${lang}`, { cache: "no-store", redirect: "follow", signal: AbortSignal.timeout(10_000) })
+    if (r.ok && (r.headers.get("content-type") ?? "").includes("text/html")) {
+      const html = await r.text()
+      const description = pick(html, /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)
+        ?? pick(html, /<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i)
+      return { up: true, title: pick(html, /<title[^>]*>([^<]*)<\/title>/i), description }
+    }
+    return { up: true, title: null, description: null }
+  } catch {
+    try {
+      const h = await fetch(`http://127.0.0.1:${port}/api/health`, { cache: "no-store", signal: AbortSignal.timeout(3000) })
+      return { up: h.ok, title: null, description: null }
+    } catch {
+      return { up: false, title: null, description: null }
+    }
+  }
+}
+
 // Хвост бренда в заголовке главной: «Сайт · Бренд», «Сайт | Бренд» — в карточке нужно имя сайта.
 const BRAND_TAIL = /\s+[|·–—]\s+[^|·–—]+$/
 
 async function catalogEntry(id: string, entry: RegistryEntry, custom: boolean, lang: "en" | "ru", d: NodeDomain | null): Promise<CatalogEntry | null> {
   const port = typeof entry.port === "number" ? entry.port : null
   if (port === null) return null
-  const seen = await probe(port, lang)
+  const seen = await catalogProbe(port, lang)
   if (!seen.up) return null
   const passport = await passportShort(port)
   const own = domainRecord(id)
