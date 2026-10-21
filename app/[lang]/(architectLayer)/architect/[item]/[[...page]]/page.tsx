@@ -47,6 +47,8 @@ import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/web4-items/ele
 import { terminalLink } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs'
 import { ScheduleTask } from '@/app/[lang]/(architectLayer)/_components/schedule-task.client'
 import { backupCronUi, backupTaskWords } from '@/app/[lang]/(architectLayer)/_components/schedule-task.i18n'
+import { NodeUsers } from '@/components/node-users/node-users.client'
+import { nodeUsersUi } from '@/components/node-users/node-users.i18n'
 import { agentKitWidget, openAiKeyHref, type AgentKitPage } from '../_agent-kit/widgets'
 import { ElementPreview } from '@/components/preview/element-preview.client'
 import { elementPreviewWords, previewTaskKit } from '@/sections/blocks/element-preview.server'
@@ -514,6 +516,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const backupSettings = key === 'backup/settings'
     ? <ScheduleTask lang={lang} service={builtInIds().includes(item) ? item : `${slug}/build`} words={backupTaskWords(lang)} />
     : null
+  // 559: «Пользователи» элемента входа — все люди узла; таблицу спрашивает островок у двери ядра `/api/node/users`.
+  const users = key === 'users' ? <NodeUsers lang={lang} ui={nodeUsersUi(lang)} table={tableUi(lang)} /> : null
 
   return (
     <ArchitectPage
@@ -522,7 +526,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}{backupSettings}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}{backupSettings}{users}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

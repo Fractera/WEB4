@@ -33,6 +33,9 @@ export type TreePage = {
   /** 558 (владелец 2026-10-21: «обновить все четыре нативных элементов связанных с памятью … вкладку на одном уровне с строительства но
    *  ниже которая будет называться резервная копирование»): раздел только элементов памяти — data, storage, vectors, graph. */
   memory?: true
+  /** 559 (владелец 2026-10-21: «добавления к стандартной вкладки авторизации на одном из верхних уровней вкладки пользователей»):
+   *  раздел только элемента входа (`auth`). */
+  auth?: true
   // 553-6: на едином проекте (nodeType project) страницы нет — в меню и по адресу
   project?: false
   doc?: { file: string; folder?: boolean; deep?: boolean }
@@ -83,7 +86,7 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
@@ -92,6 +95,7 @@ export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.network && c.native) return false
   if (p.custom && c.native) return false
   if (p.memory && !c.memory) return false
+  if (p.auth && !c.auth) return false
   return true
 }
 // 472: у элемента с H2A бот живёт в H2A — старый адрес ведёт туда (у элемента без H2A бот остаётся в «Строительстве»).
@@ -141,6 +145,12 @@ const a2aRolePages = (role: "orders" | "work"): TreePage[] => [
 
 export const ITEM_TREE: TreePage[] = [
   { slug: "preview", words: w("Live site", "The element's own site as it runs now and a visitor sees it.", "Живой сайт", "Сайт элемента таким, каким он работает сейчас и каким его видит посетитель.") }, // 393: «Preview» → «Живой сайт» (владелец 2026-10-04)
+  // 559: «Пользователи» элемента входа — сразу под «Живым сайтом»: все люди узла, серверная таблица, правка, истории, пакет.
+  {
+    slug: "users",
+    auth: true,
+    words: w("Users", "Everyone who has an account on this node: search, filters, histories and actions in batches.", "Пользователи", "Все, у кого есть учётная запись на этом узле: поиск, фильтры, истории и действия пакетом."),
+  },
   // 528-1: Messenger — сразу под «Живым сайтом»: H2H, H2A и их настройки.
   {
     slug: "messenger",

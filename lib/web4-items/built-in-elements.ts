@@ -26,6 +26,9 @@ export const BUILT_IN_STATIC: Record<string, string> = {
 /** 558: элементы памяти — у них раздел «Резервное копирование» (`memory` в дереве). Ид встроенных неизменны (557). */
 export const MEMORY_ELEMENTS: readonly string[] = ["data", "storage", "vectors", "graph"]
 
+/** 559: элемент входа — у него раздел «Пользователи» (`auth` в дереве), все люди узла. */
+export const AUTH_ELEMENT = "auth"
+
 const SERVICE_DIR = (id: string) => join(process.cwd(), "app", "[lang]", "(architectLayer)", "architect", id)
 
 /** Встроенные элементы: в реестре, не рождённые, не сайт root, на нативном шаблоне, у ядра есть их папка страниц. */
