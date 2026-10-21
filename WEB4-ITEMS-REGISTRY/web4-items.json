@@ -131,7 +131,7 @@
     {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
-      "version": "v2.0.0",
+      "version": "v2.1.0",
       "port": 24683,
       "provides": [
         "site"
