@@ -3334,3 +3334,35 @@ Owner, verbatim (the fourth time that day): «в левом меню опять 
   got their answer (RSC 200) but did not apply the navigation for `[...page]` inside a static service folder.
 - Delete and address change stay closed for built-ins (doors only for born elements). The menu needs the elements present when the
   pages are rendered — the core build redraws the pages after the lid opens (the procedure at the top of this file).
+
+## Config settings menu and the node mode switch; the account drawer item to the core (steps 564, 565, 2026-10-21)
+
+Owner, verbatim: «просто сделай на этой странице которую я тебе прислал ссылку левое меню чтобы мы переключались»; «в этом конфигураторе и
+нужно сделать ещё один механический переключатель чтобы определить в каком из двух режимов сайт будет работать … в паспорте … будет
+просто показывать в каком режиме это работает»; the drawer item «должна посылать прямо на субдомен типа: architect.domain».
+- **config v1.2.2 / design v1.1.2:** the architect branch `/<lang>/architect` has a left menu built from its `_pages/` folders
+  (`_components/section-menu.client.tsx` in the branch `layout.tsx`, no second list), the current page marked.
+- **Node mode switch — only in config:** the red card «Node mode» (`widget-dynamic-config-node-mode`) on the main page of its branch; the
+  config door `/api/node-mode` (architect only) writes through the core door `POST /api/node/type` over the machine loopback (the port from
+  `logs/runtime.json`). The mode lives only in the registry (`nodeType`). The core **Passport** shows it as a card without a switch; the core
+  door `/api/node/type` also returns `settingsUrl` — the config page on this node — for its link.
+- **config v1.2.3 / design v1.1.1:** the account drawer item «The architect group of pages» is `ARCHITECT_URL/<lang>/architect` — the
+  element's own `/<lang>/architect` is its settings branch, not a redirect to the core. The template `fractera-native-item-starter` still has
+  the old path (not moved — owner's word needed).
+
+## Backup of the memory elements and Automated management of the main agent (step 558, 2026-10-21)
+
+Owner, verbatim — `/code/development-docs/development-steps/completed-steps/558-main.md`; plan «Подтвердить, строить (Рекомендую)».
+- **Backup** — the element tree section `backup` (flag `memory`, `MEMORY_ELEMENTS` in `lib/web4-items/built-in-elements.ts`: data, storage,
+  vectors, graph), below «Build»: `backup/tools` (the element's `OWN-SERVICE-PROPS/SUBSCRIPTIONS.json`, the subscriptions view),
+  `backup/cron` (the calendar of `OWN-SERVICE-PROPS/CRON.json` + `data/cron.json`, its own words — `backupCronUi`), `backup/settings`
+  (`_components/schedule-task.client.tsx`: a voice field and «Add to development» = the element's terminal with `?paste=`, step 551-7).
+  The four elements (data v2.1.1, storage/vectors/graph v1.1.1) have their clock back for backup only — `lib/cron/` from root, once a
+  minute in their own server — and the skill `backup-schedule`.
+- **Automated management** — the main agent's top item `build/automation` (between «Working process» and «Build»): «Tools», «Cron events»,
+  «Settings» (`_components/main-agent-automation.tsx`). Data — `data/main-agent` laid out like an element: `OWN-SERVICE-PROPS/{CRON,
+  SUBSCRIPTIONS}.json` (source `lib/main-agent/OWN-SERVICE-PROPS`, copied by `main-agent-install`), the schedule `data/cron.json` and the
+  journal `data/cron-runs.jsonl` (outside git). The clock is **in the core server** (`lib/main-agent-cron/`, started in
+  `instrumentation.ts`, once a minute): the built-in event `agent-task` wakes the main agent with the entry's `message` as its task
+  (`globalThis.__web4AgentWake('build', { confirmed: true })`). Every run is a session on the owner's subscription — the price named in the
+  plan. The schedule format has no «every N minutes»: `repeat` is once · daily · weekdays · weekly · monthly at `time` HH:MM.
