@@ -3317,3 +3317,17 @@ Owner, verbatim (all words — `/code` `completed-steps/553-main.md`): «эти 
 - 🛑 **Known limit of the factory:** sign-in is shared by every element (one `users` table in `data/services/auth/auth.db`); separate
   users per application — step 554. 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
   menu of built-in elements still uses the old service pages — the next step (owner: «Сразу после 553-7»).
+
+## Built-in elements in the element tree (step 557, 2026-10-21)
+
+Owner, verbatim (the fourth time that day): «в левом меню опять вижу абсолютно тот же самый интерфейс который вообще не соответствует
+эталонному нативного шаблону нём это выпадающих списков нету строительства в нём нету документов разработки».
+- The built-in elements (auth, data, storage, vectors, graph, config, design, blocks — registry, not born, not root, native passport,
+  with a core service folder) get the same element tree as a born native element: `lib/web4-items/built-in-elements.ts`
+  (`builtInIds`, `builtInDraft`, `BUILT_IN_STATIC`); the menu replaces their old service item in place (`draft-menu.tsx`); the page of
+  the tree accepts them (`idOfAddress`, `resolve`); the existing service pages (live site, terminal, Claude Code subscription,
+  Telegram) keep their addresses; the rest of the tree is `architect/<id>/[...page]` → the same element page of the core.
+- Tree links of built-ins carry `reload` (full page load, `NavLink` in `components/workspace/workspace-shell.tsx`): the client router
+  got their answer (RSC 200) but did not apply the navigation for `[...page]` inside a static service folder.
+- Delete and address change stay closed for built-ins (doors only for born elements). The menu needs the elements present when the
+  pages are rendered — the core build redraws the pages after the lid opens (the procedure at the top of this file).
