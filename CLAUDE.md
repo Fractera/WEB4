@@ -27,8 +27,8 @@ Owner, verbatim: «Ты уже в конце концов можешь выра�
      and without the redraw the menu has no element trees and no «Documents».
 3. **Success looks like:** `===SEO_HTML_OK===`, «Крышка открыта», «Страницы ядра перерисованы … 200», «Готово». Takes 8–12 minutes.
 4. **If it fails:** the previous build is already back and the node is running. Read the error, report it with the exact line, and
-   **do not retry the same thing** — if it is memory again, send the owner to build it himself with every agent terminal closed (step
-   555 — the core «Deploy» button with that hint is planned).
+   **do not retry the same thing** — if it is memory again, send the owner to build it himself with every agent terminal closed: the
+   main agent's Build → Deployments (`architect/build/deployments`), row «core», button «Deploy the core» (step 555; built after the core build that carries it).
 5. **After a crash mid-build** (power, kill): `npm run serve:start` (or the next `serve:rebuild`) returns `WEB4-ITEMS` and starts the
    stopped processes from `data/node/quiet-build.json`.
 6. Code: `lib/deploy/quiet-build.cjs` (`closeLid`, `openLid`, `backupNext`, `restoreNext`, `itemsAside`, `itemsBack`, `redrawCore`),
@@ -3275,8 +3275,11 @@ Owner, verbatim: «перед началом сборки нужно освоб�
   терминалов зайдите поочерёдно выключите их при необходимости дождитесь завершения разработки после этого вы выполните
   развёртывания». The agent's own session (Claude Code) is one of the biggest memory users on the machine; a build started by the
   owner with the agents closed gets that memory too. Order for the agent: say it could not build and why (the exact error), name the
-  button's place, and stop — no more retries. 🛑 The core «Deploy» button with this hint is NOT built yet (queued as its own step after
-  553); until it exists the owner runs `npm run serve:rebuild` in a terminal of the core folder with every agent terminal closed.
+  button's place, and stop — no more retries. The button (step 555): the deployments board (`architect/build/deployments`), row «core», «Deploy the core» — a window
+  with the hint and the list of open element terminals (close each), then `POST /api/node/deploy { core: true }` starts
+  `scripts/core-deploy.mjs` outside the core's process tree (`spawn-free`), which runs `serve.mjs rebuild` with a cleaned environment,
+  writes `logs/core-deploy.log` and the result `data/node/core-deploy.json`; the board shows it when the core is back. It appears after
+  the core build that carries it; until then the owner runs `npm run serve:rebuild` in a terminal of the core folder.
 - 🔒 **The core build must not depend on the number of elements — `WEB4-ITEMS` leaves the core folder for `next build`.** Owner,
   verbatim: «по мере того как мы увеличивали количество элементов в проекте всегда пропорционально росло во время сборки … ядро по своей
   природе не должно быть зависимо от количества элементов также как любой другой элемент не должен зависеть от количества других

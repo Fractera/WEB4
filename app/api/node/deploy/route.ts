@@ -40,6 +40,25 @@ function startFree(script: string, args: string[]): void {
 
 type Entry = { id: string; version?: string; port?: number; kind?: string }
 
+// 555: сборка ядра по кнопке — итог последней (`scripts/core-deploy.mjs`). `running` без живого процесса — прервана (машина выключилась).
+type CoreDeploy = { state: "running" | "done" | "failed" | "interrupted"; startedAt?: string; finishedAt?: string; rc?: number | null; pid?: number }
+const CORE_DEPLOY = join(ROOT, "data", "node", "core-deploy.json")
+function readCoreDeploy(): CoreDeploy | null {
+  const s = readJson<CoreDeploy>(CORE_DEPLOY)
+  if (!s) return null
+  if (s.state === "running" && s.pid) {
+    try { process.kill(s.pid, 0) } catch { return { ...s, state: "interrupted" } }
+  }
+  return s
+}
+const coreLogTail = (): string[] => {
+  try {
+    return readFileSync(join(ROOT, "logs", "core-deploy.log"), "utf8").replace(/\r/g, "").split("\n").filter(Boolean).slice(-12)
+  } catch {
+    return []
+  }
+}
+
 function readJson<T>(file: string): T | null {
   try {
     return JSON.parse(readFileSync(file, "utf8")) as T
@@ -106,7 +125,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       ok: true,
-      core: { commit: process.env.WEB4_COMMIT ?? null, builtAt: process.env.NEXT_PUBLIC_BUILT_AT ?? null },
+      core: { commit: process.env.WEB4_COMMIT ?? null, builtAt: process.env.NEXT_PUBLIC_BUILT_AT ?? null, deploy: readCoreDeploy(), log: coreLogTail() },
       elements: elements(),
       // 337-1: осиротевшая запись (running, процесса нет) исправляется на «прервано» при этом же чтении.
       deployment: deployLock.readState(),
@@ -121,11 +140,18 @@ export async function POST(req: NextRequest) {
   const denied = await requireRoles(req, ROLES)
   if (denied) return denied
   if (deployLock.isRunning()) return NextResponse.json({ ok: false, reason: "already-running" }, { status: 409 })
-  let body: { ids?: unknown; rollback?: unknown } = {}
+  let body: { ids?: unknown; rollback?: unknown; core?: unknown } = {}
   try {
-    body = (await req.json()) as { ids?: unknown; rollback?: unknown }
+    body = (await req.json()) as { ids?: unknown; rollback?: unknown; core?: unknown }
   } catch {
     return NextResponse.json({ ok: false, reason: "bad-json" }, { status: 400 })
+  }
+  // 555: «Развернуть» ядра — `serve:rebuild` при закрытой крышке, вне дерева процессов ядра. Сборка остановит и этот сервер: ответ
+  // уходит сразу, итог страница прочтёт, когда ядро поднимется (`core.deploy`). Подсказку об открытых терминалах показывает окно кнопки.
+  if (body.core === true) {
+    if (readCoreDeploy()?.state === "running") return NextResponse.json({ ok: false, reason: "core-running" }, { status: 409 })
+    startFree("core-deploy.mjs", [])
+    return NextResponse.json({ ok: true, core: "started" })
   }
   const known = new Set(elements().filter((e) => e.installed).map((e) => e.id))
   // 287: откат — та же команда, что с машины (`npm run deploy:rollback -- <id>`), отдельным процессом.

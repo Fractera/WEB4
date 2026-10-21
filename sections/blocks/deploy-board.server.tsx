@@ -1,5 +1,6 @@
 import type { SectionRenderer } from '@/sections/contract'
 import { DeployBoard, type DeployBoardWords } from '@/components/deploy/deploy-board.client'
+import { appDialogUi } from '@/components/dialog/app-dialog.i18n'
 
 // ДАШБОРД РАЗВЁРТЫВАНИЙ (280-11b): элементы узла, что ждёт развёртывания, кнопка у каждого и «всё».
 // Слова берутся здесь, на сервере, и уходят островку пропсами.
@@ -30,6 +31,22 @@ const WORDS: Record<string, DeployBoardWords> = {
     rollback: 'Roll back to {version}',
     rollbackGit: 'The previous version from the registry history — whether it worked is not recorded.',
     codeChanges: 'code changes: {n}',
+    coreDeploy: {
+      button: 'Deploy the core',
+      title: 'Deploy the core?',
+      hint: 'The build stops every process of the node for 8 to 12 minutes; sites on the internet keep answering from their page copies, and this page stops answering until the build ends. First check which terminals are open: they are listed below and behind the orange mark of the account button at the top right. Close them one by one, waiting for an agent to finish its work if it is busy. Then deploy.',
+      terminals: 'Open terminals',
+      noTerminals: 'No element terminal is open.',
+      close: 'Close',
+      cancel: 'Cancel',
+      start: 'Deploy',
+      started: 'The core build has started. This page stops answering for about 10 minutes; open it again later to see the result here.',
+      refused: 'The build did not start: another deployment or core build is running.',
+      lastDone: 'Last core build: done, {when}.',
+      lastFailed: 'Last core build failed {when} (code {rc}); the previous build was put back.',
+      lastRunning: 'The core build is running.',
+      lastInterrupted: 'The last core build was interrupted (the machine stopped). If elements do not answer, run npm run serve:start in the core folder: it puts back what the build had stopped.',
+    },
   },
   ru: {
     intro: 'Развёртывание пересобирает часть проекта, чтобы она показала сохранённое: оформление, настройки, новую версию. Само сохранение того, что видят посетители, не меняет.',
@@ -57,9 +74,25 @@ const WORDS: Record<string, DeployBoardWords> = {
     rollback: 'Вернуть {version}',
     rollbackGit: 'Предыдущая версия из истории реестра — была ли она рабочей, не записано.',
     codeChanges: 'правок кода: {n}',
+    coreDeploy: {
+      button: 'Развернуть ядро',
+      title: 'Развернуть ядро?',
+      hint: 'Сборка останавливает все процессы узла на 8–12 минут: сайты в интернете отвечают копиями страниц, а эта страница не отвечает до конца сборки. Сначала проверьте, какие терминалы открыты: они ниже и за оранжевой меткой кнопки аккаунта справа вверху. Закройте их по очереди; если агент работает, дождитесь, пока он закончит. Затем разворачивайте.',
+      terminals: 'Открытые терминалы',
+      noTerminals: 'Ни одного терминала элемента не открыто.',
+      close: 'Закрыть',
+      cancel: 'Отмена',
+      start: 'Развернуть',
+      started: 'Сборка ядра началась. Эта страница перестанет отвечать примерно на 10 минут; откройте её позже — итог будет здесь.',
+      refused: 'Сборка не началась: идёт другое развёртывание или сборка ядра.',
+      lastDone: 'Последняя сборка ядра: готово, {when}.',
+      lastFailed: 'Последняя сборка ядра упала {when} (код {rc}); прежняя сборка возвращена.',
+      lastRunning: 'Идёт сборка ядра.',
+      lastInterrupted: 'Последняя сборка ядра прервана (машина остановилась). Если элементы не отвечают, выполните npm run serve:start в папке ядра: команда вернёт то, что остановила сборка.',
+    },
   },
 }
 
 export const deployBoard: SectionRenderer<'deployBoard'> = (b, { key: k }) => (
-  <DeployBoard key={k} words={WORDS[b.lang] ?? WORDS.en} lang={b.lang} />
+  <DeployBoard key={k} words={WORDS[b.lang] ?? WORDS.en} lang={b.lang} dialogUi={appDialogUi(b.lang)} />
 )

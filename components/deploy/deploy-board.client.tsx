@@ -5,6 +5,8 @@ import { Rocket } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Spinner } from "@/components/ui/spinner"
+import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
+import { CoreDeploy, type CoreDeployState, type CoreDeployWords } from "./core-deploy.client"
 
 // ДАШБОРД РАЗВЁРТЫВАНИЙ (280-11b).
 //
@@ -42,6 +44,8 @@ export type DeployBoardWords = {
   rollbackGit: string
   /** 337-2: «правок кода: {n}» */
   codeChanges: string
+  /** 555: кнопка «Развернуть» ядра и её окно */
+  coreDeploy: CoreDeployWords
 }
 
 type Element = {
@@ -62,13 +66,13 @@ type Deployment = {
   results: { id: string; ok: boolean; seconds: number; note: string }[]
   finishedAt: string | null
 }
-type State = { core: { commit: string | null; builtAt: string | null }; elements: Element[]; deployment: Deployment | null }
+type State = { core: { commit: string | null; builtAt: string | null; deploy?: CoreDeployState; log?: string[] }; elements: Element[]; deployment: Deployment | null }
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 const DOOR = `${BASE}/api/node/deploy`
 const when = (iso: string | null, lang: string) => (iso ? new Date(iso).toLocaleString(lang) : "—")
 
-export function DeployBoard({ words, lang }: { words: DeployBoardWords; lang: string }) {
+export function DeployBoard({ words, lang, dialogUi }: { words: DeployBoardWords; lang: string; dialogUi: AppDialogUi }) {
   const [state, setState] = useState<State | "loading" | "failed">("loading")
   const [refused, setRefused] = useState(false)
 
@@ -173,6 +177,7 @@ export function DeployBoard({ words, lang }: { words: DeployBoardWords; lang: st
           <span className="text-muted-foreground">{words.version}: {state.core.commit ?? "—"}</span>
           <span className="text-muted-foreground">{words.built}: {when(state.core.builtAt, lang)}</span>
           <span className="w-full text-muted-foreground">{words.coreNote}</span>
+          <CoreDeploy words={words.coreDeploy} dialogUi={dialogUi} last={state.core.deploy ?? null} log={state.core.log ?? []} lang={lang} disabled={running} />
         </div>
       </div>
 
