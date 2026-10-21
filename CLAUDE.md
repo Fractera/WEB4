@@ -3366,3 +3366,28 @@ Owner, verbatim — `/code/development-docs/development-steps/completed-steps/55
   `instrumentation.ts`, once a minute): the built-in event `agent-task` wakes the main agent with the entry's `message` as its task
   (`globalThis.__web4AgentWake('build', { confirmed: true })`). Every run is a session on the owner's subscription — the price named in the
   plan. The schedule format has no «every N minutes»: `repeat` is once · daily · weekdays · weekly · monthly at `time` HH:MM.
+
+## Users tab of the auth element; the sign-in canon fixes (step 559, 2026-10-21/22)
+
+Owner, verbatim (all words — `/code` `development-docs/development-steps/completed-steps/559-main.md`): «добавления к стандартной вкладки
+авторизации на одном из верхних уровней вкладки пользователей … стандартную таблицу с pagina нацией и серверными запросами … Удаление
+пользователя возможно только таким образом чтобы удалялись имя, фамилии, аватарка, способ авторизации, но сохранялся бы идентификатор
+псевдоним и логи»; choices «Три правки + новый ключ», «С первого запуска», «Email и кошелёк».
+- **Where:** the element tree section `users` (flag `auth`, only the built-in auth element, right under «Live site») →
+  `components/node-users/` (island, user dialog, batch bar; words `node-users.i18n.ts`) → core door `app/api/node/users/[[...path]]`
+  (sign-in and role architect · admin, then forwards to the auth element) → auth `/api/node-users/*` (its README). The people live only in
+  the auth element's base; the core keeps no copy.
+- **Key:** the core sends `ARCHITECT_TOKEN` (`x-architect-token`) — held only by the core and auth. Not `SETTINGS_SECRET`: every element
+  has it. The auth door answers only on the loopback (404 through the tunnel).
+- **Server table:** `components/table/server-table-tools.client.tsx` — the `TableTools` look with server paging, search, filters and sort.
+  Few rows already in a static page → `TableTools`; rows behind a door, many or personal → the server table.
+- **Sign-in canon (auth v2.1.1):** a password-less record signs in without a password only as a guest (before, any Google or e-mail-link
+  user — the architect too — signed in through the password form by e-mail alone; measured on a copy of the base); a blocked record cannot
+  sign in and drops out of `/api/session`, the ticket door and `/api/session/verify` on the next request; those doors return the roles from
+  the database, so a role change works without a new sign-in. The node signing key `NEXTAUTH_SECRET` was replaced after the fix.
+- **Proving a core island before the core build:** a stand — esbuild bundle of the real island, the CSS of the current core build (without
+  it base-ui primitives have no size), a small server forwarding the door, headless Chrome (`scratchpad/559/stand/` of the session, method
+  in `completed-steps/559-5.md`). A probe of the auth element on a spare port must have `CONFIG_SERVICE_URL` and `DESIGN_SERVICE_URL`
+  empty — otherwise it moves the live element's subscription to its own port.
+- **Not built:** the writer of Messenger Web4 records; tracking and marketing consents read by analytics and mailings; users per
+  application of an app factory (step 554); the new table in the element templates (`/admin/users` there is the old one).
