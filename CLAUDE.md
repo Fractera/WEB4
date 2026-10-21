@@ -3,6 +3,34 @@
 > `WEB4-ITEMS-REGISTRY/web4-items.json`, modules `lib/web4-items/`, pm2 `fractera-web4` · `-domain` · `-tunnel` · `-watch`,
 > environment `WEB4_COMMIT` · `WEB4_STARTED_AT`. The owner's verbatim quotes keep the old word; public page URLs (`/agi-item`) did not change.
 
+## 🔒 HOW TO BUILD THE CORE — ONE COMMAND, NOTHING ELSE (owner 2026-10-21, step 557)
+
+Owner, verbatim: «Ты уже в конце концов можешь выработать какую-то процедуру которая позволит нам делать нормальный быстрый надёжные
+сборки ядра или нет по 500 раз одно и то же … Пиши это прям в главную инструкцию а не в Антипатерны.»
+
+1. **Before:** no deploy running (`serve:rebuild` refuses itself if one is) and no agent terminal of an element working — the build
+   stops every process of the node.
+2. **Run, in the foreground, from the core folder:** `npm run serve:rebuild`. Nothing by hand: no pausing services one by one, no
+   copying `.next`, no moving folders, no retries with other memory tricks — the command does all of it:
+   - copies the current build outside the project (`<parent>/agi-code-next-backup`);
+   - **closes the lid:** stops every pm2 process of the node except the tunnels (the address stays, Cloudflare serves the page copies)
+     and prints free memory before → after;
+   - runs the `prebuild` guards with the elements in place;
+   - **moves the whole `WEB4-ITEMS` out of the core folder** for `next build` and returns it in `finally` (14 elements, ~938 000 files,
+     13 GB made Turbopack die on one 2 GB allocation even with 1587 MB free; moving only their `node_modules` and builds still failed —
+     measured 2026-10-21);
+   - starts every stopped process again; on failure puts the previous build back first;
+   - **redraws the core pages** (its own settings signal) once the elements are back: the pages were prerendered without the elements,
+     and without the redraw the menu has no element trees and no «Documents».
+3. **Success looks like:** `===SEO_HTML_OK===`, «Крышка открыта», «Страницы ядра перерисованы … 200», «Готово». Takes 8–12 minutes.
+4. **If it fails:** the previous build is already back and the node is running. Read the error, report it with the exact line, and
+   **do not retry the same thing** — if it is memory again, send the owner to build it himself with every agent terminal closed (step
+   555 — the core «Deploy» button with that hint is planned).
+5. **After a crash mid-build** (power, kill): `npm run serve:start` (or the next `serve:rebuild`) returns `WEB4-ITEMS` and starts the
+   stopped processes from `data/node/quiet-build.json`.
+6. Code: `lib/deploy/quiet-build.cjs` (`closeLid`, `openLid`, `backupNext`, `restoreNext`, `itemsAside`, `itemsBack`, `redrawCore`),
+   `scripts/serve.mjs` (`rebuild`). Change the procedure only there and in this section, together.
+
 # Who you are
 
 The agent-programmer on the owner's machine. You build a **Next 16+ application** that runs on a
