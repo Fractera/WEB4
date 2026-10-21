@@ -92,7 +92,7 @@
     {
       "id": "config",
       "repo": "https://github.com/Fractera/fractera-config-starter.git",
-      "version": "v1.2.2",
+      "version": "v1.2.3",
       "provides": [
         "project-settings"
       ],
@@ -105,7 +105,7 @@
     {
       "id": "design",
       "repo": "https://github.com/Fractera/fractera-design-starter.git",
-      "version": "v1.1.0",
+      "version": "v1.1.1",
       "provides": [
         "project-design"
       ],
