@@ -517,7 +517,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     ? <ScheduleTask lang={lang} service={builtInIds().includes(item) ? item : `${slug}/build`} words={backupTaskWords(lang)} />
     : null
   // 559: «Пользователи» элемента входа — все люди узла; таблицу спрашивает островок у двери ядра `/api/node/users`.
-  const users = key === 'users' ? <NodeUsers lang={lang} ui={nodeUsersUi(lang)} table={tableUi(lang)} /> : null
+  const users = key === 'users' ? <NodeUsers lang={lang} ui={nodeUsersUi(lang)} table={tableUi(lang)} dialogUi={appDialogUi(lang)} /> : null
 
   return (
     <ArchitectPage

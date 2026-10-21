@@ -1,13 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react"
+import { Pencil } from "lucide-react"
+import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Spinner } from "@/components/ui/spinner"
 import { ServerTableTools, SERVER_PER_PAGE, type ServerTableQuery } from "@/components/table/server-table-tools.client"
 import { ALL_ROLES } from "@/lib/roles"
 import type { TableUi } from "@/sections/table.i18n"
 import type { NodeUsersUi } from "./node-users.i18n"
+import { BatchBar } from "./batch-bar.client"
+import { UserDialog } from "./user-dialog.client"
 
 // ВКЛАДКА «ПОЛЬЗОВАТЕЛИ» ЭЛЕМЕНТА ВХОДА (узел, шаг 559). Страница ядра предрендерена; людей островок спрашивает в браузере у двери
 // ядра `/api/node/users`, а та — у элемента входа, владельца людей. Каждое изменение поиска, отбора, сортировки или страницы — запрос.
@@ -27,7 +33,9 @@ type State = { kind: "loading" } | { kind: "error"; why: "forbidden" | "unreacha
 export const ANY = "all"
 export const fullName = (r: Pick<NodeUserRow, "firstName" | "lastName">) => [r.firstName, r.lastName].filter(Boolean).join(" ")
 
-export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; table: TableUi }) {
+export function NodeUsers({ lang, ui, table, dialogUi }: { lang: string; ui: NodeUsersUi; table: TableUi; dialogUi: AppDialogUi }) {
+  const [selected, setSelected] = useState<string[]>([])
+  const [editing, setEditing] = useState<NodeUserRow | null>(null)
   const [query, setQuery] = useState<ServerTableQuery>({ q: "", page: 1, perPage: SERVER_PER_PAGE[0] })
   const [filters, setFilters] = useState<Filters>({ org: ANY, role: ANY, sort: "created_desc" })
   const [state, setState] = useState<State>({ kind: "loading" })
@@ -72,11 +80,18 @@ export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; 
   if (state.kind === "loading") return <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {ui.loading}</p>
   if (state.kind === "error") return <p className="text-sm text-destructive" role="alert" data-node-users-error={state.why}>{ui[state.why]}</p>
 
+  // Выбор живёт по id на текущей странице: обезличенных не выбирают — с ними ничего сделать нельзя.
+  const pickable = state.rows.filter((r) => r.status !== "anonymized").map((r) => r.id)
+  const allPicked = pickable.length > 0 && pickable.every((id) => selected.includes(id))
   const head = (
     <tr className="border-b border-border">
+      <th scope="col" className={`${cell} w-10`}>
+        <Checkbox aria-label={ui.cols.selectPage} checked={allPicked} onCheckedChange={() => setSelected(allPicked ? [] : pickable)} data-select-page />
+      </th>
       {[ui.cols.user, ui.cols.email, ui.cols.roles, ui.cols.orgs, ui.cols.methods, ui.cols.status, ui.cols.created].map((h) => (
         <th key={h} scope="col" className={`${cell} font-semibold whitespace-nowrap text-foreground`}>{h}</th>
       ))}
+      <th scope="col" className={`${cell} w-12`}><span className="sr-only">{ui.cols.edit}</span></th>
     </tr>
   )
 
@@ -84,6 +99,9 @@ export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; 
     const gone = r.status === "anonymized"
     return (
       <tr key={r.id} className="border-b border-border last:border-0 text-muted-foreground" data-user-row={r.id} data-status={r.status}>
+        <td className={cell}>
+          {!gone && <Checkbox aria-label={ui.cols.select} checked={selected.includes(r.id)} onCheckedChange={() => setSelected((s) => (s.includes(r.id) ? s.filter((x) => x !== r.id) : [...s, r.id]))} />}
+        </td>
         <td className={cell}>
           <div className="flex items-center gap-3">
             {r.avatar && !gone
@@ -103,6 +121,13 @@ export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; 
           <Badge variant={r.status === "active" ? "secondary" : r.status === "blocked" ? "destructive" : "outline"}>{ui.status[r.status]}</Badge>
         </td>
         <td className={`${cell} whitespace-nowrap`}>{date(r.createdAt)}</td>
+        <td className={cell}>
+          {!gone && (
+            <Button size="icon-sm" variant="ghost" aria-label={`${ui.cols.edit}: ${r.nickname ?? r.id}`} onClick={() => setEditing(r)} data-edit={r.id}>
+              <Pencil />
+            </Button>
+          )}
+        </td>
       </tr>
     )
   })
@@ -142,7 +167,10 @@ export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; 
   return (
     <div className="flex max-w-6xl flex-col" data-node-users={state.total}>
       <ServerTableTools
-        columns={7}
+        above={selected.length > 0
+          ? <BatchBar ids={selected} orgs={orgs} ui={ui} dialogUi={dialogUi} onClear={() => setSelected([])} onDone={() => { setSelected([]); void load(); void loadOrgs() }} />
+          : null}
+        columns={9}
         filters={filterBar}
         head={head}
         loading={busy}
@@ -156,6 +184,18 @@ export function NodeUsers({ lang, ui, table }: { lang: string; ui: NodeUsersUi; 
         total={state.total}
         words={table}
       />
+      {editing && (
+        <UserDialog
+          user={editing}
+          orgs={orgs}
+          ui={ui}
+          dialogUi={dialogUi}
+          lang={lang}
+          onClose={() => setEditing(null)}
+          onChanged={() => { void load(); void loadOrgs() }}
+          onOrgsChanged={() => void loadOrgs()}
+        />
+      )}
     </div>
   )
 }
