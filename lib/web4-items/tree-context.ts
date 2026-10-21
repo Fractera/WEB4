@@ -2,6 +2,7 @@ import "server-only"
 import { elementMessengers, hasCatalog, isNativeElement } from "@/lib/a2a/element-passport"
 import type { TreeContext } from "@/lib/web4-items/item-tree"
 import nodeType from "@/lib/web4-items/node-type.cjs"
+import { MEMORY_ELEMENTS } from "@/lib/web4-items/built-in-elements"
 
 // КОНТЕКСТ ДЕРЕВА ЭЛЕМЕНТА — ОДНА СБОРКА ДЛЯ МЕНЮ, МАРШРУТА И СПИСКОВ (узел, шаг 553-6; прежде — четыре копии одной строки).
 //
@@ -21,5 +22,6 @@ export function treeContextOf(id: string): TreeContext {
     messengers: effectiveMessengers(id),
     native: isNativeElement(id),
     nodeType: nodeType.readNodeType(process.cwd()) as "project" | "factory",
+    memory: MEMORY_ELEMENTS.includes(id),
   }
 }

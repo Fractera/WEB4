@@ -13,7 +13,7 @@ import { draftAddress, getDraft } from '@/lib/web4-items/drafts'
 import { findTreePath, movedPage, MOVED_WITH, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { AccordionSection } from '@/components/accordion/accordion-section.client'
 import { getService, listServices, serviceUrl } from '@/lib/microservices/registry'
-import { builtInDraft } from '@/lib/web4-items/built-in-elements'
+import { builtInDraft, builtInIds } from '@/lib/web4-items/built-in-elements'
 import { BirthButton } from '../../../_components/birth-button.client'
 import nodeType from '@/lib/web4-items/node-type.cjs'
 import { birthState } from '@/lib/web4-items/birth'
@@ -45,6 +45,8 @@ import { ElementSiteSettings } from '../../../_components/element-site-settings'
 import { addressOf, idOfAddress } from '@/lib/web4-items/element-address'
 import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/web4-items/element-describe'
 import { terminalLink } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs'
+import { ScheduleTask } from '@/app/[lang]/(architectLayer)/_components/schedule-task.client'
+import { backupTaskWords } from '@/app/[lang]/(architectLayer)/_components/schedule-task.i18n'
 import { agentKitWidget, openAiKeyHref, type AgentKitPage } from '../_agent-kit/widgets'
 import { ElementPreview } from '@/components/preview/element-preview.client'
 import { elementPreviewWords, previewTaskKit } from '@/sections/blocks/element-preview.server'
@@ -122,6 +124,9 @@ const hasSkillGroups = (id: string) => {
 }
 
 const SUBSCRIPTIONS = 'workflow/process/subscriptions'
+// 558: подписки элемента памяти — те же, но в разделе «Резервное копирование → Инструменты».
+const BACKUP_TOOLS = 'backup/tools'
+const SUBSCRIPTION_LISTS = [SUBSCRIPTIONS, BACKUP_TOOLS]
 
 // 325-3: сегмент пути — адрес элемента в ядре или его id (id неизменен; адрес — слой над ним, `lib/web4-items/element-address.ts`).
 function resolve(p: Params) {
@@ -133,10 +138,11 @@ function resolve(p: Params) {
   if (path.length === 0) return { draft, trail: [] as TreePage[], service: undefined }
   // 463 (владелец 2026-10-12: «…создавать отдельные страницы а не валить в одну кучу»): у каждого внешнего сервиса элемента
   // своя страница `workflow/process/subscriptions/<id>` (528-1); id — из его OWN-SERVICE-PROPS/SUBSCRIPTIONS.json, чужой id — 404.
-  if (path.length === 4 && path.slice(0, 3).join('/') === SUBSCRIPTIONS) {
-    const known = elementPassport(draft.id)?.subscriptions?.services.some((s) => s.id === path[3])
-    const trail = findTreePath(path.slice(0, 3))
-    return known && trail ? { draft, trail, service: path[3] } : null
+  const list = SUBSCRIPTION_LISTS.find((l) => path.length === l.split('/').length + 1 && path.slice(0, -1).join('/') === l)
+  if (list) {
+    const known = elementPassport(draft.id)?.subscriptions?.services.some((s) => s.id === path[path.length - 1])
+    const trail = findTreePath(path.slice(0, -1))
+    return known && trail ? { draft, trail, service: path[path.length - 1] } : null
   }
   const trail = findTreePath(path)
   if (!trail) return null
@@ -437,6 +443,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const PASSPORT_VIEWS: Record<string, PassportView> = {
     'build/i2i/api': 'api', 'build/i2i/mcp': 'mcp', 'build/i2i/catalog': 'catalog',
     'build/f2f/publish': 'publish', 'build/f2f/find': 'find', [SUBSCRIPTIONS]: 'subscriptions', 'workflow/process/cron': 'cron',
+    [BACKUP_TOOLS]: 'subscriptions', 'backup/cron': 'cron',
   }
   const passportView = PASSPORT_VIEWS[key]
   // 412-2: документ элемента — текст спрашивает островок при открытии (страница предрендерена, агент правит файлы в любую минуту).
@@ -492,7 +499,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       })()
     : undefined
   // 463: страница одного внешнего сервиса — `service`; ссылки списка «Подписки» строятся от `subscriptionsHref`.
-  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${SUBSCRIPTIONS}`} item={item} /> : null
+  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${key.startsWith(BACKUP_TOOLS) ? BACKUP_TOOLS : SUBSCRIPTIONS}`} item={item} /> : null
   // 551-4 (владелец 2026-10-20): «Карточки возможностей» — одна оранжевая «Образец»: описание через ИИ (задача в терминал элемента) и три
   // цены; хранятся в паспорте элемента (`payments.web3["a2a-card"].sample`). Девять дверей визитки шаблона живут в визитке и в i2i → API.
   const cardUi = capabilityCardUi(lang)
@@ -502,6 +509,12 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       : <p className="my-4 text-sm text-muted-foreground">{elementSettingsUi(lang).notBorn}</p>)
     : null
 
+  // 558: «Резервное копирование → Настройки» — задача агенту элемента голосом; терминал встроенного — `architect/<id>/terminal` (557),
+  // рождённого — под `build/`.
+  const backupSettings = key === 'backup/settings'
+    ? <ScheduleTask lang={lang} service={builtInIds().includes(item) ? item : `${slug}/build`} words={backupTaskWords(lang)} />
+    : null
+
   return (
     <ArchitectPage
       lang={lang}
@@ -509,7 +522,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}</>}
+      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}{backupSettings}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

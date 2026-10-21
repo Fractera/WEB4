@@ -30,6 +30,9 @@ export type TreePage = {
    *  уровне иметь подобные решения»; «относятся только к custom элементу»): раздел только кастомного элемента — рабочий процесс и платежи
    *  не все про сеть, поэтому отдельный флаг, а не `network`. */
   custom?: true
+  /** 558 (владелец 2026-10-21: «обновить все четыре нативных элементов связанных с памятью … вкладку на одном уровне с строительства но
+   *  ниже которая будет называться резервная копирование»): раздел только элементов памяти — data, storage, vectors, graph. */
+  memory?: true
   // 553-6: на едином проекте (nodeType project) страницы нет — в меню и по адресу
   project?: false
   doc?: { file: string; folder?: boolean; deep?: boolean }
@@ -80,7 +83,7 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory" }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
@@ -88,6 +91,7 @@ export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.unless && c.messengers[p.unless]) return false
   if (p.network && c.native) return false
   if (p.custom && c.native) return false
+  if (p.memory && !c.memory) return false
   return true
 }
 // 472: у элемента с H2A бот живёт в H2A — старый адрес ведёт туда (у элемента без H2A бот остаётся в «Строительстве»).
@@ -405,6 +409,22 @@ export const ITEM_TREE: TreePage[] = [
           { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or app works, then build your own in the element.", "Реверс-инжиниринг", "Разобрать, как устроен готовый сайт или приложение, и построить своё в элементе.") },
         ],
       },
+    ],
+  },
+  // 558 (владелец 2026-10-21): «Резервное копирование» у четырёх элементов памяти — ниже «Строительства», по образцу «Процесса» своих
+  // элементов: «Инструменты» (подписки — внешние сервисы копирования), «Крон события» (тот же календарь), «Настройки» (задача агенту голосом).
+  {
+    slug: "backup",
+    memory: true,
+    words: w("Backup", "Copies of this element's data: the services that keep them, their schedule and the task for the agent.", "Резервное копирование", "Копии данных этого элемента: сервисы, где они хранятся, расписание и задача агенту."),
+    about: {
+      en: ["Backup is set up in three places. «Tools» lists the outside services the copies go to (a storage, a cloud disk). «Cron events» is the calendar of when copying runs. «Settings» is where you say in plain words what to copy, how often and where — and send it to the element's agent, which builds the copying service and puts it on the schedule."],
+      ru: ["Резервное копирование настраивается в трёх местах. «Инструменты» — внешние сервисы, куда уходят копии (хранилище, облачный диск). «Крон события» — календарь того, когда идёт копирование. «Настройки» — здесь вы обычными словами говорите, что копировать, как часто и куда, и отправляете это агенту элемента: он строит службу копирования и ставит её в расписание."],
+    },
+    pages: [
+      { slug: "tools", words: w("Tools", "Outside services the copies go to — subscriptions of this element.", "Инструменты", "Внешние сервисы, куда уходят копии, — подписки этого элемента.") },
+      { slug: "cron", words: w("Cron events", "The calendar of copying: when each backup runs and how it went.", "Крон события", "Календарь копирования: когда идёт каждая копия и чем кончилась.") },
+      { slug: "settings", words: w("Settings", "Say what to copy, how often and where — and add it to development.", "Настройки", "Скажите, что копировать, как часто и куда, — и добавьте в разработку.") },
     ],
   },
   // 325 (слово владельца 2026-09-27): обязательная страница внизу — «Настройки», так называемый Danger zone. Всегда последняя.
