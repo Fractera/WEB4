@@ -3257,3 +3257,35 @@ Owner, verbatim: «перед началом сборки нужно освоб�
   `openLid` also puts the folder back after a crash. 🛑 Never start an element process or an agent in an element folder while the lid is
   closed. The lasting cure — the elements living outside the core folder (`lib/web4-items/paths.cjs` is the one place that knows where)
   — is the owner's decision, not taken.
+
+## Node type: single project or app factory; the All projects tab; the architect header (step 553, 2026-10-21)
+
+Owner, verbatim (all words — `/code` `completed-steps/553-main.md`): «эти два вектора должны сохраняться в каком-то общем Джейсон файл»;
+«for default need Тип 1 — «Единый проект»»; on the factory the tab «показывает и проекты других хозяев- i need»; «на весь проект должен
+существовать один единственный кошелёк. А во всех элементах … скрыть вкладки Messenger»; «я бы предпочёл иметь собственное меню для
+страницы архитектора».
+
+| | `project` — Single project (default) | `factory` — App factory |
+|---|---|---|
+| who | one owner | the core hosts projects of different owners |
+| new custom element | born «like the whole project» (CONFIG, Design, Blocks on) | born on its own settings (own header, footer, policy pages) |
+| wallet | one — the node's; an element cannot add its own (`409 one-wallet`) | per element, as in step 532 |
+| Messenger in elements | hidden (menu and address → 404); the Telegram bot lives in Build | as before |
+| core and built-in elements | under the core's CONFIG | under the core's CONFIG |
+
+- **Where:** field `nodeType` of `WEB4-ITEMS-REGISTRY/web4-items.json` (no field — `project`); `lib/web4-items/node-type.cjs`
+  (`readNodeType`, `writeNodeType`, `birthLook`, `mismatches`, `ownWallets`); the fork snapshot carries it. **Who changes:** only the
+  person — `npm run node-type -- get | set <type> | look <id> own|project`, door `GET|POST /api/node/type`, or the main agent (skill
+  `node-type`) after the person's «yes». Existing elements never switch by themselves. The Passport shows the mode with a hint (553-9).
+- **All projects:** the core counts the home pages of running elements (`catalogEntries` in `lib/web4-items/dashboard-rows.ts`, the
+  page in the catalog language only), puts them into CONFIG (`PUT /api/settings/catalog`, node key; config v1.1.0+), CONFIG signals its
+  subscribers, and every element under CONFIG draws the first header tab from its settings copy (templates v0.3.125 / v0.1.16:
+  `lib/menu/catalog-group.ts`). Refreshed only by human actions — birth, delete, address, own domain, describe, Accept, Deploy, full
+  install — and `npm run catalog:refresh`; no timers.
+- **The architect pages have their own header and footer** (`lib/shell/core-shell-data.ts`): logo, «All projects» (island, data from
+  `GET /api/node/catalog` in the browser), the account button with the orange attention dot always; the project menu from CONFIG is not
+  shown here; the footer is only the theme, width and language switches. `components/shell` is again an exact copy of the site
+  (`check:shell-kits`). The left menu zones «Native items / Custom items» (ru «Встроенные элементы / Свои элементы») fold like Passport.
+- 🛑 **Known limit of the factory:** sign-in is shared by every element (one `users` table in `data/services/auth/auth.db`); separate
+  users per application — step 554. 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
+  menu of built-in elements still uses the old service pages — the next step (owner: «Сразу после 553-7»).
