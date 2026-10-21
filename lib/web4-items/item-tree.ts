@@ -30,6 +30,8 @@ export type TreePage = {
    *  уровне иметь подобные решения»; «относятся только к custom элементу»): раздел только кастомного элемента — рабочий процесс и платежи
    *  не все про сеть, поэтому отдельный флаг, а не `network`. */
   custom?: true
+  // 553-6: на едином проекте (nodeType project) страницы нет — в меню и по адресу
+  project?: false
   doc?: { file: string; folder?: boolean; deep?: boolean }
   about?: Record<"en" | "ru", string[]>
 }
@@ -78,8 +80,9 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory" }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
+  if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
   if (p.needs && p.needs !== "catalog" && !c.messengers[p.needs]) return false
   if (p.unless && c.messengers[p.unless]) return false
@@ -137,6 +140,7 @@ export const ITEM_TREE: TreePage[] = [
   // 528-1: Messenger — сразу под «Живым сайтом»: H2H, H2A и их настройки.
   {
     slug: "messenger",
+    project: false,
     words: w("Messenger", "How people reach you and this element's agent: other people (H2H), you and your agent (H2A), and the rules for both.", "Messenger", "Как с вами и с агентом этого элемента связываются: другие люди (H2H), вы и ваш агент (H2A) — и правила для обоих."),
     about: {
       en: [

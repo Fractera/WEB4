@@ -21,7 +21,8 @@ const walletUrl = (element?: string, extra = "") =>
   `${BASE}/api/node/wallet${element !== undefined ? `?element=${encodeURIComponent(element)}${extra ? `&${extra}` : ""}` : extra ? `?${extra}` : ""}`
 type Wallet = { address: string; kind?: "address" | "generated" } | null
 type Source = "element" | "node" | null
-type State = { wallet: Wallet; source: Source; own: Wallet; node: Wallet }
+// 553-6: `oneWallet` — узел единый проект: свой кошелёк элементу не завести (дверь отвечает 409 `one-wallet`).
+type State = { wallet: Wallet; source: Source; own: Wallet; node: Wallet; oneWallet?: boolean }
 
 const pick = (w: unknown): Wallet => {
   const x = w as { address?: string; kind?: "address" | "generated" } | null
@@ -30,7 +31,7 @@ const pick = (w: unknown): Wallet => {
 const stateOf = (d: Record<string, unknown>, element?: string): State =>
   element === undefined
     ? { wallet: pick(d.wallet), source: d.wallet ? "node" : null, own: null, node: pick(d.wallet) }
-    : { wallet: pick(d.wallet), source: (d.source as Source) ?? null, own: pick(d.own), node: pick(d.node) }
+    : { wallet: pick(d.wallet), source: (d.source as Source) ?? null, own: pick(d.own), node: pick(d.node), oneWallet: d.oneWallet === true }
 
 /** Подключить, создать, снять кошелёк узла — или свой кошелёк элемента (`element` — адрес элемента в ядре). `initial` — уже известный
  *  кошелёк узла (паспорт спрашивает его сам). */
@@ -132,7 +133,9 @@ export function NodeWalletBody({ words, initial, element }: { words: NodeWalletW
           ) : (
             <p className="text-sm text-foreground">{words.noNodeWallet} <a href={`${BASE}/${words.lang}/passport/wallet`} className="text-primary underline-offset-4 hover:underline">{words.nodeWalletLink}</a></p>
           )}
-          {!adding && <Button variant="outline" size="sm" className="w-fit" onClick={() => setAdding(true)} data-wallet-add-own>{words.addOwn}</Button>}
+          {state.oneWallet
+            ? <p className="text-sm text-muted-foreground" data-wallet-one>{words.oneWallet}</p>
+            : !adding && <Button variant="outline" size="sm" className="w-fit" onClick={() => setAdding(true)} data-wallet-add-own>{words.addOwn}</Button>}
         </div>
       )}
       {element !== undefined && (mine || adding) && (

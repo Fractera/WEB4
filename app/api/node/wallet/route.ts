@@ -5,7 +5,7 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { isBornElement } from "@/lib/web4-items/element-delete"
 import { idOfAddress } from "@/lib/web4-items/element-address"
-import { generateWallet, isEvmAddress, readElementWallet, readPrivateKey, readWallet, removeWallet, saveWallet } from "@/lib/web4-items/node-wallet"
+import { generateWallet, isEvmAddress, oneWallet, readElementWallet, readPrivateKey, readWallet, removeWallet, saveWallet } from "@/lib/web4-items/node-wallet"
 
 // КОШЕЛЁК УЗЛА И ЭЛЕМЕНТА (478-3; 532). Без `element` — кошелёк узла, с `?element=<адрес или id рождённого элемента>` — свой кошелёк
 // элемента (ответ называет источник: `element` · `node` · null — элемент наследует кошелёк узла, 532-2).
@@ -31,7 +31,8 @@ function scopeOf(req: NextRequest): Scope {
 }
 
 function stateOf(element?: string) {
-  return element === undefined ? { wallet: readWallet() } : readElementWallet(element)
+  // 553-6: элементный ответ называет, один ли кошелёк на узел (единый проект) — островок прячет «Добавить свой».
+  return element === undefined ? { wallet: readWallet() } : { ...readElementWallet(element), oneWallet: oneWallet() }
 }
 
 async function gate(req: NextRequest, write: boolean): Promise<NextResponse | null> {
@@ -63,6 +64,8 @@ export async function POST(req: NextRequest) {
   if (denied) return denied
   const scope = scopeOf(req)
   if (scope instanceof NextResponse) return scope
+  // 553-6: единый проект — свой кошелёк элементу не заводится (снять прежний — DELETE — можно всегда).
+  if (scope.element !== undefined && oneWallet()) return NextResponse.json({ ok: false, error: "one-wallet", ...stateOf(scope.element) }, { status: 409, headers: NO_STORE })
   const body = (await req.json().catch(() => null)) as { address?: unknown; generate?: unknown } | null
   if (body?.generate === true) {
     generateWallet(scope.element)

@@ -10,7 +10,7 @@ import { join } from 'node:path'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const { TYPES, readNodeType, writeNodeType, mismatches } = require('../lib/web4-items/node-type.cjs')
+const { TYPES, readNodeType, writeNodeType, mismatches, ownWallets } = require('../lib/web4-items/node-type.cjs')
 
 const ROOT = process.cwd()
 const fail = (m) => { console.log(`NODE_TYPE_FAILED: ${m}`); process.exit(1) }
@@ -23,6 +23,9 @@ const MEANING = {
 function report() {
   const type = readNodeType(ROOT)
   console.log(`type: ${type} — ${MEANING[type]}`)
+  // 553-6: единый проект — кошелёк один, кошелёк узла.
+  const wallets = type === 'project' ? ownWallets(ROOT) : []
+  if (wallets.length) console.log(`own wallets: ${wallets.join(', ')} — the node is a single project; remove each on its Settings → Payments → Web3 page`)
   const odd = mismatches(type, ROOT)
   if (!odd.length) {
     console.log('every born custom element already follows this type')

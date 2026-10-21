@@ -51,7 +51,8 @@ import { EnvironmentPanel } from '@/components/environment/environment-panel'
 import { ElementPassport, type NodeElementRow, type PassportView } from '../../../_components/element-passport'
 import { nodeEntries } from '@/lib/a2a/node-registry'
 import { elementPassportUi } from '../../../_i18n/element-passport.i18n'
-import { elementMessengers, elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
+import { elementPassport, isNativeElement } from '@/lib/a2a/element-passport'
+import { effectiveMessengers, treeContextOf } from '@/lib/web4-items/tree-context'
 import { listOrders } from '@/lib/web4-items/element-orders'
 import { elementDashboardUi } from '../../../_i18n/element-dashboard.i18n'
 import { hasDoc } from '@/lib/web4-items/element-docs'
@@ -141,7 +142,7 @@ function resolve(p: Params) {
   const doc = trail[trail.length - 1].doc
   if (doc && !hasDoc(draft.id, doc)) return null
   // 472: разделы и страницы по флагам паспорта (H2A · H2H · A2A) — тот же ответ, что в левом меню; 528-1 — по всей цепочке.
-  const ctx = { catalog: hasCatalog(draft.id), messengers: elementMessengers(draft.id), native: isNativeElement(draft.id) }
+  const ctx = treeContextOf(draft.id)
   if (!trail.every((t) => treeVisible(t, ctx))) return null
   return { draft, trail, service: undefined }
 }
@@ -166,7 +167,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 472: у элемента с H2A Telegram-бот живёт в H2A — старый адрес «Строительства» ведёт туда.
   const movedWith = MOVED_WITH[(p.page ?? []).join('/')]
   const movedId = movedWith ? idOfAddress(p.item) : null
-  if (movedWith && movedId && elementMessengers(movedId)[movedWith.when]) redirect(`/${p.lang}${ARCHITECT_HOME}/${p.item}/${movedWith.to}`)
+  if (movedWith && movedId && effectiveMessengers(movedId)[movedWith.when]) redirect(`/${p.lang}${ARCHITECT_HOME}/${p.item}/${movedWith.to}`)
   const r = resolve(p)
   if (!r) notFound()
 
@@ -257,7 +258,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       </Link>
     </li>
   )
-  const treeCtx = { catalog: hasCatalog(item), messengers: elementMessengers(item), native: isNativeElement(item) }
+  const treeCtx = treeContextOf(item)
   const shown = (node.pages ?? []).filter((sp) => treeVisible(sp, treeCtx) && (!sp.doc || hasDoc(item, sp.doc)))
   const list = !r.service && shown.length > 0 ? (
     <nav aria-label={ui.sectionPages} className="flex flex-col gap-2">

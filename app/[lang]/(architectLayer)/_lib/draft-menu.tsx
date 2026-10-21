@@ -3,7 +3,8 @@ import type { WorkspaceItem } from '@/lib/content/blocks/types'
 import { listDrafts } from '@/lib/web4-items/drafts'
 import { addressOf } from '@/lib/web4-items/element-address'
 import { ITEM_TREE, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
-import { elementMessengers, elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
+import { elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
+import { treeContextOf } from '@/lib/web4-items/tree-context'
 import { hasDoc } from '@/lib/web4-items/element-docs'
 import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 import { CreateDraftButton } from '../_components/create-draft-button.client'
@@ -60,7 +61,7 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     const services = elementPassport(d.id)?.subscriptions?.services ?? []
     // 472: разделы H2A/H2H и страницы по флагам паспорта элемента (`messengers`); одна функция и для маршрута.
     const native = isNativeElement(d.id)
-    const ctx = { catalog, messengers: elementMessengers(d.id), native }
+    const ctx = { ...treeContextOf(d.id), catalog, native }
     // 412-2: пункт документа — только пока его файл есть в папке элемента.
     const shownOf = (pages?: TreePage[]) => (pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
     // 528-1: раздел, подраздел и страница устроены одинаково — пункт со ссылкой; есть видимые дети — раскрывается; открыт, когда

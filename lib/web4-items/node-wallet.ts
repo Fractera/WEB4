@@ -2,6 +2,7 @@ import "server-only"
 import { chmodSync, existsSync, mkdirSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { addressOfPrivateKey, newPrivateKey, toChecksumAddress } from "@/lib/web4-items/evm-address.mjs"
+import nodeType from "@/lib/web4-items/node-type.cjs"
 
 // КОШЕЛЁК УЗЛА (478-3). Слово владельца 2026-10-14: «в паспорте узла … должна быть опция подключить кошелёк, нет кошелька есть
 // видимость системе … заказчику будет предоставлено только обнаружение в случае если он оплачивает комиссию за обнаружение».
@@ -26,6 +27,16 @@ export type WalletSource = "element" | "node" | null
 export type ElementWalletState = { wallet: NodeWallet | null; source: WalletSource; own: NodeWallet | null; node: NodeWallet | null }
 
 const ROOT = process.cwd()
+
+/**
+ * 553-6 (владелец 2026-10-21, дословно: «в случае если пользователь выбирает решение с целью одному самостоятельно управлять всеми
+ * агентами (то есть не завод приложений) то на весь проект должен существовать один единственный кошелёк»). Единый проект — кошелёк
+ * один, кошелёк узла: свой элементу не завести; прежний свой снять можно всегда; ключи узел не стирает. Завод — как в 532.
+ * Тип читается на каждый запрос: смена типа действует сразу, без пересборки.
+ */
+export function oneWallet(): boolean {
+  return nodeType.readNodeType(ROOT) === "project"
+}
 const EVM = /^0x[0-9a-fA-F]{40}$/
 const ID = /^[a-z0-9][a-z0-9-]{0,63}$/
 
