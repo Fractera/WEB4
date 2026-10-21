@@ -41,7 +41,7 @@ npm run shell-kit:add -- <service source folder> --from <site folder>
 ```
 
 It replaces `components/shell/` of the service with the site's, copies the shadcn primitives it needs
-(`button`, `sheet`, `separator`, `badge`, `dropdown-menu`, `lib/utils`) **only when the service has none**, and adds
+(`button`, `sheet`, `separator`, `badge`, `dropdown-menu`, `navigation-menu`, `input`, `lib/utils`) **only when the service has none**, and adds
 missing dependencies (`radix-ui`, `lucide-react`, `class-variance-authority`, `clsx`, `tailwind-merge`) to its
 `package.json` — then run `npm install` in the service. 🔒 Into the service's **source** (repository or fork), never
 into `WEB4-ITEMS/<kind>/<id>/`; then commit, tag, bump the version in `WEB4-ITEMS-REGISTRY/web4-items.json`, deploy.

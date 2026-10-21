@@ -5,6 +5,7 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { draftAddress } from "@/lib/web4-items/drafts"
 import { deleteElement, deletionRisk, isBornElement } from "@/lib/web4-items/element-delete"
+import { refreshCatalog } from "@/lib/web4-items/catalog-push"
 
 // УДАЛЕНИЕ РОЖДЁННОГО WEB4 ЭЛЕМЕНТА (325-5, «Удалить насовсем»). GET — что потеряется (коммиты, которых нет в GitHub); DELETE
 // `{ confirm }` — адрес `<id>.<зона>` буква в букву, иначе 409 и ничего не снято. Только рождённые элементы: встроенные
@@ -40,5 +41,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   }
   const r = await deleteElement(id)
   revalidatePath("/[lang]", "layout")
+  // 553: каталог «Все проекты» — без удалённого элемента; ответ двери его не ждёт.
+  if (r.ok) void refreshCatalog("delete")
   return NextResponse.json(r, { status: r.ok ? 200 : 500, ...noStore })
 }

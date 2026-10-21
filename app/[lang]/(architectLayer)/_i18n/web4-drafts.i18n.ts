@@ -42,6 +42,8 @@ export type Web4DraftsUi = {
   lookOwn: string
   lookOwnText: string
   lookPick: string
+  /** 553: подсказка под вопросом облика на заводе приложений. */
+  lookFactoryHint: string
   /** 367-3: «Самостоятельный» раскрывается — откуда взять код. */
   sourceStarter: string
   sourceStarterText: string
@@ -100,6 +102,7 @@ const DICT: Record<string, Web4DraftsUi> = {
     lookOwn: "An independent project",
     lookOwnText: "Keeps the starter's own design and settings and does not follow the project; you change them on its own pages.",
     lookPick: "Choose how the element is born.",
+    lookFactoryHint: "This node is an app factory: a new element is born on its own settings — its own header, footer and policy pages.",
     sourceStarter: "Fractera starter template",
     sourceStarterText: "Our Next.js starter with its own design and settings.",
     sourceRepo: "From my repository",
@@ -154,6 +157,7 @@ const DICT: Record<string, Web4DraftsUi> = {
     lookOwn: "Самостоятельный проект",
     lookOwnText: "Остаётся со своим дизайном и настройками стартера и не следует за проектом; меняете их на его собственных страницах.",
     lookPick: "Выберите, каким родится элемент.",
+    lookFactoryHint: "Узел — завод приложений: новый элемент рождается со своими настройками — своя шапка, подвал и страницы политик.",
     sourceStarter: "Стартовый шаблон Fractera",
     sourceStarterText: "Наш стартер на Next.js со своим дизайном и настройками.",
     sourceRepo: "Из своего репозитория",

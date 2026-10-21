@@ -5,6 +5,7 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { isBornElement } from "@/lib/web4-items/element-delete"
 import { takeDescription } from "@/lib/web4-items/element-describe"
+import { refreshCatalog } from "@/lib/web4-items/catalog-push"
 
 // «ЗАБРАТЬ В ЯДРО» (325-2). POST — паспорт элемента (`summary`, `provides`, написанные его агентом) → запись реестра узла.
 // Неверная форма — 422 со словом ошибки, реестр не тронут. Только рождённые элементы; ворота architect/admin; на временном
@@ -24,5 +25,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const r = takeDescription(id)
   if (!r.ok) return NextResponse.json(r, { status: r.error === "registry-failed" ? 500 : 422, ...noStore })
   revalidatePath("/[lang]", "layout")
+  // 553: описание элемента — запасное слово его карточки в «Все проекты».
+  void refreshCatalog("describe")
   return NextResponse.json(r, noStore)
 }

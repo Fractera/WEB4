@@ -1,13 +1,10 @@
 import { ProjectFooter } from "@/components/shell/project-footer";
-import { loadProjectShell } from "@/components/shell/remote-shell";
-import { coreShellWhere } from "@/lib/shell/core-shell-where";
+import { coreShellData } from "@/lib/shell/core-shell-data";
 
-// ПОДВАЛ ЯДРА = ПОДВАЛ ПРОЕКТА (285-3). Вид — `components/shell/project-footer.tsx` (копия сайта), данные —
-// дверь сайта `/api/shell/<язык>`: страницы подвала сайта, имя ссылкой в корень проекта, соцсети, ширина, тема,
-// язык — те же, что у сайта; выбор посетителя — в cookie проекта, на все страницы.
-// 🪦 Прежний подвал ядра (своя копия подвала сайта) — git history этого файла.
-export async function FooterMenu({ lang }: { lang: string }) {
-  const data = await loadProjectShell(lang, coreShellWhere());
-  if (!data) return null;
-  return <ProjectFooter data={data} />;
+// ПОДВАЛ СТРАНИЦ АРХИТЕКТОРА — СВОЙ (узел, шаг 553). Вид — `components/shell/project-footer.tsx` (копия сайта), данные —
+// `lib/shell/core-shell-data.ts`: только переключатели темы, ширины и языка, без ссылок проекта (владелец 2026-10-21: «Только
+// переключатели (Рекомендую)»); выбор посетителя — в cookie проекта, как прежде.
+// 🪦 285-3 «подвал ядра = подвал проекта» (дверь сайта `/api/shell/<язык>`) снят шагом 553 — git history этого файла.
+export function FooterMenu({ lang }: { lang: string }) {
+  return <ProjectFooter data={coreShellData(lang)} />;
 }

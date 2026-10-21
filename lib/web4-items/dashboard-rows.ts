@@ -170,3 +170,49 @@ export async function projectRows(lang: string): Promise<ProjectRow[]> {
   ]
   return Promise.all(jobs)
 }
+
+// ── 553: КАТАЛОГ «ВСЕ ПРОЕКТЫ» ────────────────────────────────────────────────────────────────────────────────────────────
+// Слово владельца 2026-10-21: «каждый раз когда появляется новый элемент ссылка на него появляется в этом верхнем списке». Те же
+// измерения, что у таблицы проектов: в каталог идёт только элемент, чья главная ответила; заголовок и описание — с его главной на
+// языке каталога, как есть. Карточку рисует шапка элемента (каталог раздаёт CONFIG) и островок «Все проекты» в шапке ядра.
+
+/** Запись каталога — та же форма, что `CatalogEntry` шаблона элемента (`lib/project-settings.ts`). */
+export type CatalogEntry = { id: string; title: string; description: string; href: string | null; local: string | null; kind: "custom" | "native" }
+
+// Хвост бренда в заголовке главной: «Сайт · Бренд», «Сайт | Бренд» — в карточке нужно имя сайта.
+const BRAND_TAIL = /\s+[|·–—]\s+[^|·–—]+$/
+
+async function catalogEntry(id: string, entry: RegistryEntry, custom: boolean, lang: "en" | "ru", d: NodeDomain | null): Promise<CatalogEntry | null> {
+  const port = typeof entry.port === "number" ? entry.port : null
+  if (port === null) return null
+  const seen = await probe(port, lang)
+  if (!seen.up) return null
+  const passport = await passportShort(port)
+  const own = domainRecord(id)
+  const title = (seen.title ?? "").replace(BRAND_TAIL, "").trim() || addressOf(id)
+  return {
+    id,
+    title: title.slice(0, 160),
+    description: (seen.description ?? passport.short ?? "").slice(0, 400),
+    href: own ? `https://${own.domain}/${lang}` : d?.zone ? `https://${serviceHost(id, d)}/${lang}` : null,
+    local: `http://localhost:${port}/${lang}`,
+    kind: custom && !passport.native ? "custom" : "native",
+  }
+}
+
+/** Карточки «Все проекты» на одном языке: root, затем кастомные (новые сверху), затем нативные в порядке реестра. */
+export async function catalogEntries(lang: "en" | "ru"): Promise<CatalogEntry[]> {
+  const d = nodeDomain()
+  const drafts = listDrafts()
+  const customIds = new Set(drafts.map((x) => x.id))
+  const services = listServices()
+  const byId = new Map(services.map((s) => [s.id, s]))
+  const root = byId.get("root")
+  const jobs = [
+    ...(root ? [catalogEntry("root", root, false, lang, d)] : []),
+    ...drafts.filter((x) => x.id !== "root" && byId.has(x.id)).map((x) => catalogEntry(x.id, byId.get(x.id) as RegistryEntry, true, lang, d)),
+    ...services.filter((s) => s.id !== "root" && !customIds.has(s.id)).map((s) => catalogEntry(s.id, s, false, lang, d)),
+  ]
+  const all = await Promise.all(jobs)
+  return all.filter((e): e is CatalogEntry => e !== null)
+}

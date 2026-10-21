@@ -285,4 +285,6 @@ async function connectAddress() {
 }
 const address = await connectAddress()
 stage(address.note)
+// 553: новый элемент — в каталоге «Все проекты» у всех элементов, подключённых к CONFIG (по действию человека, не по таймеру).
+await require('../lib/web4-items/catalog-notify.cjs').notifyCatalog('birth', ROOT)
 say(`===BIRTH_OK=== ${id} port ${port} url ${address.url}${address.answers ? ` answers ${address.answers}` : ''}`)

@@ -14,6 +14,7 @@ import { findTreePath, movedPage, MOVED_WITH, treeLang, treeVisible, type TreePa
 import { AccordionSection } from '@/components/accordion/accordion-section.client'
 import { getService, listServices, serviceUrl } from '@/lib/microservices/registry'
 import { BirthButton } from '../../../_components/birth-button.client'
+import nodeType from '@/lib/web4-items/node-type.cjs'
 import { birthState } from '@/lib/web4-items/birth'
 import { ServicePort } from '@/components/services/service-port.client'
 import { servicePortWords } from '@/components/services/service-port.i18n'
@@ -231,7 +232,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
               : <ElementDiscoveryAlarm ui={hu} described={described} card={card} orderHref={terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK })} />
             return <ElementHome id={item} rating={lagrixRatingUi(lang)} wallet={nodeWalletUi(lang)} alarm={alarm} alarmMark={hu.alarmMark} />
           })()}
-          {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} />}
+          {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} suggested={nodeType.birthLook({ native: false }, process.cwd()) as "project" | "own"} nodeType={nodeType.readNodeType(process.cwd()) as "project" | "factory"} />}
         </>}
       />
     )

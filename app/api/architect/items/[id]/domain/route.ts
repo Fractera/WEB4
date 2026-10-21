@@ -4,6 +4,7 @@ import { requireRoles } from "@/lib/auth/require-roles"
 import { isTemporaryPublicAddress } from "@/lib/auth/temporary-address"
 import { isBornElement } from "@/lib/web4-items/element-delete"
 import { attachDomain, checkDomain, detachDomain, domainOf, setPrimary } from "@/lib/web4-items/element-domain"
+import { refreshCatalog } from "@/lib/web4-items/catalog-push"
 
 // «СВОЙ ДОМЕН» ЭЛЕМЕНТА (324-1). GET `?name=` — форма имени по правилам DNS, занятость другим элементом, зона в аккаунте
 // Cloudflare узла и её статус (серверы имён — если зона ждёт их у регистратора). Ничего не пишет. Подключение — 324-2.
@@ -34,6 +35,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   let name = ""
   try { name = String(((await req.json()) as { name?: unknown }).name ?? "") } catch { return NextResponse.json({ ok: false, error: "bad-request" }, { status: 400 }) }
   const r = await attachDomain(id, name)
+  // 553: адрес карточки в «Все проекты» — свой домен; ответ двери каталог не ждёт.
+  if (r.ok) void refreshCatalog("domain")
   return NextResponse.json(r, { status: r.ok ? 200 : 400, ...noStore })
 }
 
@@ -45,6 +48,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
   if (denied) return denied
   if (!isBornElement(id)) return NextResponse.json({ ok: false, error: "not-a-born-element" }, { status: 404 })
   const r = await detachDomain(id)
+  if (r.ok) void refreshCatalog("domain")
   return NextResponse.json(r, { status: r.ok ? 200 : 400, ...noStore })
 }
 
@@ -59,5 +63,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   try { primary = ((await req.json()) as { primary?: unknown }).primary } catch { return NextResponse.json({ ok: false, error: "bad-request" }, { status: 400 }) }
   if (primary !== "domain" && primary !== "subdomain") return NextResponse.json({ ok: false, error: "bad-request" }, { status: 400 })
   const r = await setPrimary(id, primary)
+  if (r.ok) void refreshCatalog("domain")
   return NextResponse.json(r, { status: r.ok ? 200 : 400, ...noStore })
 }

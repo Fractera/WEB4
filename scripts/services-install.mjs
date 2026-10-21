@@ -1117,6 +1117,13 @@ if (!ONLY && require('../lib/web4-items/static-copy-start.cjs').startStaticCopyA
 
 // 548: граница агента элемента — инструкция ядра не грузится, выход за папку только с ответа человека.
 spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cwd: ROOT, windowsHide: true, stdio: 'inherit' })
+// 553: полная установка узла — каталог «Все проекты» заново, если ядро уже работает (одиночную `--only` зовут рождение и
+// развёртывание — они обновляют каталог сами).
+if (!ONLY) {
+  let coreUp = false
+  try { coreUp = (await fetch(`http://localhost:${JSON.parse(readFileSync(join(ROOT, 'logs', 'runtime.json'), 'utf8')).port ?? 24680}/api/health`, { signal: AbortSignal.timeout(5000) })).ok } catch { /* ядро не запущено */ }
+  if (coreUp) await require('../lib/web4-items/catalog-notify.cjs').notifyCatalog('install', ROOT)
+}
 say('\n🛑 После установки узлу нужна ПЕРЕСБОРКА: npm run serve:rebuild — значения')
 say('   NEXT_PUBLIC_* запекаются в сборку, и без неё правка не применится.')
 say('===SERVICES_INSTALL_OK===')

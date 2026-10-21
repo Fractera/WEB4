@@ -86,5 +86,11 @@ state.running = false
 state.current = null
 state.finishedAt = new Date().toISOString()
 save()
+// 553: развёрнутые главные — в каталог «Все проекты» (одним пересчётом на всё развёртывание, после последнего элемента).
+if (state.results.some((r) => r.ok)) {
+  const last = [...state.results].reverse().find((r) => r.ok)
+  const port = (JSON.parse(readFileSync(join(ROOT, 'WEB4-ITEMS-REGISTRY', 'web4-items.json'), 'utf8')).services || []).find((s) => s.id === last.id)?.port ?? null
+  await createRequire(import.meta.url)('../lib/web4-items/catalog-notify.cjs').notifyCatalog('deploy', ROOT, { waitPort: port })
+}
 // 460-3: хоть один отказ — код выхода 1 (вызывающий — дверь или человек в терминале — видит провал, а не «готово»).
 if (state.results.some((r) => !r.ok)) process.exitCode = 1

@@ -10,6 +10,7 @@ import { addressOf, checkAddress, setAddress } from "@/lib/web4-items/element-ad
 import { moveSubdomain } from "@/lib/web4-items/element-subdomain"
 import { renameElementRepo } from "@/lib/web4-items/element-github"
 import { saveNodeMap } from "@/lib/web4-items/node-map"
+import { refreshCatalog } from "@/lib/web4-items/catalog-push"
 
 // «ПЕРЕИМЕНОВАТЬ АДРЕС» (325-3). GET `?name=` — свободно ли имя (занято — варианты); POST `{ address }` — записать, id не
 // меняется. Только рождённые элементы; ворота architect/admin; на временном публичном адресе — отказ. 🪦 «Поддомен не трогается»
@@ -57,5 +58,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   spawnSync(process.execPath, [join(ROOT, "scripts", "spawn-free.mjs"), join(ROOT, "scripts", "element-move.mjs"), id], {
     cwd: ROOT, windowsHide: true, stdio: "ignore", timeout: 10_000,
   })
+  // 553: карточка элемента в «Все проекты» — под новым адресом; ответ двери каталог не ждёт.
+  void refreshCatalog("address")
   return NextResponse.json({ ...r, address: addressOf(id), folder: "moving", subdomain, repo }, noStore)
 }

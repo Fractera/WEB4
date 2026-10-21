@@ -28,14 +28,15 @@ type State = { state: "idle" | "running" | "done" | "failed"; lines: string[]; r
 
 // `born` — элемент уже в реестре узла (рождение дошло до записи и упало позже): кнопки нет, подсказка — повтор установки.
 // Иначе упавшее рождение ничего не записало, и подсказка — нажать кнопку снова.
-export function BirthButton({ id, ui, dialogUi, born = false }: { id: string; ui: Web4DraftsUi; dialogUi: AppDialogUi; born?: boolean }) {
+// 553: `suggested` — облик по типу узла (единый проект → как проект, завод → самостоятельный); человек может выбрать другой.
+export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeType }: { id: string; ui: Web4DraftsUi; dialogUi: AppDialogUi; born?: boolean; suggested?: "project" | "own"; nodeType?: "project" | "factory" }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [starting, setStarting] = useState(false)
   // 367-5: отказ двери с объяснением (например, «это не ваш репозиторий — сделайте Fork») — в окне, окно не закрывается.
   const [refusal, setRefusal] = useState<string | null>(null)
   // 367 (слово владельца 2026-10-01): облик элемента выбирает человек — «как весь проект» или «самостоятельный»; без выбора не рождаем.
-  const [look, setLook] = useState<"project" | "own" | "">("")
+  const [look, setLook] = useState<"project" | "own" | "">(suggested ?? "")
   // 367-3: у самостоятельного — источник кода: стартер Fractera или репозиторий человека (адрес проверяет и дверь).
   const [source, setSource] = useState<"starter" | "repo" | "">("")
   const [repo, setRepo] = useState("")
@@ -144,6 +145,7 @@ export function BirthButton({ id, ui, dialogUi, born = false }: { id: string; ui
       >
         <div className="flex flex-col gap-2" role="radiogroup" aria-label={ui.lookQuestion} data-birth-look>
           <p className="text-sm font-medium text-foreground">{ui.lookQuestion}</p>
+          {nodeType === "factory" && <p className="text-xs text-muted-foreground" data-birth-factory-hint>{ui.lookFactoryHint}</p>}
           {option("project", ui.lookProject, ui.lookProjectText, look === "project", () => setLook("project"), "data-birth-look-option")}
           {option("own", ui.lookOwn, ui.lookOwnText, look === "own", () => setLook("own"), "data-birth-look-option")}
           {/* 367-3 (владелец: «нажатие на вторую карточку … увеличит её в длину и покажет два варианта»): откуда код самостоятельного. */}

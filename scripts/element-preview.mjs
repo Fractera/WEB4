@@ -238,4 +238,6 @@ writeFileSync(join(ROOT, 'logs', 'deploy-history.jsonl'), JSON.stringify({ id, v
 rmSync(FILE, { force: true })
 // 344-3: принятая версия уходит и в копию публичных страниц в Cloudflare (только у элемента со своим доменом).
 require('../lib/web4-items/static-copy-start.cjs').startStaticCopy(ROOT, id)
+// 553: принятая главная — в каталог «Все проекты» (заголовок и описание могли смениться); сначала ждём, пока элемент ответит.
+await require('../lib/web4-items/catalog-notify.cjs').notifyCatalog('accept', ROOT, { waitPort: entry.port })
 process.exit(0)

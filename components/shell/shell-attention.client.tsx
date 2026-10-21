@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useCallback, useEffect, useState } from "react"
 import { ChevronDown } from "lucide-react"
-import { buttonVariants } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
 // ЧТО ЖДЁТ АРХИТЕКТОРА — ВНУТРИ ЯЩИКА «МОЙ АККАУНТ» ЯДРА (узел, шаг 356-1). Слово владельца 2026-10-01: «перенести её в выдвижной
@@ -58,11 +58,11 @@ function Branch({ title, items, words, onGo, kind }: { title: string; items: Att
   if (items.length === 0) return null
   return (
     <div className="flex flex-col" data-attention-branch={kind}>
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "relative w-full justify-start gap-2 pl-6")}>
+      <Button type="button" variant="ghost" size="sm" onClick={() => setOpen((o) => !o)} aria-expanded={open} className="relative w-full justify-start gap-2 pl-6">
         <ChevronDown className={cn("size-3.5 transition-transform", !open && "-rotate-90")} aria-hidden />
         {title} · {items.length}
         {!open && <AttentionDot className="absolute right-2 top-1/2 -translate-y-1/2" />}
-      </button>
+      </Button>
       {open && (
         <ul className="flex flex-col gap-0.5 pb-1 pl-10">
           {items.map((it) => (
@@ -90,10 +90,10 @@ export function ArchitectAttention({ href, label, attention, words, onGo }: {
     <div className="flex flex-col" data-architect-attention>
       <div className="flex items-center">
         <Link href={href} onClick={onGo} className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "flex-1 justify-start")}>{label}</Link>
-        <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={words.waiting} title={words.waiting} className={cn(buttonVariants({ variant: "ghost", size: "icon-sm" }), "relative")}>
+        <Button type="button" variant="ghost" size="icon-sm" onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={words.waiting} title={words.waiting} className="relative">
           <ChevronDown className={cn("size-4 transition-transform", !open && "-rotate-90")} aria-hidden />
           {!open && <AttentionDot className="absolute right-0.5 top-0.5" />}
-        </button>
+        </Button>
       </div>
       {open && (
         <>

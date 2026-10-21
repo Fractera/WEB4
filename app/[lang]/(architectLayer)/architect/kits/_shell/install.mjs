@@ -45,7 +45,8 @@ rmSync(join(dst, 'components', 'shell'), { recursive: true, force: true })
 cpSync(join(site, 'components', 'shell'), join(dst, 'components', 'shell'), { recursive: true })
 console.log(`shell-kit: components/shell скопирована с сайта (${site}) в ${dst}`)
 
-const PRIMITIVES = ['components/ui/button.tsx', 'components/ui/sheet.tsx', 'components/ui/separator.tsx', 'components/ui/badge.tsx', 'components/ui/dropdown-menu.tsx', 'lib/utils.ts']
+// 553: мега-меню оболочки — navigation-menu; поиск языка — input.
+const PRIMITIVES = ['components/ui/button.tsx', 'components/ui/sheet.tsx', 'components/ui/separator.tsx', 'components/ui/badge.tsx', 'components/ui/dropdown-menu.tsx', 'components/ui/navigation-menu.tsx', 'components/ui/input.tsx', 'lib/utils.ts']
 for (const p of PRIMITIVES) {
   if (existsSync(join(dst, p))) continue
   mkdirSync(dirname(join(dst, p)), { recursive: true })
