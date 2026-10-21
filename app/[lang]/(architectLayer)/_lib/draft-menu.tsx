@@ -24,17 +24,15 @@ const ANCHOR = 'design'
 // меню на зоны». Якорь первой зоны — пункт «Ядро» (`build`); вторая встаёт за «Дизайном», над кнопкой создания.
 const CORE = 'build'
 
-/** Разделитель зоны меню: горизонтальная черта и мелкая подпись у левого края. */
-function zone(label: string): WorkspaceItem {
-  return {
-    label,
-    node: (
-      <div className="mt-2 border-t border-border px-[9px] pt-2 text-[length:var(--fs-small)] text-muted-foreground" data-menu-zone>
-        {label}
-      </div>
-    ),
-  }
+/** Разделитель зоны меню: горизонтальная черта и мелкая подпись у левого края — она же переключатель зоны (553). */
+function zone(label: string, id: string, open: boolean): WorkspaceItem {
+  return { label, zoneHead: { id, open } }
 }
+
+/** 553: пункты зоны прячутся вместе с ней; зона открыта, когда человек на странице одного из её пунктов. */
+const inZone = (items: WorkspaceItem[], id: string): WorkspaceItem[] => items.map((m) => ({ ...m, zone: id }))
+const holds = (items: WorkspaceItem[], path: string): boolean =>
+  items.some((m) => !!m.active || !!m.open || (!!m.href && (path === m.href || path.startsWith(`${m.href}/`))))
 
 /** Меню слоя с кнопкой и группами черновиков, вставленными за «Дизайном». */
 export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: string): WorkspaceItem[] {
@@ -94,8 +92,14 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
   const strip = ({ native: _native, ...item }: WorkspaceItem & { native: boolean }): WorkspaceItem => item
   const natives = drafts.filter((d) => d.native).map(strip)
   const customs = drafts.filter((d) => !d.native).map(strip)
-  const withCustom = [...menu.slice(0, cut), ...natives, zone(ui.zoneCustom), button, ...customs, ...menu.slice(cut)]
+  const page = at(currentPath)
+  const customZone = [button, ...customs]
+  const withCustom = [...menu.slice(0, cut), ...natives, zone(ui.zoneCustom, 'custom', holds(customs, page)), ...inZone(customZone, 'custom'), ...menu.slice(cut)]
   // Нет пункта «Ядро» — первой зоны нет: подпись над пустотой хуже её отсутствия.
   const c = withCustom.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/${CORE}`))
-  return c < 0 ? withCustom : [...withCustom.slice(0, c + 1), zone(ui.zoneNative), ...withCustom.slice(c + 1)]
+  if (c < 0) return withCustom
+  // Зона «Нативные» — от «Ядра» до подписи «Кастомные».
+  const end = withCustom.findIndex((m) => m.zoneHead?.id === 'custom')
+  const nativeZone = withCustom.slice(c + 1, end)
+  return [...withCustom.slice(0, c + 1), zone(ui.zoneNative, 'native', holds(nativeZone, page)), ...inZone(nativeZone, 'native'), ...withCustom.slice(end)]
 }

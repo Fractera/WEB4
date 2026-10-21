@@ -39,6 +39,13 @@ export type WorkspaceShellItem = {
   open?: boolean
   /** Пункт-действие (314-1): вместо ссылки рисуется готовый островок, например кнопка «Создать микросервис». */
   node?: ReactNode
+  /**
+   * 553 (владелец 2026-10-21: «В левом меню добавь возможность закрывать вкладки нативные элементы и кастомные элементы также как у нас
+   * скрываются паспорт, супер узел и прочее»): зона меню. `zoneHead` — подпись зоны, она же переключатель; `zone` — пункт принадлежит
+   * зоне и прячется, когда зона свёрнута. Открыта, когда человек внутри зоны (как раскрывашка группы).
+   */
+  zone?: string
+  zoneHead?: { id: string; open: boolean }
 }
 export type WorkspaceShellNote = {
   tone: 'recommended' | 'advice' | 'warning'
@@ -231,10 +238,20 @@ export function WorkspaceShell({
             🔒 ЗАГОЛОВОК ПОДМЕНЮ — ССЫЛКА, ЕСЛИ У ГРУППЫ ЕСТЬ СВОЯ СТРАНИЦА, и
             просто подпись, если её нет. Ссылка в никуда хуже отсутствия ссылки, а
             стрелка рядом остаётся переключателем в обоих случаях. */}
+        {/* 553: свёрнутая зона прячет свои пункты чистым CSS (`:has` по флажку в подписи зоны) — без JavaScript, как и раскрывашки ниже. */}
+        {menu.some((m) => m.zoneHead) && (
+          <style>{menu.filter((m) => m.zoneHead).map((m) => `[data-workspace-menu] ul:has(input[data-zone-toggle="${m.zoneHead!.id}"]:not(:checked)) > li[data-zone="${m.zoneHead!.id}"]{display:none}`).join('')}</style>
+        )}
         <ul className="flex flex-col gap-1">
           {menu.map((item, i) => (
-            <li key={`${id}-m-${i}`}>
-              {item.node ? (
+            <li key={`${id}-m-${i}`} data-zone={item.zone}>
+              {item.zoneHead ? (
+                <label className="mt-2 flex cursor-pointer items-center justify-between gap-2 border-t border-border px-[9px] pt-2 text-[length:var(--fs-small)] text-muted-foreground transition-colors hover:text-foreground [&:has(input:checked)_svg]:rotate-180" data-menu-zone={item.zoneHead.id}>
+                  <span>{item.label}</span>
+                  <input type="checkbox" className="peer sr-only" data-zone-toggle={item.zoneHead.id} defaultChecked={item.zoneHead.open} aria-label={item.label} />
+                  <ChevronDown size={14} aria-hidden className="shrink-0 transition-transform duration-200" />
+                </label>
+              ) : item.node ? (
                 item.node
               ) : item.children && item.children.length > 0 ? (
                 <details open={item.open ?? item.active} className="group/sub">
