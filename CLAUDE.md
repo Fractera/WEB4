@@ -8,6 +8,9 @@
 Owner, verbatim: «Ты уже в конце концов можешь выработать какую-то процедуру которая позволит нам делать нормальный быстрый надёжные
 сборки ядра или нет по 500 раз одно и то же … Пиши это прям в главную инструкцию а не в Антипатерны.»
 
+0. **When:** ONCE, after every step of the queue is done (owner 2026-10-21, verbatim: «если что-то требуется изменить в едре то оставь это
+   на самый конец развернем в ядро только потом когда закончим все шаги ядро у нас очень долго разворачиваются и это просто катастрофа»).
+   Core changes are committed as they come, without a rebuild; the list of unbuilt core commits lives in `current-steps.md`.
 1. **Before:** no deploy running (`serve:rebuild` refuses itself if one is) and no agent terminal of an element working — the build
    stops every process of the node.
 2. **Run, in the foreground, from the core folder:** `npm run serve:rebuild`. Nothing by hand: no pausing services one by one, no
