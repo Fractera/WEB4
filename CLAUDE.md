@@ -3188,3 +3188,38 @@ Owner of the node, 2026-10-20: «разделить процессы и прот
   file and `check-skill-process` reads the group tables from all three.
 - **Measured (552-5, Haiku, same minute, template):** first request of the working-process session 30 424 → 26 296 tokens (−4 128), of the
   build session 38 353 → 38 245; the build session still answers with the three confirming lines and names its checks first.
+
+## Native elements on the native template; the data layer is four elements (steps 549 and 550, 2026-10-21)
+
+The owner's words (2026-10-21): every native element moves to the native template (`fractera-native-item-starter`), and the data
+layer becomes four elements — the database, the object storage, the vector storage and the LightRAG graph; «the application must
+work as it works, but fully on the template architecture». Choices: «Шаблон + логика, двери те же», «data = база данных, старые
+адреса пересылают», «Элемент графа сейчас, LightRAG — отдельно», «Локально, репозитории создам утром».
+
+| Element | Port | Version | What it keeps |
+|---|---|---|---|
+| `data` | 24682 | v2.0.0 | the database: `/db/*`, `/deploy-runs`, `/a2a-log`, `/panel-settings`, `/platform/openai-key`, `/service/<name>/*`, `/capabilities` |
+| `storage` | 24693 | v1.0.0 | files: `/media/*` (upload ≤ 200 MB, thumbnails, video trim, icon sets) — `data/media.db`, `storage/`, `icons/` |
+| `vectors` | 24694 | v1.0.0 | vectors: `/vectors/*` on a sqlite-vec index partitioned by collection — `data/vectors.db` |
+| `graph` | 24689 | v1.0.0 | the knowledge graph element (549-4); the LightRAG server itself is a separate step |
+
+- **Consumers did not change.** Every element and the core still call `REMOTE_DATA_URL` (data) with `X-Data-Secret`; data passes
+  `/media/*` and `/vectors/*` as they are (method, headers, streamed body) to `STORAGE_URL` and `VECTORS_URL` — the installer
+  writes them by the neighbour rule. A neighbour that is not installed answers 503 naming it. A stored file address stays on data.
+- **One lock for the three:** `lib/data-store/auth.mjs` is word for word the same in data, storage and vectors (the shared
+  `DATA_SECRET` or a privileged session; schema routes by the machine key only; 404 through the tunnel). Change it in all three.
+- **How the Express code moved:** the handlers of the former `server.js` live verbatim in `lib/data-store/*.mjs`;
+  `express-shim.mjs` gives them `app.get/use`, `req`, `res` over Next route handlers (`app/<segment>/[[...path]]/route.ts`), and
+  `proxy.ts` lets these root segments through first (`DATA_DOOR_ROOTS`).
+- **Core sections** `architect/storage` and `architect/vectors` (icons `drive`, `scan`) are committed and appear after a core rebuild.
+  🛑 The core rebuild is blocked today by `check-shell-kits`: since 549-6 the root site is the custom template v0.3.124, and the
+  core's `components/shell` (with its own `shell-attention`) no longer matches it — `npm run shell-kit:add -- .` would replace the
+  core shell with the site's; that is the owner's decision.
+- 🛑 **The installer moves a live element to a tag of another stack in place:** checkout and dependencies come BEFORE the build, so
+  the old process loses its modules. A build that fails then leaves the element down (550: data was silent about 5 minutes). Before
+  switching an element to a new stack, prove the commit builds from a clean clone, not only in the working folder.
+- 🛑 **A `.gitignore` line without a leading slash matches at every depth:** `icons/` hid the template's `public/icons/`,
+  `components/icons/` and `app/api/media/icons/…` from the commits of all three elements. Ignore a root folder as `/icons/`.
+- Memory: the former data service was 29 + 16 MB (with its watcher); data, storage and vectors on the template take about 360 MB
+  together. Their GitHub repositories (`fractera-storage-starter`, `fractera-vectors-starter`) are created by the owner; until then
+  a fresh node cannot clone them, so the core commits of 550 are not pushed.
