@@ -95,6 +95,11 @@ function readSubscriptions(dir: string): ExternalServices | null {
   }
 }
 
+/** 558-3: подписки и расписание папки по раскладке элемента — у главного агента это `data/main-agent` (его «Автоматизированное управление»). */
+export function folderAutomation(dir: string): { subscriptions: ExternalServices | null; cron: CronPlan | null } {
+  return { subscriptions: readSubscriptions(dir), cron: readCron(dir) }
+}
+
 export function elementPassport(id: string): ElementPassport | null {
   const dir = elementDir(id)
   if (!dir) return null

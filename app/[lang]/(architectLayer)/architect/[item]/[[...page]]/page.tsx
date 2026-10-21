@@ -46,7 +46,7 @@ import { addressOf, idOfAddress } from '@/lib/web4-items/element-address'
 import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/web4-items/element-describe'
 import { terminalLink } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs'
 import { ScheduleTask } from '@/app/[lang]/(architectLayer)/_components/schedule-task.client'
-import { backupTaskWords } from '@/app/[lang]/(architectLayer)/_components/schedule-task.i18n'
+import { backupCronUi, backupTaskWords } from '@/app/[lang]/(architectLayer)/_components/schedule-task.i18n'
 import { agentKitWidget, openAiKeyHref, type AgentKitPage } from '../_agent-kit/widgets'
 import { ElementPreview } from '@/components/preview/element-preview.client'
 import { elementPreviewWords, previewTaskKit } from '@/sections/blocks/element-preview.server'
@@ -499,7 +499,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       })()
     : undefined
   // 463: страница одного внешнего сервиса — `service`; ссылки списка «Подписки» строятся от `subscriptionsHref`.
-  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${key.startsWith(BACKUP_TOOLS) ? BACKUP_TOOLS : SUBSCRIPTIONS}`} item={item} /> : null
+  const passport = passportView ? <ElementPassport view={passportView} passport={entry ? elementPassport(item) : null} ui={key === 'backup/cron' ? { ...elementPassportUi(lang), cron: backupCronUi(lang, elementPassportUi(lang).cron) } : elementPassportUi(lang)} lang={lang} nodeElements={nodeElements} service={r.service} subscriptionsHref={`/${lang}${dir}/${key.startsWith(BACKUP_TOOLS) ? BACKUP_TOOLS : SUBSCRIPTIONS}`} item={item} /> : null
   // 551-4 (владелец 2026-10-20): «Карточки возможностей» — одна оранжевая «Образец»: описание через ИИ (задача в терминал элемента) и три
   // цены; хранятся в паспорте элемента (`payments.web3["a2a-card"].sample`). Девять дверей визитки шаблона живут в визитке и в i2i → API.
   const cardUi = capabilityCardUi(lang)

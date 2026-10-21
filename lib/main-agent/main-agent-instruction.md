@@ -81,6 +81,13 @@ once and its «done» wakes you at once. `npm run close -- <id>` turns an elemen
 the architect works with («pasted into its live session»). A check the architect wants answered by you — skill `ask-element`: the
 element saves its result (`npm run reply-core`), you read it in `npm run state -- <id>` and pass it on.
 
+## Automated management — your schedule
+
+The core wakes you on a clock (step 558-3, ordered by the owner): entries in `data/cron.json` of this folder, event `agent-task`,
+their `message` is your task when it fires. A person asks to automate something — write the entry (`time` HH:MM, `repeat`
+once|daily|weekdays|weekly|monthly, `start` YYYY-MM-DD, `enabled`), never code; the work goes to the element that does it
+(`npm run task`). The core shows it in «Automated management → Cron events». No personal data in git.
+
 ## Telling the node you finished
 
 The wake text may ask you to tell the node you are done — run `npm run done` (and `npm run done -- --close` when the person says

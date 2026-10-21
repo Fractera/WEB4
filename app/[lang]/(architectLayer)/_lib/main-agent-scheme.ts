@@ -16,7 +16,8 @@
 export const MAIN_AGENT = 'build'
 
 /** Пункты верхнего уровня главного агента — как разделы элемента; всё остальное обязано иметь место ниже. */
-export const MAIN_AGENT_TOP = ['messenger', 'workflow', 'construction', 'settings'] as const
+// 558-3 (владелец 2026-10-21): «Автоматизированное управление» — свой раздел главного агента (у элемента его нет: это не страница дерева).
+export const MAIN_AGENT_TOP = ['messenger', 'workflow', 'automation', 'construction', 'settings'] as const
 
 export const MAIN_AGENT_PLACE: Record<string, string> = {
   // «Строительство» — как у элемента: GitHub, подписка, терминал, развёртывание, переменные, i2i, Документы.

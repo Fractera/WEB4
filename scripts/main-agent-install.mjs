@@ -20,6 +20,10 @@ export function installMainAgent(root) {
   mkdirSync(join(dst, '.claude', 'skills'), { recursive: true })
   copyFileSync(join(src, 'main-agent-instruction.md'), join(dst, 'CLAUDE.md'))
   copyFileSync(join(src, 'package.json'), join(dst, 'package.json'))
+  // 558-3: каталоги «Автоматизированного управления» (события и внешние сервисы) — как у элемента; расписание `data/` своё, вне git.
+  mkdirSync(join(dst, 'OWN-SERVICE-PROPS'), { recursive: true })
+  for (const f of ['CRON.json', 'SUBSCRIPTIONS.json']) if (existsSync(join(src, 'OWN-SERVICE-PROPS', f))) copyFileSync(join(src, 'OWN-SERVICE-PROPS', f), join(dst, 'OWN-SERVICE-PROPS', f))
+  if (!existsSync(join(dst, '.gitignore'))) writeFileSync(join(dst, '.gitignore'), 'data/\n', 'utf8')
   const want = existsSync(join(src, 'skills')) ? readdirSync(join(src, 'skills'), { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name) : []
   for (const old of readdirSync(join(dst, '.claude', 'skills'), { withFileTypes: true })) {
     if (old.isDirectory() && !want.includes(old.name)) rmSync(join(dst, '.claude', 'skills', old.name), { recursive: true, force: true })
