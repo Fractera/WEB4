@@ -13,6 +13,7 @@ import { draftAddress, getDraft } from '@/lib/web4-items/drafts'
 import { findTreePath, movedPage, MOVED_WITH, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { AccordionSection } from '@/components/accordion/accordion-section.client'
 import { getService, listServices, serviceUrl } from '@/lib/microservices/registry'
+import { builtInDraft } from '@/lib/web4-items/built-in-elements'
 import { BirthButton } from '../../../_components/birth-button.client'
 import nodeType from '@/lib/web4-items/node-type.cjs'
 import { birthState } from '@/lib/web4-items/birth'
@@ -125,7 +126,8 @@ const SUBSCRIPTIONS = 'workflow/process/subscriptions'
 // 325-3: сегмент пути — адрес элемента в ядре или его id (id неизменен; адрес — слой над ним, `lib/web4-items/element-address.ts`).
 function resolve(p: Params) {
   const id = idOfAddress(p.item)
-  const draft = id ? getDraft(id) : null
+  // 557: у встроенного элемента черновика нет — его запись даёт `builtInDraft` (то же дерево, что у рождённого нативного).
+  const draft = id ? getDraft(id) ?? builtInDraft(id) : null
   if (!draft) return null
   const path = p.page ?? []
   if (path.length === 0) return { draft, trail: [] as TreePage[], service: undefined }

@@ -5,6 +5,7 @@ import { addressOf } from '@/lib/web4-items/element-address'
 import { ITEM_TREE, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
 import { treeContextOf } from '@/lib/web4-items/tree-context'
+import { BUILT_IN_STATIC, builtInIds } from '@/lib/web4-items/built-in-elements'
 import { hasDoc } from '@/lib/web4-items/element-docs'
 import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 import { CreateDraftButton } from '../_components/create-draft-button.client'
@@ -45,10 +46,15 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     node: <CreateDraftButton lang={lang} label={ui.create} busyLabel={ui.creating} failed={ui.createFailed} />,
   }
 
-  const drafts: (WorkspaceItem & { native: boolean })[] = listDrafts().map((d) => {
+  // 557: пункт элемента — дерево. У встроенного элемента (`builtIn`) страницы, которые уже есть в папке службы, ведут на прежний адрес.
+  const treeItem = (d: { id: string }, builtIn: boolean): WorkspaceItem & { native: boolean } => {
     // 325-3: пункт и пути — по адресу элемента в ядре (нет своего — id).
     const slug = addressOf(d.id)
     const dir = `${ARCHITECT_HOME}/${slug}`
+    const hrefPath = (path: string) => {
+      const own = builtIn ? BUILT_IN_STATIC[path.slice(dir.length + 1)] : undefined
+      return own ? `${dir}/${own}` : path
+    }
     // 320: раздел со страницами раскрывается третьим уровнем (слово владельца 2026-09-27). Раздел «активен» только на
     // своей странице, «открыт» — пока человек на любой его странице: отметка «вы здесь» не стоит в двух местах.
     // 406-4: пункт «Каталог» — только у элемента, чей паспорт объявляет каталог.
@@ -70,9 +76,10 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
       const kids: WorkspaceItem[] = path === `${dir}/workflow/process/subscriptions`
         ? services.map((x) => ({ label: x.name, href: at(`${path}/${x.id}`), active: `${path}/${x.id}` === currentPath }))
         : shownOf(p.pages).map((c) => node(c, path))
+      const href = hrefPath(path)
       return kids.length > 0
-        ? { label: p.words[l].title, href: at(path), active: path === currentPath, open: path === currentPath || inside, children: kids }
-        : { label: p.words[l].title, href: at(path), active: path === currentPath || inside }
+        ? { label: p.words[l].title, href: at(href), active: href === currentPath, open: href === currentPath || inside, children: kids }
+        : { label: p.words[l].title, href: at(href), active: href === currentPath || inside }
     }
     const children = shownOf(ITEM_TREE).map((s) => node(s, dir))
     return {
@@ -84,7 +91,11 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
       open: currentPath === dir || currentPath.startsWith(`${dir}/`),
       children,
     }
-  })
+  }
+  const drafts = listDrafts().map((d) => treeItem(d, false))
+  // 557: прежний пункт встроенного элемента (страница службы) заменяется деревом на том же месте — адрес пункта тот же.
+  const builtIn = new Map(builtInIds().map((id) => { const t = treeItem({ id }, true); return [t.href, t] as const }))
+  menu = menu.map((m) => { const t = m.href ? builtIn.get(m.href) : undefined; if (!t) return m; const { native: _n, ...item } = t; return { ...item, label: m.label, icon: m.icon ?? item.icon } })
 
   const i = menu.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/${ANCHOR}`))
   const cut = i < 0 ? menu.length : i + 1
