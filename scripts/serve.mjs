@@ -17,6 +17,8 @@ import os from 'node:os'
 import { createRequire } from 'node:module'
 import paths from '../lib/web4-items/paths.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
+// 553: сборка ядра при «закрытой крышке» — все процессы узла, кроме туннеля, на время сборки остановлены.
+const { closeLid, openLid, backupNext, restoreNext, dropBackup, itemsAside, itemsBack } = createRequire(import.meta.url)('../lib/deploy/quiet-build.cjs')
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
@@ -106,6 +108,8 @@ function ensureElements() {
 }
 
 async function start() {
+  // 553: оборванная сборка при «закрытой крышке» оставила узел остановленным — список в data/node/quiet-build.json.
+  openLid(root)
   // 369: не в облачной сессии Claude Code; 368: только из прямого форка оригинала Fractera — обе проверки до установки элементов.
   const local = spawnSync(process.execPath, [path.join(here, 'check-local.mjs')], { stdio: 'inherit', windowsHide: true })
   if (local.status !== 0) process.exit(1)
@@ -594,16 +598,37 @@ function rebuild() {
     console.error("Сейчас идёт развёртывание элемента (страница «Развёртывания»). Сборка сайта не начата: дождитесь его окончания и повторите.")
     process.exit(1)
   }
-  console.log("Собираю сайт заново. Это занимает около минуты; сайт всё это время работает.")
-  const build = spawnSync(process.platform === "win32" ? "npm.cmd" : "npm", ["run", "build"], {
-    cwd: root,
-    stdio: "inherit",
-    shell: isWindows,
-  })
+  // 🔒 553 (владелец 2026-10-21): сборка при «закрытой крышке» — `lib/deploy/quiet-build.cjs`. Копия прежней сборки вне проекта,
+  // затем все процессы узла, кроме туннеля, остановлены: вся память — сборке; снаружи Cloudflare отдаёт копии страниц. Итог любой —
+  // процессы поднимаются; упала — возвращается прежняя сборка.
+  // Прежняя оборванная сборка оставила узел остановленным — сначала поднять его (список — в data/node/quiet-build.json).
+  openLid(root)
+  console.log("Собираю сайт заново. На время сборки узел остановлен: пульт и сайты этого компьютера не отвечают, в интернете — копии страниц.")
+  const backedUp = backupNext(root)
+  closeLid(root)
+  // 553: сторожа `prebuild` — с элементами на месте (часть из них сверяет элементы), затем `next build` — с элементами ВНЕ папки
+  // ядра (`itemsAside`): сборка ядра не должна зависеть от числа элементов. Возврат — всегда, и после отказа.
+  const npm = process.platform === "win32" ? "npm.cmd" : "npm"
+  let build = spawnSync(npm, ["run", "prebuild"], { cwd: root, stdio: "inherit", shell: isWindows })
+  if (build.status === 0) {
+    let aside = false
+    try {
+      aside = itemsAside(root)
+      build = spawnSync(isWindows ? "npx.cmd" : "npx", ["next", "build"], { cwd: root, stdio: "inherit", shell: isWindows })
+    } catch (e) {
+      console.error(`Элементы не вынесены из папки ядра: ${e instanceof Error ? e.message : e}`)
+      build = { status: 1 }
+    } finally {
+      if (aside) itemsBack(root)
+    }
+  }
   // 🛑 Код выхода берётся у самой сборки. ✗ оплачено в 232-1: конвейер (| tail)
   // печатает код последней команды, и упавшая сборка выглядит успешной.
   if (build.status !== 0) {
-    console.error("\nСборка НЕ УДАЛАСЬ — сайт продолжает работать на прежней сборке. Ошибки выше.")
+    // Упавшая сборка стирает статику прежней (ANTI-PATTERNS «Оборванная сборка ядра…») — прежняя возвращается из копии.
+    if (backedUp) restoreNext(root)
+    openLid(root)
+    console.error(`\nСборка НЕ УДАЛАСЬ — ${backedUp ? "возвращена прежняя сборка, узел запущен снова" : "копии прежней сборки не было, узел запущен снова"}. Ошибки выше.`)
     process.exit(1)
   }
   // 🔒 СТОРОЖ ЯЗЫКОВЫХ СИГНАЛОВ — МЕЖДУ СБОРКОЙ И ПЕРЕЗАПУСКОМ (256-8).
@@ -621,16 +646,20 @@ function rebuild() {
     stdio: "inherit",
   })
   if (seo.status !== 0) {
+    if (backedUp) restoreNext(root)
+    openLid(root)
     console.error("\nСборка собралась, но языковые сигналы в ней противоречат друг другу —")
-    console.error("сайт НЕ выложен и продолжает работать на прежней сборке. Разбор выше.")
+    console.error("сайт НЕ выложен: возвращена прежняя сборка, узел запущен снова. Разбор выше.")
     console.error("Это защита от ярлыка «дорвей»: набор почти одинаковых адресов,")
     console.error("обещанных поисковику, стоит сайту присутствия в выдаче целиком.")
     process.exit(1)
   }
 
   waitDeploy()
-  console.log("\nСборка готова, перезапускаю сайт…")
-  pm2run(["restart", "fractera-web4"], { quiet: true })
+  console.log("\nСборка готова, запускаю узел…")
+  // Ядро в списке остановленных — `pm2 start` поднимает его уже на новой сборке; узел без «крышки» — прежний перезапуск.
+  if (!openLid(root).includes("fractera-web4")) pm2run(["restart", "fractera-web4"], { quiet: true })
+  dropBackup(root)
   console.log("Готово. Проверить: npm run serve:status")
 }
 

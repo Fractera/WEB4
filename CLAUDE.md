@@ -3223,3 +3223,37 @@ work as it works, but fully on the template architecture». Choices: «Шабл�
 - Memory: the former data service was 29 + 16 MB (with its watcher); data, storage and vectors on the template take about 360 MB
   together. Their GitHub repositories (`fractera-storage-starter`, `fractera-vectors-starter`) are created by the owner; until then
   a fresh node cannot clone them, so the core commits of 550 are not pushed.
+
+## Rebuilding the core: the closed lid, and the owner's button when the agent cannot (step 553, owner 2026-10-21)
+
+Owner, verbatim: «перед началом сборки нужно освободить память, проверить сколько её есть и при необходимости остановить работу
+проекта чтобы выполнить сборку. Это не временное решение … проект разрастается большим количеством элементов … наш проект всегда
+продолжает работать на Cloud Flyer и возвращать статику … сразу освободить всё необходимое пространство полностью остановив работу
+приложения как будто крышка компьютера закрыта для внешнего мира».
+- 🔒 **`npm run serve:rebuild` builds with the lid closed — by itself** (`lib/deploy/quiet-build.cjs`, used by `scripts/serve.mjs`):
+  copy `.next` without `cache` outside the project (`<parent>/agi-code-next-backup`) → stop EVERY pm2 process of the node except the
+  tunnels (the address must not change; outside, Cloudflare serves the page copies) and print free memory before → after → build →
+  start everything again; a failed build puts the previous build back from the copy. The list of stopped processes is written to
+  `data/node/quiet-build.json` BEFORE stopping: if the machine dies mid-build, `serve:start` and the next `serve:rebuild` start them.
+  Price, said aloud: for ~10–15 minutes the control panel and the sites of this computer do not answer.
+- 🛑 **Never pause services one by one and retry.** Paid 2026-10-21: two 10-minute builds died «memory allocation of 2147483648 bytes
+  failed» at 740 and 1263 MB free, and both times the panel was left without static files until the copy was put back by hand.
+- 🔒 **When the agent cannot build the core, it sends the owner to the button — the owner's words, verbatim:** «чтобы выполнить сборку
+  перейди туда туда нажми кнопку развернуть? И тогда нажатие эту кнопки автоматически приводит к подсказке проверьте какие терминалы
+  сейчас открыты для этого нажмите на кнопку в правом верхнем меню если на нём есть оранжевая метка вы увидите список активных
+  терминалов зайдите поочерёдно выключите их при необходимости дождитесь завершения разработки после этого вы выполните
+  развёртывания». The agent's own session (Claude Code) is one of the biggest memory users on the machine; a build started by the
+  owner with the agents closed gets that memory too. Order for the agent: say it could not build and why (the exact error), name the
+  button's place, and stop — no more retries. 🛑 The core «Deploy» button with this hint is NOT built yet (queued as its own step after
+  553); until it exists the owner runs `npm run serve:rebuild` in a terminal of the core folder with every agent terminal closed.
+- 🔒 **The core build must not depend on the number of elements — `WEB4-ITEMS` leaves the core folder for `next build`.** Owner,
+  verbatim: «по мере того как мы увеличивали количество элементов в проекте всегда пропорционально росло во время сборки … ядро по своей
+  природе не должно быть зависимо от количества элементов также как любой другой элемент не должен зависеть от количества других
+  элементов»; and «for test can we remove a lot of items , check bilding after return items ?». Measured 2026-10-21: `WEB4-ITEMS` inside
+  the core folder held 14 elements, ~938 000 files, 13 GB (every element has its own `node_modules` and builds); with it Turbopack died
+  four times on one 2 GB allocation (also with 1587 MB free and the lid closed); with the folder renamed away the same core built first
+  time in 5.5 min. So `serve:rebuild` runs the `prebuild` guards with the elements in place (some of them read the elements), then
+  `itemsAside` (rename to `<parent>/agi-code-WEB4-ITEMS-aside` — instant, nothing copied) → `next build` → `itemsBack` in `finally`;
+  `openLid` also puts the folder back after a crash. 🛑 Never start an element process or an agent in an element folder while the lid is
+  closed. The lasting cure — the elements living outside the core folder (`lib/web4-items/paths.cjs` is the one place that knows where)
+  — is the owner's decision, not taken.
