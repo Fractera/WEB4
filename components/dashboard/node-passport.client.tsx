@@ -8,7 +8,6 @@ import { Spinner } from "@/components/ui/spinner"
 import { LagrixRating, type LagrixRatingWords } from "@/components/element-docs/lagrix-rating"
 import { NodeWalletBody } from "@/components/wallet/node-wallet.client"
 import type { NodeWalletWords } from "@/components/wallet/node-wallet.i18n"
-import { IndicatorHint } from "@/components/element-docs/indicator-hint.client"
 
 // «ПАСПОРТ» УЗЛА (478-1, переделан по слову владельца 2026-10-14): «посмотри вкладку роман, дизайн в блоке а2а … именно такая
 // карточка у нас должна была лежать в паспорте и описывать аккумулирующий рейтинг по всем элементам а под ним должны были быть все
@@ -57,27 +56,44 @@ export type NodePassportWords = {
   provides: string
   openElement: string
   wallet: NodeWalletWords
-  /** 553-9: режим узла и объяснение обоих режимов под ⓘ. */
-  mode: { label: string; project: string; factory: string; hint: string; lines: string[] }
+  /** 553-9 → 564: карточка режима узла — название, описание текущего режима, общее для обоих, где сменить. */
+  mode: { label: string; project: string; factory: string; byDefault: string; projectText: string; factoryText: string; both: string; chosen: string; change: string }
 }
 
 // 553-9 (владелец 2026-10-21: «на вкладке паспорт имела бы смысл рассказать о том в каком режиме работает узел и под знаком вопрос более
 // подробно узнать какие бы существуют режимы чем они отличаются»). Режим — о машине, поэтому спрашивается в браузере (закон 264):
 // смена `npm run node-type -- set` видна при следующем открытии без пересборки.
-function NodeMode({ words }: { words: NodePassportWords["mode"] }) {
-  const [type, setType] = useState<"project" | "factory" | null>(null)
+function NodeMode({ words, lang }: { words: NodePassportWords["mode"]; lang: string }) {
+  const [state, setState] = useState<{ type: "project" | "factory"; settingsUrl: string | null } | null>(null)
   useEffect(() => {
     fetch(`${BASE}/api/node/type`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : null))
-      .then((d: { type?: string } | null) => setType(d?.type === "factory" ? "factory" : d?.type === "project" ? "project" : null))
-      .catch(() => setType(null))
+      .then((d: { type?: string; settingsUrl?: string | null } | null) =>
+        setState(d?.type === "factory" || d?.type === "project" ? { type: d.type, settingsUrl: d.settingsUrl ?? null } : null))
+      .catch(() => setState(null))
   }, [])
-  if (!type) return null
+  if (!state) return null
+  const { type } = state
+  // 564 (владелец 2026-10-21: «в паспорте должны дарить карточку в каком состоянии проекта по умолчанию … в паспорте … переключатели иметь
+  // не будет будет просто показывать в каком режиме это работает»): карточка без переключателя; сменить — на странице настроек config.
   return (
-    <p className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground" data-node-mode={type}>
-      {words.label}: <span className="font-medium text-foreground">{type === "factory" ? words.factory : words.project}</span>
-      <IndicatorHint label={`${words.label}: ${words.hint}`} text={words.lines} />
-    </p>
+    <UiCard className="mb-6" data-node-mode={type}>
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold">
+          {words.label}: {type === "factory" ? words.factory : words.project}{type === "project" ? ` ${words.byDefault}` : ""}
+        </CardTitle>
+        <CardDescription>{type === "factory" ? words.factoryText : words.projectText}</CardDescription>
+      </CardHeader>
+      <CardContent className="flex flex-col gap-3 text-sm">
+        <p className="text-muted-foreground">{words.both}</p>
+        <p className="text-muted-foreground">{words.chosen}</p>
+        {state.settingsUrl && (
+          <a href={state.settingsUrl.replace("{lang}", lang)} className="self-start font-medium text-primary hover:underline" data-node-mode-settings>
+            {words.change}
+          </a>
+        )}
+      </CardContent>
+    </UiCard>
   )
 }
 
@@ -121,7 +137,7 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
   if (cards === "loading" || cards === "failed" || cards.length === 0) {
     return (
       <>
-        <NodeMode words={words.mode} />
+        <NodeMode words={words.mode} lang={lang} />
         <Accordion type="single" collapsible defaultValue="node">{node}</Accordion>
         {cards === "loading" ? (
           <p className="my-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {words.loading}</p>
@@ -136,7 +152,7 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
 
   return (
     <>
-      <NodeMode words={words.mode} />
+      <NodeMode words={words.mode} lang={lang} />
       <Accordion type="single" collapsible defaultValue="node">
         {node}
         {walletCard}
