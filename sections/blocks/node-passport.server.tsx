@@ -22,6 +22,18 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     fullDescription: 'Full description',
     provides: 'What it provides',
     openElement: 'Open the element',
+    mode: {
+      label: 'Node mode',
+      project: 'Single project',
+      factory: 'App factory',
+      hint: 'What the modes are',
+      lines: [
+        'Single project: one owner. Every element lives under the core’s CONFIG — one header and footer, one wallet (the node’s), no Messenger in the elements.',
+        'App factory: the core hosts projects of different owners. A new custom element is born on its own settings — its own header, footer and policy pages; wallets and Messenger stay with each element.',
+        'In both modes the core and the built-in elements stay under the core’s CONFIG.',
+        'To change the mode: npm run node-type -- set project or factory, or ask the main agent.',
+      ],
+    },
   },
   ru: {
     nodeTitle: 'Узел в Lagrix: репутация его элементов',
@@ -29,7 +41,7 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     nodeNote: 'Показатели появятся, когда узел подключится к Lagrix.',
     elementNote: 'Показатели появятся, когда элемент подключится к Lagrix.',
     root: 'Корневой элемент',
-    custom: 'Кастомный элемент',
+    custom: 'Свой элемент',
     loading: 'Спрашиваю узел о его элементах…',
     unavailable: 'Узел не ответил, поэтому элементы не показаны.',
     empty: 'В узле пока нет элементов с репутацией.',
@@ -39,6 +51,18 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     fullDescription: 'Полное описание',
     provides: 'Что он даёт',
     openElement: 'Открыть элемент',
+    mode: {
+      label: 'Режим узла',
+      project: 'Единый проект',
+      factory: 'Завод приложений',
+      hint: 'Какие бывают режимы',
+      lines: [
+        'Единый проект: один хозяин. Все элементы живут по CONFIG ядра — одна шапка и один подвал, один кошелёк (кошелёк узла), у элементов нет Messenger.',
+        'Завод приложений: ядро — хостинг для проектов разных хозяев. Новый свой элемент рождается со своими настройками — своя шапка, подвал и страницы политик; кошельки и Messenger — у каждого элемента свои.',
+        'В обоих режимах ядро и встроенные элементы живут по CONFIG ядра.',
+        'Сменить режим: npm run node-type -- set project или factory, или попросить главного агента.',
+      ],
+    },
   },
 }
 

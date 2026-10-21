@@ -8,6 +8,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { LagrixRating, type LagrixRatingWords } from "@/components/element-docs/lagrix-rating"
 import { NodeWalletBody } from "@/components/wallet/node-wallet.client"
 import type { NodeWalletWords } from "@/components/wallet/node-wallet.i18n"
+import { IndicatorHint } from "@/components/element-docs/indicator-hint.client"
 
 // «ПАСПОРТ» УЗЛА (478-1, переделан по слову владельца 2026-10-14): «посмотри вкладку роман, дизайн в блоке а2а … именно такая
 // карточка у нас должна была лежать в паспорте и описывать аккумулирующий рейтинг по всем элементам а под ним должны были быть все
@@ -56,6 +57,28 @@ export type NodePassportWords = {
   provides: string
   openElement: string
   wallet: NodeWalletWords
+  /** 553-9: режим узла и объяснение обоих режимов под ⓘ. */
+  mode: { label: string; project: string; factory: string; hint: string; lines: string[] }
+}
+
+// 553-9 (владелец 2026-10-21: «на вкладке паспорт имела бы смысл рассказать о том в каком режиме работает узел и под знаком вопрос более
+// подробно узнать какие бы существуют режимы чем они отличаются»). Режим — о машине, поэтому спрашивается в браузере (закон 264):
+// смена `npm run node-type -- set` видна при следующем открытии без пересборки.
+function NodeMode({ words }: { words: NodePassportWords["mode"] }) {
+  const [type, setType] = useState<"project" | "factory" | null>(null)
+  useEffect(() => {
+    fetch(`${BASE}/api/node/type`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { type?: string } | null) => setType(d?.type === "factory" ? "factory" : d?.type === "project" ? "project" : null))
+      .catch(() => setType(null))
+  }, [])
+  if (!type) return null
+  return (
+    <p className="mb-4 inline-flex items-center gap-2 text-sm text-muted-foreground" data-node-mode={type}>
+      {words.label}: <span className="font-medium text-foreground">{type === "factory" ? words.factory : words.project}</span>
+      <IndicatorHint label={`${words.label}: ${words.hint}`} text={words.lines} />
+    </p>
+  )
 }
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
@@ -98,6 +121,7 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
   if (cards === "loading" || cards === "failed" || cards.length === 0) {
     return (
       <>
+        <NodeMode words={words.mode} />
         <Accordion type="single" collapsible defaultValue="node">{node}</Accordion>
         {cards === "loading" ? (
           <p className="my-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {words.loading}</p>
@@ -112,6 +136,7 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
 
   return (
     <>
+      <NodeMode words={words.mode} />
       <Accordion type="single" collapsible defaultValue="node">
         {node}
         {walletCard}
