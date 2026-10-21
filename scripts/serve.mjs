@@ -18,7 +18,7 @@ import { createRequire } from 'node:module'
 import paths from '../lib/web4-items/paths.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
 // 553: сборка ядра при «закрытой крышке» — все процессы узла, кроме туннеля, на время сборки остановлены.
-const { closeLid, openLid, backupNext, restoreNext, dropBackup, itemsAside, itemsBack } = createRequire(import.meta.url)('../lib/deploy/quiet-build.cjs')
+const { closeLid, openLid, backupNext, restoreNext, dropBackup, itemsAside, itemsBack, redrawCore } = createRequire(import.meta.url)('../lib/deploy/quiet-build.cjs')
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const root = path.join(here, '..')
@@ -593,7 +593,7 @@ function waitDeploy() {
   while (deployLock.isRunning()) spawnSync(process.execPath, ["-e", "setTimeout(()=>{},5000)"])
 }
 
-function rebuild() {
+async function rebuild() {
   if (deployLock.isRunning()) {
     console.error("Сейчас идёт развёртывание элемента (страница «Развёртывания»). Сборка сайта не начата: дождитесь его окончания и повторите.")
     process.exit(1)
@@ -660,6 +660,8 @@ function rebuild() {
   // Ядро в списке остановленных — `pm2 start` поднимает его уже на новой сборке; узел без «крышки» — прежний перезапуск.
   if (!openLid(root).includes("fractera-web4")) pm2run(["restart", "fractera-web4"], { quiet: true })
   dropBackup(root)
+  // 557: страницы собраны без элементов (они были вынесены) — перерисовать их, когда ядро поднялось и элементы на месте.
+  await redrawCore(root)
   console.log("Готово. Проверить: npm run serve:status")
 }
 
