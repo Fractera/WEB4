@@ -235,3 +235,28 @@ If you enjoy this starter, please don't forget to give the project a star — it
 <p align="center">
   <a href="https://github.com/Fractera/WEB4"><img src="public/video/git-star.gif" alt="Star the project on GitHub" height="100"></a>
 </p>
+
+## In the Fractera project
+
+This repository is the core of a node. Your fork is yours; the core is not an element and is never replaced. A change here changes the
+frame of every element (menu, element pages, installation), so make it with Claude Code in the core folder and keep the laws in
+`CLAUDE.md`. It shows after `npm run serve:rebuild` (8 to 12 minutes, the node's processes stop for that time and Cloudflare serves
+copies of the pages). Fractera's own changes reach your fork when you sync it with this repository on GitHub.
+
+The other repositories of the project and what they do:
+
+| Repository | Role in the node |
+|---|---|
+| `Fractera/fractera-auth-starter` | sign-in, roles and the users of the node (built-in element `auth`) |
+| `Fractera/fractera-data-starter` | the database; the only door to stored data (built-in `data`) |
+| `Fractera/fractera-storage-starter` | files: pictures, videos, documents (built-in `storage`, through `data`) |
+| `Fractera/fractera-vectors-starter` | vectors and similarity search (built-in `vectors`, through `data`) |
+| `Fractera/fractera-graph-lightrag-starter` | the knowledge graph (built-in `graph`) |
+| `Fractera/fractera-config-starter` | project settings, menu, node mode (built-in `config`) |
+| `Fractera/fractera-design-starter` | the shared look of the node (built-in `design`) |
+| `Fractera/fractera-blocks-starter` | the registry of page blocks (`blocks`) |
+| `Fractera/fractera-root-starter` | the site at the root of the domain (`root`) |
+| `Fractera/fractera-custom-item-starter` | the template every new custom element is born from |
+| `Fractera/fractera-native-item-starter` | the template of native elements |
+
+Every element repository has a section like this one: what it does, whether you can change it, how, and how the change is used.
