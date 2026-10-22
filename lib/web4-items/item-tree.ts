@@ -422,7 +422,7 @@ export const ITEM_TREE: TreePage[] = [
           { slug: "quiz", words: w("Product quiz", "Questions that shape the element.", "Продуктовый квиз", "Вопросы, из которых складывается элемент.") },
           // 538 (владелец 2026-10-19): «замену двух этих записей на надпись Реверс инжиниринг» — «Переезд из другого Next.js» и
           // «Переезд из другого фреймворка» свёрнуты в один пункт; прежние адреса переадресуются (`MOVED_PAGES`).
-          { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or app works, then build your own in the element.", "Реверс-инжиниринг", "Разобрать, как устроен готовый сайт или приложение, и построить своё в элементе.") },
+          { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or SDK works, then build your own in this element.", "Реверс-инжиниринг", "Разберите, как устроен готовый сайт или SDK, чтобы построить своё в этом элементе.") },
         ],
       },
     ],

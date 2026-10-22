@@ -11,29 +11,29 @@ export const dynamic = "force-dynamic"
 
 const WORDS = {
   en: {
-    title: "A test account for the analysis",
-    lead: "The node's agent will study the internal pages of this site in the account you sign in to in this window. It only reads: it never votes, posts, sends or pays. Your password stays with you — the agent never sees it.",
-    type: "Type the site name to confirm:",
-    go: "I confirm — open the site to sign in",
-    after: "Consent recorded. Opening the site — sign in to the test account, then close this window.",
+    title: "Signing in for the analysis",
+    lead: "Next, this window opens the site, and you sign in to it with a separate account. The node's agent will then look at the site's pages under this account and change nothing there: it sends nothing and buys nothing. You type the login and password on the site itself; the node never sees them.",
+    type: "Type the site address to confirm:",
+    go: "I confirm, open the site",
+    after: "Done. The site opens now: sign in to the account and close this window.",
     errors: {
       "no-window": "No login window is open for this site. Open it again from the node.",
       "bad-window": "This form does not belong to the open login window. Open the window again from the node.",
       checks: "Tick all three statements.",
-      typed: "Type the site name exactly as shown.",
+      typed: "Type the site address as it is written above.",
     } as Record<string, string>,
   },
   ru: {
-    title: "Тестовая учётная запись для разбора",
-    lead: "Агент узла изучит внутренние страницы этого сайта в учётной записи, в которую вы войдёте в этом окне. Он только читает: не голосует, не публикует, не отправляет и не платит. Пароль остаётся у вас — агент его не видит.",
-    type: "Введите имя сайта, чтобы подтвердить:",
-    go: "Подтверждаю — открыть сайт для входа",
-    after: "Согласие записано. Открываю сайт — войдите в тестовую учётную запись и закройте это окно.",
+    title: "Вход на сайт для разбора",
+    lead: "Дальше в этом окне откроется сайт, и вы войдёте на него в отдельной учётной записи. Агент узла потом будет смотреть страницы сайта под этой записью и ничего там не изменит: ничего не отправит и ничего не купит. Логин и пароль вы вводите на самом сайте, узел их не видит.",
+    type: "Введите адрес сайта, чтобы подтвердить:",
+    go: "Подтверждаю, открыть сайт",
+    after: "Готово. Сейчас откроется сайт: войдите в учётную запись и закройте это окно.",
     errors: {
       "no-window": "Окно входа для этого сайта не открыто. Откройте его заново из узла.",
       "bad-window": "Эта форма не принадлежит открытому окну входа. Откройте окно заново из узла.",
       checks: "Отметьте все три пункта.",
-      typed: "Введите имя сайта точно так, как оно написано.",
+      typed: "Введите адрес сайта, как он написан выше.",
     } as Record<string, string>,
   },
 }

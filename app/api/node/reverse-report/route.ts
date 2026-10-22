@@ -35,7 +35,14 @@ export async function GET(req: NextRequest) {
     const jobs = existsSync(REPORTS)
       ? readdirSync(REPORTS, { withFileTypes: true }).filter((d) => d.isDirectory() && existsSync(join(REPORTS, d.name, "report.json"))).map((d) => d.name).sort()
       : []
-    return NextResponse.json({ ok: true, jobs }, { headers: HEADERS })
+    // 556-9: the page names what was studied (target, kind, the first lines of the summary) instead of a task id; `jobs` stays for
+    // the element's `npm run reverse -- list`. Newest first.
+    const items = jobs.map((j) => {
+      let r: { target?: { source?: string; name?: string; kind?: string }; summary?: string } = {}
+      try { r = JSON.parse(read(join(REPORTS, j, "report.json")) ?? "{}") } catch { /* a broken report shows its id only */ }
+      return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400) }
+    }).reverse()
+    return NextResponse.json({ ok: true, jobs, items }, { headers: HEADERS })
   }
   if (!JOB.test(job)) return NextResponse.json({ ok: false, error: "bad-job" }, { status: 400, headers: HEADERS })
   const dir = join(REPORTS, job)
