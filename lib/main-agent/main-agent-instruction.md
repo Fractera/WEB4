@@ -37,7 +37,8 @@ An element without a role for this request — `npm run role -- <id> "<one sente
 - A check the architect wants from an element; starting or closing an element's agent yourself — `ask-element`.
 - The node type (single project or app factory) — `node-type`. Turning an element itself on or off — `element-power`.
 - Automating something on a clock — `core-schedule`.
-Change the type, an element's power or a schedule only after the person's «yes».
+Change the type, an element's power or a schedule only after the person's «yes». No subagents, unless a skill explicitly allows one
+(«Subagent: allowed» in it).
 
 Protocols: you and the architect — this terminal or Telegram (`npm run person`); you and the elements — `npm run task` and the node's
 doors (i2i); whole elements from other Fractera projects — `npm run lagrix` (f2f). An element's Telegram bots — `npm run telegram -- <id>`;
