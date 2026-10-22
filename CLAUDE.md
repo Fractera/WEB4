@@ -3480,3 +3480,32 @@ Owner, verbatim (all words — `/code` `development-docs/development-steps/compl
   empty — otherwise it moves the live element's subscription to its own port.
 - **Not built:** the writer of Messenger Web4 records; tracking and marketing consents read by analytics and mailings; users per
   application of an app factory (step 554); the new table in the element templates (`/admin/users` there is the old one).
+
+## Reverse engineering and the product quiz — one cycle (step 563, 2026-10-22)
+
+The owner's words (2026-10-22): the quiz and the reverse engineering are one cycle — «квиз может существовать без реверса инжиниринг а
+вот риверс инжиниринг в концепции нашего проекта вообще не может существовать без Quiz»; the heavy tool is off by default and the node's
+agent turns it on for a task and off after it; the analysis covers SDKs too.
+
+- **The element `reverse`** (`WEB4-ITEMS/core/reverse`, `Fractera/fractera-reverse-engineering-starter`, port 24696, native): passport
+  `power.default: "off"` — installed and built, never started. Its tools: `npm run rea -- <command> [--save <file>]` (REA from the core's
+  single copy `data/tools/rea`, 6.7.0 — no MCP anywhere, step 539), `npm run browser:start -- <url>` / `browser:stop` (Chrome with
+  `--headless=new`, its own profile in `data/services/reverse/browser-profile`, the debugging port on the loopback; ~375 MB of its own
+  memory), the skill `reverse-engineer` (Work skill, `context: fork`, `model: opus`, `effort: max`, «Subagent: allowed») — a website, an
+  npm / JavaScript SDK, a Python package, .NET, a native library, Android, WASM; ONE report form `report.json` + `report.md` in
+  `data/services/reverse/reports/<task>/`, its entities go to the graph (`graph-insert`).
+- **The main agent** (skill `reverse-engineer`): a request for an analysis is the «yes» to turn `reverse` on (the only such exception in
+  `element-power`); one task at a time; `supervise --max 1` → `task` starting «Build process:» (a native element has only its build
+  session) → «done» → `state` → the report to the asker → `close` → `power off "<reason>"` → `done`. `element-power off` also stops the
+  element's own browser (`data/services/<id>/browser.json`).
+- **Doors:** `GET /api/node/reverse-report[?job=<task>]` (the report while `reverse` is off) and `GET /api/node/elements` (the whole node
+  for the quiz: address, native/custom, role, what it does, on or off and why — unlike the A2A registry, which skips turned-off elements);
+  both take the node key or an architect/admin session.
+- **The quiz** (`product-quiz`, custom template v0.3.130 and root v2.1.5): `model: opus`, `effort: max`; reads the node (`npm run node --
+  elements`); offers an analysis with its price, then `ask-core` and `npm run reverse -- get <task>` (only `report.json` is copied into the
+  element's English-only documents); plans **stages 0…N** — stage 0 is static pages filled with primary data loaded from JSON, each next
+  stage adds one capability and works on its own; `check:product` checks the stages. The core's quiz page shows the stages; the element
+  page «Product design → Reverse engineering» lists the reports.
+- 🛑 Measured: REA on the whole Stripe npm SDK 23.0.0 — 1497 files, 2 minutes, a 108 MB answer and partial semantic coverage; give it one
+  build of a package. The browser without a window: 9 processes. Not measured yet: a live cycle with the models (step 563-6, only after
+  the owner's «yes» with the price).

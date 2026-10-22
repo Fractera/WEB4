@@ -40,6 +40,10 @@ export type ProductQuizWords = {
   openQuestions: string
   notNow: string
   slices: string
+  /** 563-5: the stages 0…N of the quiz. */
+  stages: string
+  stageWorks: string
+  stageReady: string
   decisions: string
   draft: string
   /** «{date}» is replaced. */
@@ -395,6 +399,26 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
               </li>
             ))}
           </ul>
+        </section>
+      )}
+
+      {quiz.stages.length > 0 && (
+        <section className="flex flex-col gap-3" data-quiz-stages>
+          <H2 variant="ui">{words.stages}</H2>
+          <ol className="flex flex-col gap-3">
+            {quiz.stages.map((s) => (
+              <li key={s.n} className="flex flex-col gap-1" data-quiz-stage={s.n}>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Small className="font-mono text-muted-foreground">{s.n}</Small>
+                  <P className="font-medium">{s.name}</P>
+                  {statusBadge(s.status, s.confirmed?.date)}
+                </div>
+                <Small>{words.stageWorks}: {s.works}</Small>
+                <Small>{words.stageReady}: {s.ready}</Small>
+                {s.items.length > 0 && <Small className="text-muted-foreground">{s.items.join(", ")}</Small>}
+              </li>
+            ))}
+          </ol>
         </section>
       )}
 

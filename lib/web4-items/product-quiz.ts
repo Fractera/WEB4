@@ -42,6 +42,8 @@ export type ProductQuiz = {
   openQuestions: { id: string; text: string; about: string[] }[]
   notNow: { id: string; text: string }[]
   slices: { id: string; name: string; items: string[] }[]
+  /** 563-5: stages 0…N, each working on its own (owner 2026-10-22); older quizzes have only `slices`. */
+  stages: { n: number; name: string; works: string; ready: string; items: string[]; status: QuizStatus; confirmed?: { date: string; said: string } }[]
   decisions: { date: string; said: string; gist: string }[]
 }
 export type QuizRead = { quiz: ProductQuiz | null; problems: string[] }
@@ -193,6 +195,18 @@ export function readProductQuiz(id: string): QuizRead {
     openQuestions: list(q.openQuestions).map((o) => ({ id: str(o.id), text: str(o.text), about: strs(o.about) })),
     notNow: list(q.notNow).map((n) => ({ id: str(n.id), text: str(n.text) })),
     slices: list(q.slices).map((s) => ({ id: str(s.id), name: str(s.name), items: strs(s.items) })),
+    stages: list(q.stages).map((s, i) => {
+      const c = s.confirmed && typeof s.confirmed === "object" ? (s.confirmed as Record<string, unknown>) : null
+      return {
+        n: Number.isInteger(s.n) ? (s.n as number) : i,
+        name: str(s.name),
+        works: str(s.works),
+        ready: str(s.ready),
+        items: strs(s.items),
+        status: status(s.status),
+        confirmed: c ? { date: str(c.date), said: str(c.said) } : undefined,
+      }
+    }),
     decisions: list(q.decisions).map((d) => ({ date: str(d.date), said: str(d.said), gist: str(d.gist) })),
   }
 

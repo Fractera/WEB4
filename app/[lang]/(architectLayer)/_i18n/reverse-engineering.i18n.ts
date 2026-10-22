@@ -100,6 +100,16 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
         network: "No answer from the node. Reload the page.",
       },
     },
+    reports: {
+      title: "Reports of analyses",
+      lead: "Every analysis the node ran with its reverse engineering element. The element is off between tasks; the reports stay in the node.",
+      loading: "Reading the reports…",
+      failed: "Could not read the reports right now. Reload the page.",
+      empty: "No analysis yet. Ask the node's main agent how a site, an app or a package is built.",
+      target: "Target",
+      open: "Reading the report…",
+      openFailed: "Could not read this report.",
+    },
   },
   ru: {
     aboutTitle: "Подробнее о реверс-инжиниринге",
@@ -195,6 +205,16 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
         "temporary-address": "На временном адресе это недоступно. Откройте пульт на этом компьютере или на своём домене.",
         network: "Узел не ответил. Обновите страницу.",
       },
+    },
+    reports: {
+      title: "Отчёты разбора",
+      lead: "Каждый разбор, который узел провёл элементом реверс-инжиниринга. Между задачами элемент выключен, отчёты остаются в узле.",
+      loading: "Читаю отчёты…",
+      failed: "Не удалось прочитать отчёты. Обновите страницу.",
+      empty: "Разборов пока нет. Спросите главного агента узла, как устроен сайт, приложение или пакет.",
+      target: "Цель",
+      open: "Читаю отчёт…",
+      openFailed: "Не удалось прочитать этот отчёт.",
     },
   },
 }

@@ -40,6 +40,81 @@ export type ReverseEngineeringWords = {
     retry: string
     errors: Record<string, string>
   }
+  /** 563-5: the reports of the node's analyses — the door /api/node/reverse-report. */
+  reports: { title: string; lead: string; loading: string; failed: string; empty: string; target: string; open: string; openFailed: string }
+}
+
+type ReportView = { summary: string; target: string; markdown: string | null } | "loading" | "failed"
+
+// 563-5: ОТЧЁТЫ РАЗБОРА. Элемент `reverse` между задачами выключен, отчёты отдаёт ядро (`/api/node/reverse-report`). Список читается при
+// открытии страницы, отчёт — при раскрытии строки; таймеров и опроса нет (запрет незаказанного поведения 2026-09-25).
+function Reports({ w }: { w: ReverseEngineeringWords["reports"] }) {
+  const [jobs, setJobs] = useState<string[] | "loading" | "failed">("loading")
+  const [views, setViews] = useState<Record<string, ReportView>>({})
+
+  useEffect(() => {
+    void (async () => {
+      try {
+        const r = await fetch(`${BASE}/api/node/reverse-report`, { cache: "no-store" })
+        const j = (await r.json().catch(() => null)) as { ok?: boolean; jobs?: string[] } | null
+        setJobs(j?.ok ? (j.jobs ?? []) : "failed")
+      } catch {
+        setJobs("failed")
+      }
+    })()
+  }, [])
+
+  async function open(job: string) {
+    if (!job || views[job]) return
+    setViews((v) => ({ ...v, [job]: "loading" }))
+    try {
+      const r = await fetch(`${BASE}/api/node/reverse-report?job=${encodeURIComponent(job)}`, { cache: "no-store" })
+      const j = (await r.json().catch(() => null)) as { ok?: boolean; report?: { summary?: string; target?: { source?: string; name?: string } }; markdown?: string | null } | null
+      setViews((v) => ({ ...v, [job]: j?.ok ? { summary: j.report?.summary ?? "", target: j.report?.target?.source || j.report?.target?.name || "", markdown: j.markdown ?? null } : "failed" }))
+    } catch {
+      setViews((v) => ({ ...v, [job]: "failed" }))
+    }
+  }
+
+  let body: ReactNode
+  if (jobs === "loading") body = <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {w.loading}</p>
+  else if (jobs === "failed") body = <p className="text-sm text-destructive" role="alert">{w.failed}</p>
+  else if (!jobs.length) body = <p className="text-sm text-muted-foreground" data-rea-reports="empty">{w.empty}</p>
+  else body = (
+    <Accordion type="single" collapsible className="rounded-md border border-border px-3" onValueChange={(v) => void open(v)} data-rea-reports={jobs.length}>
+      {jobs.map((job, i) => {
+        const v = views[job]
+        return (
+          <AccordionItem key={job} value={job} className={i === jobs.length - 1 ? "border-b-0" : undefined} data-rea-report={job}>
+            <AccordionTrigger><span className="font-mono">{job}</span></AccordionTrigger>
+            <AccordionContent>
+              {v === undefined || v === "loading" ? (
+                <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {w.open}</p>
+              ) : v === "failed" ? (
+                <p className="text-sm text-destructive" role="alert">{w.openFailed}</p>
+              ) : (
+                <div className="flex flex-col gap-2 text-sm text-foreground">
+                  {v.target && <p className="text-muted-foreground">{w.target}: <span className="break-all font-mono">{v.target}</span></p>}
+                  {v.summary && <p>{v.summary}</p>}
+                  {v.markdown && <pre className="whitespace-pre-wrap rounded-md bg-muted p-3 text-[length:var(--fs-small)]">{v.markdown}</pre>}
+                </div>
+              )}
+            </AccordionContent>
+          </AccordionItem>
+        )
+      })}
+    </Accordion>
+  )
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-xl font-semibold">{w.title}</CardTitle>
+        <CardDescription>{w.lead}</CardDescription>
+      </CardHeader>
+      <CardContent>{body}</CardContent>
+    </Card>
+  )
 }
 
 type Status = {
@@ -141,6 +216,7 @@ export function ReverseEngineering({ words }: { words: ReverseEngineeringWords }
         </CardHeader>
         <CardContent>{body}</CardContent>
       </Card>
+      <Reports w={words.reports} />
       <Card>
         <CardHeader>
           <CardTitle className="text-xl font-semibold">{words.aboutTitle}</CardTitle>
