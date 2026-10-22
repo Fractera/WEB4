@@ -3320,9 +3320,27 @@ Owner, verbatim (all words — `/code` `completed-steps/553-main.md`): «эти 
   `GET /api/node/catalog` in the browser), the account button with the orange attention dot always; the project menu from CONFIG is not
   shown here; the footer is only the theme, width and language switches. `components/shell` is again an exact copy of the site
   (`check:shell-kits`). The left menu zones «Native items / Custom items» (ru «Встроенные элементы / Свои элементы») fold like Passport.
-- 🛑 **Known limit of the factory:** sign-in is shared by every element (one `users` table in `data/services/auth/auth.db`); separate
-  users per application — step 554. 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
+- 🪦 *Closed by step 554 (2026-10-22): «sign-in is shared by every element» — see the next section.* 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
   menu of built-in elements still uses the old service pages — the next step (owner: «Сразу после 553-7»).
+
+## Factory sign-in: one auth element, own people per application (step 554, 2026-10-22)
+
+Owner, verbatim (all words — `/code` `completed-steps/554-main.md`): the model «своя запись в каждом приложении»; «Когда создается новый
+элемент в случае если переключатель находится в состоянии завод приложений у нас создается для авторизации новой организации. Название
+этой организации соответствует соответствующие записи в конфиг самого элемента»; the return — «чтобы он по ошибке не мог попасть
+например на главную страницу проекта».
+- **Application = an organization of the sign-in with `element`.** `scripts/item-birth.mjs` on a `factory` node, for a custom element,
+  calls `POST /api/node/users/apps` (core door → auth `POST /api/node-users/apps`, architect key) — `===APP_ORG=== <id> <org>`. Its name
+  in the auth database is the element id; the core Users door (`app/api/node/users`) replaces it with the element's live `short_name`
+  (`lib/web4-items/app-names.ts`, APP-CONFIG override → defaults, «Fractera» by default) — a rename shows at once, no sync, no timer.
+- **Accounts, sign-in, admission** live in the auth element (v2.3.1, its README «Applications of an app factory»): `users.app`, email
+  and Google unique inside an application; the return to an element site goes through the ticket (328) and back to the same page;
+  `/api/session` admits only `node` accounts, so an application person is nobody to the core and to other applications; a `node`
+  architect is admitted everywhere. Elements and templates did not change (their `/api/auth/callback` and ticket reading already exist).
+- **Users tab widths** (owner's word): methods 200 px one line, roles 200 px two rows of chips, organizations 400 px with 180 px chips two
+  rows, the application chip first — `components/node-users/clamped-chips.client.tsx`.
+- 🛑 Not built: an application owner managing their own people, moving people between applications, guests of an application (a guest
+  stays `node`). A single project behaves exactly as before (all `node`, measured by the door snapshot).
 
 ## Built-in elements in the element tree (step 557, 2026-10-21)
 
