@@ -165,12 +165,15 @@ Owner, verbatim: «узел это сервер на котором действ
 
 🚧 Under development (owner 2026-10-13): the node is being redefined toward a shared, SaaS-like node; the gap is closed by the next step (474, intermediaries who create agents for other people). Until then, never write «the node is the person's computer» as a fact, and never call a node a super-node.
 
-## 🛑 Multi-agent development is forbidden — all development is sequential (owner, 2026-09-28)
+## 🛑 Subagents are forbidden — unless a skill explicitly allows one (owner, 2026-09-28 and 2026-10-22)
 
-The owner, verbatim: «a categorical ban on multi-agent development … all development is sequential only». One agent, one
-task at a time, step by step: no sub-agents, no parallel agents, no agent teams, no background agents splitting the work.
-Long work is a sequence of steps with its state written down, never a fan-out. This holds for every agent of the project —
-the core, the element template and every element.
+The owner, verbatim: «a categorical ban on multi-agent development … all development is sequential only» (2026-09-28); then (2026-10-22):
+«субагента запрещены кроме тех случаев когда навык прямо разрешает использование субб агента». One agent, one task at a time, step by
+step: no sub-agents, no parallel agents, no agent teams, no background agents splitting the work. Long work is a sequence of steps with
+its state written down, never a fan-out. **The one exception:** a skill that explicitly allows a subagent — `context: fork` (and `model:`)
+in its frontmatter and the line «Subagent: allowed — <why>» in its body. No such line — no subagent. Measured (step 569): a forked skill
+pays only when it does much work inside; a one-command action is cheaper in the session itself. This holds for every agent of the
+project — the core, its main agent, both element templates and every element (each instruction carries the same line).
 
 ## How this application runs on a human machine (step 232, 2026-09-18)
 
