@@ -44,6 +44,17 @@ export type ProductQuizWords = {
   stages: string
   stageWorks: string
   stageReady: string
+  /** 556-4: the references of a product like an existing one (skill `product-clone`). «{covered}», «{areas}», «{assigned}», «{total}»,
+   *  «{later}» and «{count}» are replaced. */
+  references: string
+  referencesLead: string
+  coverage: string
+  stageParity: string
+  seenIn: string
+  stageShort: string
+  unknowns: string
+  referenceRules: Record<string, string>
+  referenceSources: Record<string, string>
   decisions: string
   draft: string
   /** «{date}» is replaced. */
@@ -287,6 +298,8 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
   }
 
   const items = quiz.modules.flatMap((m) => m.items)
+  // 556-4: older readers of the door may not send the field — treat it as «no references».
+  const refs = quiz.references ?? null
   const confirmedCount = items.filter((i) => i.status === "confirmed").length
   const statusBadge = (s: QuizItem["status"], date?: string) =>
     s === "confirmed"
@@ -402,6 +415,59 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
         </section>
       )}
 
+      {refs && (
+        <section className="flex flex-col gap-3" data-quiz-references>
+          <H2 variant="ui">{words.references}</H2>
+          <Small className="text-muted-foreground">{words.referencesLead}</Small>
+          <Small data-quiz-parity>
+            {fill(words.coverage, {
+              covered: refs.areas.filter((a) => refs.scenarios.some((o) => o.area === a.id)).length,
+              areas: refs.areas.length,
+              assigned: refs.scenarios.filter((o) => o.stage !== null).length,
+              total: refs.scenarios.length,
+              later: refs.scenarios.filter((o) => o.notNow).length,
+            })}
+          </Small>
+          <ul className="flex flex-col gap-1">
+            {refs.products.map((p) => (
+              <li key={p.id} data-quiz-reference={p.id}>
+                <Small>
+                  <span className="font-mono text-muted-foreground">{p.id}</span> {p.name} · {words.referenceRules[p.rules] ?? p.rules} ·{" "}
+                  {words.referenceSources[p.source] ?? p.source}
+                </Small>
+              </li>
+            ))}
+          </ul>
+          {refs.areas.map((a) => (
+            <div key={a.id} className="flex flex-col gap-1">
+              <P className="font-medium">{a.name}</P>
+              <ul className="flex flex-col gap-1">
+                {refs.scenarios.filter((o) => o.area === a.id).map((o) => (
+                  <li key={o.id}>
+                    <Small>
+                      <span className="font-mono text-muted-foreground">{o.id}</span> {o.name} — {words.seenIn} {o.seenIn.join(", ")} ·{" "}
+                      {o.stage !== null ? `${words.stageShort} ${o.stage}` : o.notNow ? words.notNow : "—"}
+                    </Small>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+          {refs.unknowns.length > 0 && (
+            <div className="flex flex-col gap-1">
+              <P className="font-medium">{words.unknowns}</P>
+              <ul className="flex flex-col gap-1">
+                {refs.unknowns.map((u) => (
+                  <li key={u.id}>
+                    <Small><span className="font-mono text-muted-foreground">{u.id}</span> {u.text} → {u.question || u.decision}</Small>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+      )}
+
       {quiz.stages.length > 0 && (
         <section className="flex flex-col gap-3" data-quiz-stages>
           <H2 variant="ui">{words.stages}</H2>
@@ -416,6 +482,11 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
                 <Small>{words.stageWorks}: {s.works}</Small>
                 <Small>{words.stageReady}: {s.ready}</Small>
                 {s.items.length > 0 && <Small className="text-muted-foreground">{s.items.join(", ")}</Small>}
+                {refs && refs.scenarios.length > 0 && (
+                  <Small className="text-muted-foreground" data-quiz-stage-parity={s.n}>
+                    {fill(words.stageParity, { count: refs.scenarios.filter((o) => o.stage === s.n).length, total: refs.scenarios.length })}
+                  </Small>
+                )}
               </li>
             ))}
           </ol>

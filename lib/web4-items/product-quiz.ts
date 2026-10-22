@@ -44,7 +44,15 @@ export type ProductQuiz = {
   slices: { id: string; name: string; items: string[] }[]
   /** 563-5: stages 0…N, each working on its own (owner 2026-10-22); older quizzes have only `slices`. */
   stages: { n: number; name: string; works: string; ready: string; items: string[]; status: QuizStatus; confirmed?: { date: string; said: string } }[]
+  /** 556-4: products like this one (skill `product-clone`) — where each of their scenarios was seen and which stage brings it here. */
+  references: QuizReferences | null
   decisions: { date: string; said: string; gist: string }[]
+}
+export type QuizReferences = {
+  products: { id: string; name: string; url: string; rules: string; source: string; report: string }[]
+  areas: { id: string; name: string }[]
+  scenarios: { id: string; area: string; name: string; seenIn: string[]; stage: number | null; notNow: string }[]
+  unknowns: { id: string; text: string; question: string; decision: string }[]
 }
 export type QuizRead = { quiz: ProductQuiz | null; problems: string[] }
 
@@ -56,6 +64,25 @@ const strs = (v: unknown): string[] => (Array.isArray(v) ? v.filter((x): x is st
 const list = (v: unknown): Record<string, unknown>[] =>
   Array.isArray(v) ? v.filter((x): x is Record<string, unknown> => !!x && typeof x === "object") : []
 const status = (v: unknown): QuizStatus => (v === "confirmed" ? "confirmed" : "draft")
+
+// 556-4: the block `references` as the skill `product-clone` writes it; the guard `check:product` of the element checks its links.
+function readReferences(v: unknown): QuizReferences | null {
+  if (!v || typeof v !== "object") return null
+  const r = v as Record<string, unknown>
+  return {
+    products: list(r.products).map((p) => ({ id: str(p.id), name: str(p.name), url: str(p.url), rules: str(p.rules), source: str(p.source), report: str(p.report) })),
+    areas: list(r.areas).map((a) => ({ id: str(a.id), name: str(a.name) })),
+    scenarios: list(r.scenarios).map((o) => ({
+      id: str(o.id),
+      area: str(o.area),
+      name: str(o.name),
+      seenIn: strs(o.seenIn),
+      stage: Number.isInteger(o.stage) ? (o.stage as number) : null,
+      notNow: str(o.notNow),
+    })),
+    unknowns: list(r.unknowns).map((u) => ({ id: str(u.id), text: str(u.text), question: str(u.question), decision: str(u.decision) })),
+  }
+}
 
 function readJson(path: string): { value: Record<string, unknown> | null; error: string | null } {
   try {
@@ -207,6 +234,7 @@ export function readProductQuiz(id: string): QuizRead {
         confirmed: c ? { date: str(c.date), said: str(c.said) } : undefined,
       }
     }),
+    references: readReferences(q.references),
     decisions: list(q.decisions).map((d) => ({ date: str(d.date), said: str(d.said), gist: str(d.gist) })),
   }
 
