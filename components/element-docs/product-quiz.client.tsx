@@ -3,12 +3,12 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react"
 import { MessageSquareText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button, buttonVariants } from "@/components/ui/button"
+import { Button } from "@/components/ui/button"
 import { BlockTask } from "@/_tools/block-task/client/block-task.client"
 import type { BlockTaskUi } from "@/_tools/block-task/types/block-task"
 import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
-import { isLoopbackHostname } from "@/lib/auth/owner-at-machine"
-import { cleanPaste } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
+import { TerminalDrawer } from "@/_tools/terminal-drawer/client/terminal-drawer.client"
+import type { TerminalDrawerWords, TerminalKit } from "@/_tools/terminal-drawer/types/terminal-drawer"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { H2, H3, P, Small } from "@/components/ui/typography"
@@ -19,8 +19,9 @@ import type { ProductQuiz, QuizItem, QuizStepState, QuizWork } from "@/lib/web4-
 // The page is prerendered and the agent edits the quiz at any minute, so the quiz is asked from `GET /api/node/product-quiz` when the
 // page opens. The page only reads: the quiz changes in a conversation with the element's agent, never by a button here.
 // Four states: loading · the quiz · no quiz yet (an invitation to plan) · refused (a refusal means «unknown», not «no quiz»).
-// 🔒 The Telegram link appears only when the element's bot is connected (the channel door of the element answers with the bot
-// and at least one allowed person); on the temporary address that door refuses, and the link is simply not drawn.
+// 556-10 (the person, 2026-10-23: «реальное назначение этой кнопки называется запустить Quiz»): «Start the quiz», «Continue the quiz»
+// and «Send» of the 💬 window open the element's terminal on the right (`_tools/terminal-drawer`, as the Preview does); the Telegram
+// phrase and the bot link are gone — the terminal works on the node's own domain, it is closed only on the temporary address.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
@@ -29,8 +30,8 @@ export type ProductQuizWords = {
   failed: string
   instructionTitle: string
   instructionText: string
-  terminal: string
-  telegram: string
+  /** 556-10: the button of an existing quiz — the element's terminal opens on the right with «askContinue». */
+  continueQuiz: string
   /** «{confirmed}», «{total}», «{questions}» are replaced. */
   counters: string
   /** «{lang}» is replaced. */
@@ -84,16 +85,12 @@ export type ProductQuizWords = {
   askQuestion: string
   askContinue: string
   askStart: string
-  /** Opened not from this computer (the terminal works only here): the window copies the phrase for the element's bot. */
-  remoteNote: string
-  telegramPhrase: string
-  sendRemote: string
-  copied: string
-  copyFailed: string
+  /** 556-10: the drawer with the element's terminal. */
+  drawer: TerminalDrawerWords
 }
 
 /** 536-3: the window of a quiz task — the block-task tool in its note mode, with the quiz's own words; the server picks them. */
-export type QuizTaskKit = { ui: BlockTaskUi; dialogUi: AppDialogUi; keyHref: string }
+export type QuizTaskKit = TerminalKit & { ui: BlockTaskUi }
 
 // 🔒 Colours are the core theme's tokens, light and dark: done — success, in progress — warning, planned — tone-reach, none — an empty
 // ring. The colour is never the only carrier: the dot has its words as the label and in the hover.
@@ -183,44 +180,20 @@ const anchor = (id: string) => `quiz-${id}`
 
 // 536-3 (the person, 2026-10-18): «напротив каждого абзаца иконка и инструкция например если хотите обратить внимание на этот часть
 // инструкции нажмите на иконку! Агент из искусственного интеллекта уточнит что вы имели в виду». The 💬 opens the block-task window in
-// its note mode: the task line names the item, the person adds words or voice. On this computer «Send» opens the element's terminal
-// with the task in the paste window (it goes into the terminal only by the person's own button, law 316) — the same road as «Reject»
-// of a preview (356-3). Opened from the internet, the terminal is not reachable: the window copies the phrase for the element's bot.
-async function copyText(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text)
-    return true
-  } catch {
-    // No secure context (plain http on an address): the old way still works where the new one is missing.
-    const area = document.createElement("textarea")
-    area.value = text
-    document.body.appendChild(area)
-    area.select()
-    const ok = document.execCommand("copy")
-    area.remove()
-    return ok
-  }
-}
-
-export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { item: string; lang: string; terminalHref: string; words: ProductQuizWords; task: QuizTaskKit }) {
+// its note mode: the task line names the item, the person adds words or voice; «Send» opens the drawer with the element's terminal.
+export function ProductQuizIsland({ item, lang, words, task }: { item: string; lang: string; words: ProductQuizWords; task: QuizTaskKit }) {
   const [read, setRead] = useState<Read | null>(null)
   const [failed, setFailed] = useState(false)
-  const [bot, setBot] = useState<string | null>(null)
-  const [local, setLocal] = useState(true)
   const [askLine, setAskLine] = useState<string | null>(null)
-  const [notice, setNotice] = useState<string | null>(null)
-  useEffect(() => setLocal(isLoopbackHostname(window.location.hostname)), [])
+  // A new number is a new drawer: the terminal reconnects with the new task, the agent's session keeps running.
+  const [drawer, setDrawer] = useState<{ n: number; text: string } | null>(null)
 
-  async function send(text: string) {
+  function send(text: string) {
     setAskLine(null)
-    if (local) {
-      window.location.href = `${BASE}${terminalHref}?paste=${encodeURIComponent(cleanPaste(text))}`
-      return
-    }
-    setNotice((await copyText(text)) ? words.copied : words.copyFailed)
+    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, text }))
   }
   const askButton = (line: string, id: string) => (
-    <Button type="button" variant="ghost" size="icon-xs" aria-label={words.ask} title={words.ask} onClick={() => { setNotice(null); setAskLine(line) }} data-quiz-ask={id}>
+    <Button type="button" variant="ghost" size="icon-xs" aria-label={words.ask} title={words.ask} onClick={() => setAskLine(line)} data-quiz-ask={id}>
       <MessageSquareText aria-hidden />
     </Button>
   )
@@ -231,12 +204,15 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
       onOpenChange={(o) => { if (!o) setAskLine(null) }}
       address={askLine ?? ""}
       lang={lang}
-      ui={local ? task.ui : { ...task.ui, send: words.sendRemote }}
+      ui={task.ui}
       dialogUi={task.dialogUi}
       voiceApiUrl={`${BASE}/api/transcribe?item=${encodeURIComponent(item)}`}
       keyHref={task.keyHref}
-      onSend={(text) => void send(text)}
+      onSend={send}
     />
+  )
+  const terminal = drawer && (
+    <TerminalDrawer key={drawer.n} service={item} lang={lang} words={words.drawer} kit={task} text={drawer.text} start onCollapse={() => setDrawer(null)} />
   )
 
   useEffect(() => {
@@ -249,27 +225,16 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
         else setFailed(true)
       })
       .catch(() => live && setFailed(true))
-    fetch(`${BASE}/${lang}/architect/${encodeURIComponent(item)}/agent-api/channel`, { cache: "no-store" })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((b: { ok?: boolean; botUsername?: string | null; allowed?: number } | null) => {
-        if (live && b?.ok && b.botUsername && (b.allowed ?? 0) > 0) setBot(b.botUsername)
-      })
-      .catch(() => {})
     return () => {
       live = false
     }
-  }, [item, lang])
+  }, [item])
 
-  const terminal = (
-    <Button type="button" onClick={() => { setNotice(null); setAskLine(words.askContinue) }} data-quiz-terminal>
-      {local ? words.terminal : words.telegramPhrase}
+  const continueButton = (
+    <Button type="button" onClick={() => send(words.askContinue)} data-quiz-terminal>
+      {words.continueQuiz}
     </Button>
   )
-  const telegram = bot ? (
-    <a href={`https://t.me/${bot}`} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })} data-quiz-telegram>
-      {words.telegram}
-    </a>
-  ) : null
 
   if (failed) return <P className="text-muted-foreground" data-product-quiz="failed">{words.failed}</P>
   if (!read) return <P className="text-muted-foreground" data-product-quiz="loading">{words.loading}</P>
@@ -277,23 +242,21 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
   const quiz = read.quiz
   if (!quiz) {
     return (
-      <Card className="max-w-3xl" data-product-quiz="empty">
-        <CardHeader>
-          <CardTitle>{words.emptyTitle}</CardTitle>
-          <CardDescription>{words.emptyText}</CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-2">
-          <div className="flex flex-wrap gap-2">
-            <Button type="button" onClick={() => { setNotice(null); setAskLine(words.askStart) }} data-quiz-start>
-              {local ? words.start : words.telegramPhrase}
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start" data-product-quiz="empty">
+        <Card className="min-w-0 max-w-3xl flex-1">
+          <CardHeader>
+            <CardTitle>{words.emptyTitle}</CardTitle>
+            <CardDescription>{words.emptyText}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button type="button" onClick={() => send(words.askStart)} data-quiz-start>
+              {words.start}
             </Button>
-            {telegram}
-          </div>
-          {!local && <Small className="text-muted-foreground" data-quiz-remote>{words.remoteNote}</Small>}
-          {notice && <Small role="status" data-quiz-notice>{notice}</Small>}
-        </CardContent>
-        {dialog}
-      </Card>
+          </CardContent>
+          {dialog}
+        </Card>
+        {terminal}
+      </div>
     )
   }
 
@@ -307,16 +270,15 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
       : <Badge variant="outline" data-quiz-draft>{words.draft}</Badge>
 
   return (
-    <div className="flex max-w-4xl flex-col gap-8" data-product-quiz="quiz">
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+    <div className="flex min-w-0 max-w-4xl flex-1 flex-col gap-8" data-product-quiz="quiz">
       <Card data-quiz-instruction>
         <CardHeader>
           <CardTitle>{words.instructionTitle}</CardTitle>
           <CardDescription>{words.instructionText}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-2">{terminal}{telegram}</div>
-          {!local && <Small className="text-muted-foreground" data-quiz-remote>{words.remoteNote}</Small>}
-          {notice && <Small role="status" data-quiz-notice>{notice}</Small>}
+          <div className="flex flex-wrap gap-2">{continueButton}</div>
           <Small className="text-muted-foreground" data-quiz-counters>
             {fill(words.counters, { confirmed: confirmedCount, total: items.length, questions: quiz.openQuestions.length })}
             {" · "}
@@ -526,6 +488,8 @@ export function ProductQuizIsland({ item, lang, terminalHref, words, task }: { i
         </section>
       )}
       {dialog}
+    </div>
+    {terminal}
     </div>
   )
 }

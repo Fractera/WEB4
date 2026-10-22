@@ -30,7 +30,9 @@ type State = "checking" | "sleeping" | "connecting" | "running" | "stopped" | "o
 // сохраняет значок и текст (слово владельца 2026-09-29).
 // 552-4б: `mode="work"` — сессия рабочего процесса элемента («Рабочий процесс → Терминал»): дверь состояния `?mode=work`, ключ
 // сессии и сокета — из её ответа (`<id>--work`, `lib/agent-kit/modes.cjs`), а не собирается здесь второй раз.
-export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, keyHref, compact = false, mode }: { service: string; lang: string; words: AgentTerminalWords; dialogUi: AppDialogUi; initialPaste?: string; keyHref?: string; compact?: boolean; mode?: "work" }) {
+// 556-9: `startTask` — задача кнопкой «Начать …» на странице ядра (ящик `_tools/terminal-drawer`): то же, что ссылка `?paste=` (551-7) —
+// спящему терминалу она уходит первым поручением, работающему — окном вставки, отправляет человек.
+export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, keyHref, compact = false, mode, startTask }: { service: string; lang: string; words: AgentTerminalWords; dialogUi: AppDialogUi; initialPaste?: string; keyHref?: string; compact?: boolean; mode?: "work"; startTask?: string }) {
   const api = `${BASE}/${lang}/architect/${service}/agent-api`
   const sessionUrl = `${api}/session${mode === "work" ? "?mode=work" : ""}`
   const keyRef = useRef(service)
@@ -56,7 +58,7 @@ export function AgentTerminal({ service, lang, words, dialogUi, initialPaste, ke
   // 551-7 (владелец 2026-10-20: «если терминал не активен автоматически при таком переходе активировать терминал и подтверждается
   // папка в которой находится агент и потом запускается этот процесс»): СПЯЩЕМУ терминалу задача уходит мосту вместе с запуском —
   // первым поручением агента, и вопрос доверия папке мост отвечает сам. Работающему — как прежде: окно вставки, кнопка человека.
-  const taskForStartRef = useRef<string | null>(null)
+  const taskForStartRef = useRef<string | null>(startTask ?? null)
   // Задача ушла с запуском, а сессия ещё не подтвердилась: отказ запуска (код 1008) возвращает её в окно вставки — не теряется.
   const taskPendingRef = useRef<string | null>(null)
   const [taskAtStart, setTaskAtStart] = useState(false)

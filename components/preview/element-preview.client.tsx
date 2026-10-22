@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react"
 import { OpenOnThisComputerButton } from "@/components/node-state/open-on-this-computer.client"
 import { isLoopbackHostname } from "@/lib/auth/owner-at-machine"
-import { CircleHelp, Copy, ExternalLink, Globe, Highlighter, Monitor, PanelRightClose, RefreshCw, Search, SquareTerminal } from "lucide-react"
+import { CircleHelp, Copy, ExternalLink, Globe, Highlighter, Monitor, RefreshCw, Search, SquareTerminal } from "lucide-react"
 import { Button, buttonVariants } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -13,7 +13,7 @@ import { useScreenScale } from "./use-screen-scale.client"
 // 316: ссылка на терминал службы с адресом блока в окне вставки — одна функция мастера комплекта агента.
 import { terminalLink } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
 // 336: окно задачи блока (инструмент) и терминал службы в ящике справа — тот же остров мастера комплекта, та же сессия.
-import { AgentTerminal } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/agent-terminal.client"
+import { TerminalDrawer } from "@/_tools/terminal-drawer/client/terminal-drawer.client"
 import type { AgentTerminalWords } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/words/agent-terminal.i18n"
 import { BlockTask } from "@/_tools/block-task/client/block-task.client"
 import type { BlockTaskUi } from "@/_tools/block-task/types/block-task"
@@ -368,20 +368,15 @@ export function ElementPreview({ serviceId, terminalService, lang, words, task, 
       </WebPreview>
       </div>
       {task && drawerText !== null && (
-        <aside className="flex w-[min(640px,48%)] shrink-0 flex-col gap-2 rounded-lg border border-border p-3" data-preview-drawer>
-          <div className="flex items-center gap-2">
-            <SquareTerminal className="size-4" aria-hidden />
-            <p className="flex-1 text-sm font-medium">{words.drawerTitle}</p>
-            <Button type="button" variant="outline" size="sm" className="gap-1.5" onClick={() => setDrawerText(null)} data-preview-drawer-collapse>
-              <PanelRightClose className="size-4" aria-hidden />
-              {words.drawerCollapse}
-            </Button>
-          </div>
-          <p className="text-muted-foreground text-xs">{words.drawerHint}</p>
-          <div className="min-h-0 flex-1 overflow-auto">
-            <AgentTerminal service={serviceId} lang={lang} words={task.terminalWords} dialogUi={task.dialogUi} initialPaste={drawerText} keyHref={task.keyHref} compact />
-          </div>
-        </aside>
+        <TerminalDrawer
+          service={serviceId}
+          lang={lang}
+          words={{ title: words.drawerTitle, hint: words.drawerHint, collapse: words.drawerCollapse }}
+          kit={task}
+          text={drawerText}
+          onCollapse={() => setDrawerText(null)}
+          className="w-[min(640px,48%)]"
+        />
       )}
       </div>
       {task && taskAddress !== null && (

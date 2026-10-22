@@ -89,6 +89,7 @@ import { ReverseEngineering } from '@/components/element-docs/reverse-engineerin
 import { CapabilityCards } from '../../../_components/capability-cards.client'
 import { capabilityCardUi } from '../../../_i18n/capability-card.i18n'
 import { reverseEngineeringUi } from '../../../_i18n/reverse-engineering.i18n'
+import { agentTerminalWords } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/words/agent-terminal.i18n'
 
 // ОДНА СТРАНИЦА НА ВСЕ АДРЕСА ВСЕХ ЧЕРНОВИКОВ (314-1): `/architect/<id>`, `/architect/<id>/<раздел>`,
 // `/architect/<id>/<раздел>/<страница>`. Дерево — `lib/web4-items/item-tree.ts`, черновики — `data/web4-drafts.json`.
@@ -475,14 +476,18 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     ? (entry ? <ElementMessengerSettings item={item} lang={lang} ui={messengerSettingsUi(lang)} /> : <p className="my-4 text-sm text-muted-foreground">{messengerSettingsUi(lang).notBorn}</p>)
     : null
   // 536-1 (владелец 2026-10-18): «Продуктовый квиз» — живое описание продукта из `development-docs/product/` элемента; страница
-  // только читает, меняет квиз агент элемента в разговоре. Сверху — терминал элемента и бот Telegram, если он подключён.
+  // только читает, меняет квиз агент элемента в разговоре. 556-10: «Начать квиз», «Продолжить квиз» и 💬 открывают справа терминал
+  // агента элемента (`_tools/terminal-drawer`); Telegram со страницы снят.
   const productQuiz = key === 'build/product-design/quiz'
-    ? <ProductQuizIsland item={item} lang={lang} terminalHref={`/${lang}/architect/${slug}/build/terminal`} words={productQuizUi(lang)}
-        task={{ ui: quizTaskUi(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref(item, lang) }} />
+    ? <ProductQuizIsland item={item} lang={lang} words={productQuizUi(lang)}
+        task={{ ui: quizTaskUi(lang), terminalWords: agentTerminalWords(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref(item, lang) }} />
     : null
-  // 539-3 (владелец 2026-10-19): «Реверс-инжиниринг» — карточка «REA в ядре» (одна копия на узел, дверь `/api/node/rea`) и
-  // подробное описание в свёрнутом аккордеоне; одна страница ядра для каждого элемента.
-  const reverseEngineering = key === 'build/product-design/reverse-engineering' ? <ReverseEngineering words={reverseEngineeringUi(lang)} /> : null
+  // 539-3, переделано 556-9 (владелец 2026-10-23: «Представь все просто в формате карточек аккордеон»): карточки адреса и страниц,
+  // «Начать реверс-инжиниринг» — справа терминал главного агента узла (`build`); одна страница ядра для каждого элемента.
+  const reverseEngineering = key === 'build/product-design/reverse-engineering'
+    ? <ReverseEngineering item={item} lang={lang} words={reverseEngineeringUi(lang)}
+        kit={{ terminalWords: agentTerminalWords(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref('build', lang) }} />
+    : null
   // 530-1 (владелец 2026-10-18): «Настройки → Платежи» — Web2 (ключи Stripe элемента) и Web3. 532: Web3 — кошелёк элемента: наследует
   // кошелёк узла, свой добавляется и удаляется (снова кошелёк узла) — слово владельца в `lib/web4-items/node-wallet.ts`.
   const pw = paymentsUi(lang)
