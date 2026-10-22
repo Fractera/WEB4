@@ -1,9 +1,11 @@
 import "server-only"
 
-import { projectRows } from "@/lib/web4-items/dashboard-rows"
+import { diskPassport } from "@/lib/web4-items/dashboard-rows"
 import { registryDescription, TASK as DESCRIBE_TASK } from "@/lib/web4-items/element-describe"
 import { addressOf } from "@/lib/web4-items/address-file.mjs"
 import { listServices } from "@/lib/microservices/registry"
+import { listDrafts } from "@/lib/web4-items/drafts"
+import power from "@/lib/web4-items/element-power.cjs"
 import paths from "@/lib/web4-items/paths.cjs"
 import elementProps from "@/lib/web4-items/element-props.cjs"
 import { terminalLink } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
@@ -40,26 +42,39 @@ export type PassportCard = {
   reputation: null
 }
 
+// 567-7 (владелец 2026-10-22: «каждый раз когда в паспорте подгружаются элементы … это занимает слишком много времени … Подтверди что
+// никакие лишние данные не загружаются»). ✗ До 567-7 карточки строились из `projectRows` — всей таблицы «Проектов»: на каждый элемент узла,
+// и нативный, который паспорт тут же отбрасывал, — два `git`, полная главная страница и паспорт по HTTP; дверь отвечала ~3 с. Паспорту
+// из этого нужны только адрес, описание, тип и признак выключения — всё лежит на диске узла, поэтому здесь ни одного запроса к элементам.
+// Порядок тот же, что в «Проектах»: службы реестра, затем черновики — новые сверху.
 export async function passportCards(lang: string): Promise<PassportCard[]> {
-  const born = new Set(listServices().map((s) => s.id))
-  const rows = await projectRows(lang)
+  const services = listServices()
+  const byId = new Map(services.map((s) => [s.id, s]))
+  const drafts = listDrafts()
+  const customIds = new Set(drafts.map((x) => x.id))
+  const ids = [...services.filter((s) => !customIds.has(s.id)).map((s) => s.id), ...drafts.map((x) => x.id)]
   // 478-1, владелец 2026-10-14: «Кроме root, нативные элементы должны быть скрыты … мы показываем там рут, и все кастомные элементы».
-  return rows.filter((r) => r.custom || r.id === "root").map((r) => {
-    const d = registryDescription(r.id)
-    const slug = addressOf(r.id)
-    return {
-      id: r.id,
-      custom: r.custom,
+  return ids.flatMap((id) => {
+    const entry = byId.get(id) ?? null
+    const own = entry ? diskPassport(entry) : { short: null, native: false }
+    const custom = customIds.has(id) && !own.native
+    if (!custom && id !== "root") return []
+    const d = registryDescription(id)
+    const slug = addressOf(id)
+    const off = entry ? power.offOf(entry) : null
+    return [{
+      id,
+      custom,
       name: slug,
-      lead: d?.summary ?? r.description,
+      lead: d?.summary ?? own.short,
       summary: d?.summary ?? null,
       provides: d?.provides ?? [],
       described: d !== null,
-      open: r.open,
-      generate: born.has(r.id) ? terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK }) : null,
-      off: r.status === "off" ? r.offReason ?? "" : null,
-      web4: (() => { const e = listServices().find((s) => s.id === r.id); return e ? elementProps.readElementProps(paths.entryDir(e))?.visibility === "network" : false })(),
+      open: `/architect/${slug}`,
+      generate: entry ? terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK }) : null,
+      off: off ? power.reasonIn(off, lang) ?? "" : null,
+      web4: entry ? elementProps.readElementProps(paths.entryDir(entry))?.visibility === "network" : false,
       reputation: null,
-    }
+    }]
   })
 }

@@ -4,6 +4,7 @@ import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle }
 import { Eyebrow, Small } from "@/components/ui/typography"
 import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { IndicatorHint } from "./indicator-hint.client"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 // THE ELEMENT'S REPUTATION IN Lagrix (step 436-3) — on the home page of «Links (A2A)» and on the node passport (478-1).
 //
@@ -66,7 +67,7 @@ const INDICATORS: Indicator[] = [
   { key: "unreviewed", Icon: MessageSquareDashedIcon, tone: "text-muted-foreground", unit: "sumUnit" },
 ]
 
-export function LagrixRating({ words, title, lead, marker, children, id, item }: {
+export function LagrixRating({ words, title, lead, marker, children, id, item, star }: {
   words: LagrixRatingWords
   title?: ReactNode
   lead?: ReactNode
@@ -75,6 +76,9 @@ export function LagrixRating({ words, title, lead, marker, children, id, item }:
   id?: string
   /** Accordion item value: the card collapses inside the caller's `Accordion` (495-5). */
   item?: string
+  /** 567-7 (owner 2026-10-22: «используй большую звёздочку … закрасить или не закрасить … перенеси подсказки»): the big star on the right
+   *  says whether the element is in the Web4 network — filled or empty, with the owner's words in a tooltip. Without it — the plain star. */
+  star?: { on: boolean; hint: string }
 }) {
   const body = (
       <CardContent className="flex flex-col gap-4">
@@ -129,7 +133,20 @@ export function LagrixRating({ words, title, lead, marker, children, id, item }:
         <CardTitle className="flex items-center gap-2 text-xl font-semibold">{marker}{title ?? words.title}</CardTitle>
         <CardDescription>{lead ?? words.lead}</CardDescription>
         <CardAction className="flex items-center gap-2">
-          <StarIcon role="img" aria-hidden className="size-6 text-primary" />
+          {star ? (
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="relative z-10 inline-flex" aria-label={star.hint} data-passport-web4={star.on ? "on" : "off"}>
+                    <StarIcon aria-hidden className={star.on ? "size-6 fill-primary text-primary" : "size-6 text-muted-foreground"} />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>{star.hint}</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <StarIcon role="img" aria-hidden className="size-6 text-primary" />
+          )}
           {item && <AccordionTrigger aria-label={words.toggle} className="py-0 after:absolute after:inset-0 after:content-['']" />}
         </CardAction>
       </CardHeader>

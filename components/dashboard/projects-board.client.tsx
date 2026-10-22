@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { Spinner } from "@/components/ui/spinner"
+import { Skeleton } from "@/components/ui/skeleton"
 import { TableTools } from "@/components/table/table-tools.client"
 import type { TableUi } from "@/sections/table.i18n"
 
@@ -61,10 +61,28 @@ export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang
   }, [lang])
 
   if (rows === "loading") {
+    // 567-7 (владелец 2026-10-22): «таблицу в виде скелетона 10 записей» — настоящие заголовки колонок и десять пустых строк.
     return (
-      <p className="my-6 inline-flex items-center gap-2 text-sm text-muted-foreground">
-        <Spinner /> {words.loading}
-      </p>
+      <figure className="overflow-x-auto rounded-2xl border border-border" role="status" aria-label={words.loading} data-projects-skeleton>
+        <table className="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-border">
+              {words.head.map((h) => (
+                <th key={h} scope="col" className="px-4 py-3 align-bottom font-semibold whitespace-nowrap text-foreground">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {Array.from({ length: 10 }, (_, i) => (
+              <tr key={i} className="border-b border-border last:border-0">
+                {words.head.map((h, j) => (
+                  <td key={h} className="px-4 py-3"><Skeleton className={j === 2 || j === 3 || j === 6 ? "h-4 w-48" : "h-4 w-16"} /></td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </figure>
     )
   }
   if (rows === "failed") return <p className="my-6 text-sm text-destructive" role="alert">{words.unavailable}</p>

@@ -2,12 +2,10 @@
 
 import { useEffect, useState } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { buttonVariants } from "@/components/ui/button"
 import { Card as UiCard, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Spinner } from "@/components/ui/spinner"
+import { Skeleton } from "@/components/ui/skeleton"
 import { LagrixRating, type LagrixRatingWords } from "@/components/element-docs/lagrix-rating"
 import { NodeWalletBody } from "@/components/wallet/node-wallet.client"
 import type { NodeWalletWords } from "@/components/wallet/node-wallet.i18n"
@@ -153,7 +151,22 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
         <NodeMode words={words.mode} lang={lang} />
         <Accordion type="single" collapsible defaultValue="node">{node}</Accordion>
         {cards === "loading" ? (
-          <p className="my-6 inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {words.loading}</p>
+          // 567-7 (владелец 2026-10-22): «скелетон … в виде карточки четыре штуки» — форма будущих карточек, пока узел отвечает.
+          <div role="status" aria-label={words.loading} data-passport-skeleton>
+            {[0, 1, 2, 3].map((i) => (
+              <UiCard key={i} className="my-4">
+                <CardHeader>
+                  <Skeleton className="h-3 w-24" />
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-6 w-40" />
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </div>
+                  <Skeleton className="h-4 w-3/4" />
+                  <CardAction><Skeleton className="size-6 rounded-full" /></CardAction>
+                </CardHeader>
+              </UiCard>
+            ))}
+          </div>
         ) : cards === "failed" ? (
           <p className="my-6 text-sm text-destructive" role="alert">{words.unavailable}</p>
         ) : (
@@ -183,22 +196,20 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
                 marker={dot}
                 title={<span className="flex flex-wrap items-center gap-2">
                   <a href={`${BASE}/${lang}${c.open}`} className="relative z-10 underline-offset-4 hover:underline" title={words.openElement}>{c.name}</a>
-                  {/* 567-5 (владелец 2026-10-22): «добавь к ним метку включён или выключен» — признак узла, не догадка. */}
-                  <Badge variant={c.off != null ? "outline" : "secondary"} className={c.off != null ? "text-muted-foreground" : undefined} data-passport-power={c.off != null ? "off" : "on"}>
+                  {/* 567-5 (владелец 2026-10-22): «добавь к ним метку включён или выключен» — признак узла, не догадка.
+                      567-7: «отличаются буквально одной буквой … для включённого … зелёным цветом а для выключенного … оранжевым». */}
+                  <Badge
+                    variant="outline"
+                    className={c.off != null
+                      ? "border-orange-500/50 bg-orange-500/15 text-orange-700 dark:text-orange-300"
+                      : "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}
+                    data-passport-power={c.off != null ? "off" : "on"}
+                  >
                     {c.off != null ? words.powerOff : words.powerOn}
                   </Badge>
-                  {/* 566 (владелец 2026-10-22): звёздочка — элемент в сети Web4 (паспорт `visibility: network`), подсказка — его слова. */}
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button" className="relative z-10 inline-flex" aria-label={c.web4 ? words.web4On : words.web4Off} data-passport-web4={c.web4 ? "on" : "off"}>
-                          <Star className={c.web4 ? "size-4 fill-primary text-primary" : "size-4 text-muted-foreground"} aria-hidden />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>{c.web4 ? words.web4On : words.web4Off}</TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
                 </span>}
+                // 566 → 567-7: Web4 — большая звезда справа (закрашена — в сети), подсказка — слова владельца; вторая звёздочка снята.
+                star={{ on: !!c.web4, hint: c.web4 ? words.web4On : words.web4Off }}
                 lead={<>
                   <span className="line-clamp-1">{c.lead ?? words.noDescription}</span>
                   {/* 567: выключенный элемент — с причиной. */}

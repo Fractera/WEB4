@@ -1,5 +1,5 @@
 import "server-only"
-import { spawnSync } from "node:child_process"
+import { execFile } from "node:child_process"
 import { existsSync, readFileSync } from "node:fs"
 import { join } from "node:path"
 
@@ -14,6 +14,7 @@ import paths from "@/lib/web4-items/paths.cjs"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"
 import power from "@/lib/web4-items/element-power.cjs"
 import web4 from "@/lib/web4-items/element-web4.cjs"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 
 // СТРОКИ ТАБЛИЦЫ «Dashboard → Проекты» (339). Слово владельца 2026-09-29: «В каждой строке: порядковый номер · служебный адрес ·
 // заголовок из мета · описание из мета · отдельно адрес если существует · выставлен на продажу в web3 · последний коммит ·
@@ -75,10 +76,28 @@ function serviceHost(id: string, d: NodeDomain | null): string {
   return id === "root" ? d.hostname ?? d.zone : `${name}.${d.zone}`
 }
 
-function git(dir: string, args: string[]): string | null {
-  if (!existsSync(join(dir, ".git"))) return null
-  const r = spawnSync("git", ["-C", dir, ...args], { encoding: "utf8", windowsHide: true, timeout: 10_000 })
-  return r.status === 0 ? r.stdout.trim() : null
+// 567-7: асинхронно — ✗ `spawnSync` держал сервер ядра: 2 вызова × 13 элементов подряд = 1,45 с, пока ни одна дверь не отвечала.
+function git(dir: string, args: string[]): Promise<string | null> {
+  if (!existsSync(join(dir, ".git"))) return Promise.resolve(null)
+  return new Promise((done) => {
+    execFile("git", ["-C", dir, ...args], { encoding: "utf8", windowsHide: true, timeout: 10_000 }, (err, out) => done(err ? null : String(out).trim()))
+  })
+}
+
+// 567-7: из главной нужны только `<title>` и описание — читается `<head>`, остальное не качается.
+// ✗ Замерено 2026-10-22: полные главные 13 элементов — 1,7 МБ (rtyhh — 780 КБ) ради двух строк.
+async function readHead(r: Response): Promise<string> {
+  const reader = r.body?.getReader()
+  if (!reader) return ""
+  const dec = new TextDecoder()
+  let html = ""
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    html += dec.decode(value, { stream: true })
+    if (/<\/head>/i.test(html) || html.length > 256_000) { await reader.cancel().catch(() => {}); break }
+  }
+  return html
 }
 
 function building(id: string): boolean {
@@ -105,8 +124,8 @@ async function probe(port: number, lang: string): Promise<{ up: boolean; title: 
     try {
       const r = await fetch(`http://127.0.0.1:${port}${path}`, { cache: "no-store", redirect: "follow", signal: AbortSignal.timeout(3000) })
       up = true
-      if (!r.ok || !(r.headers.get("content-type") ?? "").includes("text/html")) continue
-      const html = await r.text()
+      if (!r.ok || !(r.headers.get("content-type") ?? "").includes("text/html")) { await r.body?.cancel().catch(() => {}); continue }
+      const html = await readHead(r)
       const title = pick(html, /<title[^>]*>([^<]*)<\/title>/i)
       const description = pick(html, /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)
         ?? pick(html, /<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i)
@@ -117,33 +136,32 @@ async function probe(port: number, lang: string): Promise<{ up: boolean; title: 
 }
 
 /**
- * 417 (владелец 2026-10-06): короткое описание элемента в сводке узла — из его паспорта (`GET /api/own-service-props`,
- * `shortDescription`, рабочая природа элемента); паспорта нет или текст пуст — мета главной, как раньше.
+ * 417 (владелец 2026-10-06): короткое описание элемента в сводке узла — из его паспорта (`shortDescription`, рабочая природа
+ * элемента); паспорта нет или текст пуст — мета главной, как раньше.
+ * 567-7: паспорт читается с диска тем же читателем, что у всего ядра (`element-props.cjs`), а не дверью элемента
+ * `/api/own-service-props`. ✗ Замерено 2026-10-22: дверь отвечала 0,4–0,86 с у каждого элемента (7,4 с на узел), а её ответ совпал с
+ * файлом у всех 11 живых элементов. Заодно описание есть и у остановленного и выключенного элемента.
  */
-async function passportShort(port: number): Promise<{ short: string | null; native: boolean }> {
-  try {
-    const r = await fetch(`http://127.0.0.1:${port}/api/own-service-props`, { cache: "no-store", signal: AbortSignal.timeout(3000) })
-    if (!r.ok) return { short: null, native: false }
-    const b = (await r.json()) as { shortDescription?: unknown; elementType?: unknown }
-    const short = typeof b.shortDescription === "string" && b.shortDescription.trim() ? b.shortDescription.trim() : null
-    // 548-10: элемент из нативного шаблона — нативный, хотя и рождён из черновика (паспорт `elementType`, шаг 544).
-    return { short, native: b.elementType === "native" }
-  } catch {
-    return { short: null, native: false }
-  }
+export function diskPassport(entry: RegistryEntry): { short: string | null; native: boolean } {
+  const p = elementProps.readElementProps(paths.entryDir(entry)) as { shortDescription?: unknown; summary?: unknown; elementType?: unknown } | null
+  const raw = typeof p?.shortDescription === "string" ? p.shortDescription : typeof p?.summary === "string" ? p.summary : ""
+  // 548-10: элемент из нативного шаблона — нативный, хотя и рождён из черновика (паспорт `elementType`, шаг 544).
+  return { short: raw.trim() || null, native: p?.elementType === "native" }
 }
 
 async function row(id: string, entry: RegistryEntry | null, custom: boolean, lang: string, d: NodeDomain | null, role: string | null): Promise<ProjectRow> {
   const service = serviceHost(id, d)
   const own = domainRecord(id)
   const dir = entry ? (paths.entryDir(entry) as string) : null
-  const log = dir ? git(dir, ["log", "-1", "--format=%h%x09%cI%x09%s"]) : null
-  const [hash, date, subject] = log ? log.split("\t") : []
-  const count = dir ? git(dir, ["rev-list", "--count", "HEAD"]) : null
   const port = entry && typeof entry.port === "number" ? entry.port : null
   const off = entry ? power.offOf(entry) : null
-  const seen = port !== null && !off ? await probe(port, lang) : { up: false, title: null, description: null }
-  const passport = port !== null && seen.up ? await passportShort(port) : { short: null, native: false }
+  const [log, count, seen] = await Promise.all([
+    dir ? git(dir, ["log", "-1", "--format=%h%x09%cI%x09%s"]) : null,
+    dir ? git(dir, ["rev-list", "--count", "HEAD"]) : null,
+    port !== null && !off ? probe(port, lang) : { up: false, title: null, description: null },
+  ])
+  const [hash, date, subject] = log ? log.split("\t") : []
+  const passport = entry ? diskPassport(entry) : { short: null, native: false }
   const status: ProjectStatus = building(id) ? "building" : !entry ? "unborn" : off ? "off" : seen.up ? "running" : "stopped"
   return {
     id,
@@ -198,7 +216,7 @@ async function catalogProbe(port: number, lang: string): Promise<{ up: boolean; 
   try {
     const r = await fetch(`http://127.0.0.1:${port}/${lang}`, { cache: "no-store", redirect: "follow", signal: AbortSignal.timeout(10_000) })
     if (r.ok && (r.headers.get("content-type") ?? "").includes("text/html")) {
-      const html = await r.text()
+      const html = await readHead(r)
       const description = pick(html, /<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)
         ?? pick(html, /<meta[^>]+content=["']([^"']*)["'][^>]+name=["']description["']/i)
       return { up: true, title: pick(html, /<title[^>]*>([^<]*)<\/title>/i), description }
@@ -222,7 +240,7 @@ async function catalogEntry(id: string, entry: RegistryEntry, custom: boolean, l
   if (port === null) return null
   const seen = await catalogProbe(port, lang)
   if (!seen.up) return null
-  const passport = await passportShort(port)
+  const passport = diskPassport(entry)
   const own = domainRecord(id)
   const title = (seen.title ?? "").replace(BRAND_TAIL, "").trim() || addressOf(id)
   return {
