@@ -37,6 +37,8 @@ export function installMainAgent(root) {
   // 569-3: встроенные инструменты Claude Code главного агента — только те, которыми он работает (команды, свои файлы, навыки); мост читает
   // этот файл (`lib/agent-kit/modes.cjs` `launchTools`). Замер: первый запрос 18 104 → 12 786 токенов. PowerShell есть только на Windows.
   writeFileSync(join(dst, '.claude', 'launch-tools.txt'), `${process.platform === 'win32' ? 'Bash,PowerShell,Read,Write,Edit,Skill' : 'Bash,Read,Write,Edit,Skill'}\n`, 'utf8')
+  // 570 (закон владельца 2026-10-22, выбор «Sonnet — он пишет текст»): главный агент направляет и отвечает, код строят элементы.
+  writeFileSync(join(dst, '.claude', 'launch-model.txt'), 'sonnet\n', 'utf8')
   // Свой корень репозитория: навыки корня узла выше него не грузятся.
   if (!existsSync(join(dst, '.git'))) {
     const r = spawnSync('git', ['init', '-q'], { cwd: dst, encoding: 'utf8', windowsHide: true })

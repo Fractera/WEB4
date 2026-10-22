@@ -167,6 +167,9 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // интерактивном режиме берёт его первым, когда готов, — момент готовности не угадывается. Многострочный текст с кавычками и
   // кириллицей доходит через node-pty байт в байт (замерено тем же днём).
   // 551-7: поручение, начатое с «-», `claude` прочёл бы флагом — пробел впереди оставляет его текстом.
+  // 570: модель по роду работы (`lib/agent-kit/modes.cjs` `launchModel`) — один флаг с одним значением, до поручения.
+  const model = typeof modes.launchModel === 'function' ? modes.launchModel(cwd, mode) : null
+  if (model) args = [...args, '--model', model]
   if (firstPrompt) args = [...args, firstPrompt.startsWith('-') ? ` ${firstPrompt}` : firstPrompt]
   let child
   try {
