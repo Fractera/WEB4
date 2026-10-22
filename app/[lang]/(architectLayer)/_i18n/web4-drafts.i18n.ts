@@ -6,6 +6,8 @@ export type Web4DraftsUi = {
   /** 327: подписи зон левого меню. */
   zoneNative: string
   zoneCustom: string
+  /** 560-2: группа встроенных элементов памяти. */
+  memoryGroup: string
   creating: string
   createFailed: string
   draftBadge: string
@@ -71,6 +73,7 @@ const DICT: Record<string, Web4DraftsUi> = {
     createFailed: "The WEB4 ITEM was not created: the node could not write the draft.",
     zoneNative: "Native items",
     zoneCustom: "Custom items",
+    memoryGroup: "Memory",
     draftBadge: "Draft",
     sectionPages: "Pages of this section",
     aboutSummary: "More about this",
@@ -126,6 +129,7 @@ const DICT: Record<string, Web4DraftsUi> = {
     createFailed: "WEB4 ITEM не создан: узел не смог записать черновик.",
     zoneNative: "Встроенные элементы",
     zoneCustom: "Свои элементы",
+    memoryGroup: "Память",
     draftBadge: "Черновик",
     sectionPages: "Страницы раздела",
     aboutSummary: "Подробнее",

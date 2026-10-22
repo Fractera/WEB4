@@ -255,12 +255,19 @@ export function WorkspaceShell({
             стрелка рядом остаётся переключателем в обоих случаях. */}
         {/* 553: свёрнутая зона прячет свои пункты чистым CSS (`:has` по флажку в подписи зоны) — без JavaScript, как и раскрывашки ниже. */}
         {menu.some((m) => m.zoneHead) && (
-          <style>{menu.filter((m) => m.zoneHead).map((m) => `[data-workspace-menu] ul:has(input[data-zone-toggle="${m.zoneHead!.id}"]:not(:checked)) > li[data-zone="${m.zoneHead!.id}"]{display:none}`).join('')}</style>
+          <style>{menu.filter((m) => m.zoneHead).map((m) => `[data-workspace-menu] ul:has(input[data-zone-toggle="${m.zoneHead!.id}"]:not(:checked)) > li[data-zone~="${m.zoneHead!.id}"]{display:none}`).join('')}</style>
         )}
         <ul className="flex flex-col gap-1">
           {menu.map((item, i) => (
-            <li key={`${id}-m-${i}`} data-zone={item.zone}>
-              {item.zoneHead ? (
+            <li key={`${id}-m-${i}`} data-zone={item.zone} className={item.zone?.includes(' ') ? 'pl-3' : undefined}>
+              {item.zoneHead?.item ? (
+                // 560-2: подзона-пункт («Память»): значок, подпись и стрелка, как у раскрывающейся группы; флажок тот же, что у зоны.
+                <label className="flex cursor-pointer items-center justify-between gap-2 rounded-md px-[9px] py-2 text-[length:var(--fs-body)] text-muted-foreground transition-colors hover:bg-muted/60 hover:text-foreground [&:has(input:checked)_svg.chevron]:rotate-180" data-menu-zone={item.zoneHead.id}>
+                  <span className="flex min-w-0 items-center gap-2"><MenuIcon name={item.icon} /><span className="truncate">{item.label}</span></span>
+                  <input type="checkbox" className="peer sr-only" data-zone-toggle={item.zoneHead.id} defaultChecked={item.zoneHead.open} aria-label={item.label} />
+                  <ChevronDown size={14} aria-hidden className="chevron shrink-0 transition-transform duration-200" />
+                </label>
+              ) : item.zoneHead ? (
                 <label className="mt-2 flex cursor-pointer items-center justify-between gap-2 border-t border-border px-[9px] pt-2 text-[length:var(--fs-small)] text-muted-foreground transition-colors hover:text-foreground [&:has(input:checked)_svg]:rotate-180" data-menu-zone={item.zoneHead.id}>
                   <span>{item.label}</span>
                   <input type="checkbox" className="peer sr-only" data-zone-toggle={item.zoneHead.id} defaultChecked={item.zoneHead.open} aria-label={item.label} />

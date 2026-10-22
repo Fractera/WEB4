@@ -5,33 +5,35 @@ import type { WorkspacePageData, CollectionBranch } from '@/lib/collection/types
 import { data as p0 } from './auth/_data'
 import { data as p1 } from './blocks/_data'
 import { data as p2 } from './build/_data'
-import { data as p3 } from './config/_data'
-import { data as p4 } from './dashboard/_data'
-import { data as p5 } from './data/_data'
-import { data as p6 } from './design/_data'
-import { data as p7 } from './graph/_data'
-import { data as p8 } from './hosting/_data'
-import { data as p9 } from './passport/_data'
-import { data as p10 } from './root/_data'
-import { data as p11 } from './storage/_data'
-import { data as p12 } from './super-node/_data'
-import { data as p13 } from './vectors/_data'
+import { data as p3 } from './cache/_data'
+import { data as p4 } from './config/_data'
+import { data as p5 } from './dashboard/_data'
+import { data as p6 } from './data/_data'
+import { data as p7 } from './design/_data'
+import { data as p8 } from './graph/_data'
+import { data as p9 } from './hosting/_data'
+import { data as p10 } from './passport/_data'
+import { data as p11 } from './root/_data'
+import { data as p12 } from './storage/_data'
+import { data as p13 } from './super-node/_data'
+import { data as p14 } from './vectors/_data'
 import { PAGES as c0, TREE as t0 } from './auth/_list.generated'
 import { PAGES as c1, TREE as t1 } from './blocks/_list.generated'
 import { PAGES as c2, TREE as t2 } from './build/_list.generated'
-import { PAGES as c3, TREE as t3 } from './config/_list.generated'
-import { PAGES as c4, TREE as t4 } from './dashboard/_list.generated'
-import { PAGES as c5, TREE as t5 } from './data/_list.generated'
-import { PAGES as c6, TREE as t6 } from './design/_list.generated'
-import { PAGES as c7, TREE as t7 } from './graph/_list.generated'
-import { PAGES as c8, TREE as t8 } from './hosting/_list.generated'
-import { PAGES as c9, TREE as t9 } from './passport/_list.generated'
-import { PAGES as c10, TREE as t10 } from './root/_list.generated'
-import { PAGES as c11, TREE as t11 } from './storage/_list.generated'
-import { PAGES as c12, TREE as t12 } from './super-node/_list.generated'
-import { PAGES as c13, TREE as t13 } from './vectors/_list.generated'
+import { PAGES as c3, TREE as t3 } from './cache/_list.generated'
+import { PAGES as c4, TREE as t4 } from './config/_list.generated'
+import { PAGES as c5, TREE as t5 } from './dashboard/_list.generated'
+import { PAGES as c6, TREE as t6 } from './data/_list.generated'
+import { PAGES as c7, TREE as t7 } from './design/_list.generated'
+import { PAGES as c8, TREE as t8 } from './graph/_list.generated'
+import { PAGES as c9, TREE as t9 } from './hosting/_list.generated'
+import { PAGES as c10, TREE as t10 } from './passport/_list.generated'
+import { PAGES as c11, TREE as t11 } from './root/_list.generated'
+import { PAGES as c12, TREE as t12 } from './storage/_list.generated'
+import { PAGES as c13, TREE as t13 } from './super-node/_list.generated'
+import { PAGES as c14, TREE as t14 } from './vectors/_list.generated'
 
-export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13]
+export const PAGES: WorkspacePageData[] = [p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14]
 
 /** Each child together with its own children — see the law in the generator. */
 export const TREE: CollectionBranch[] = [
@@ -49,4 +51,5 @@ export const TREE: CollectionBranch[] = [
   { page: p11, children: c11, branches: t11 },
   { page: p12, children: c12, branches: t12 },
   { page: p13, children: c13, branches: t13 },
+  { page: p14, children: c14, branches: t14 },
 ]

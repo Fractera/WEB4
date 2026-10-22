@@ -1,6 +1,6 @@
 import {
   AppWindow, Blocks, Bot, Box, Clock, Database, LayoutDashboard, FlaskConical, Hammer, House, IdCard, KeyRound, LayoutTemplate, Package, Palette,
-  HardDrive, Network, Plus, ScanSearch, Server, Settings, SlidersHorizontal, Store, ToggleRight, Wrench,
+  HardDrive, MemoryStick, Network, Plus, ScanSearch, Zap, Server, Settings, SlidersHorizontal, Store, ToggleRight, Wrench,
 } from 'lucide-react'
 
 // ЗНАЧКИ ЛЕВОГО МЕНЮ (шаг 288-2). Слово владельца 2026-09-24: «Слева от кнопок нужно нарисовать иконке … для корня
@@ -40,6 +40,9 @@ const ICONS = {
   // 550: элементы «Хранилище» (файлы) и «Векторы» (поиск по смыслу) — части слоя данных.
   drive: HardDrive,
   scan: ScanSearch,
+  // 560: группа «Память» (пять элементов слоя данных) и элемент «Быстрое хранилище» (cache).
+  memory: MemoryStick,
+  zap: Zap,
 } as const
 
 export type MenuIconName = keyof typeof ICONS

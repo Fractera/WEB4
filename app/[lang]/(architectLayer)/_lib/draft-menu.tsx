@@ -5,7 +5,7 @@ import { addressOf } from '@/lib/web4-items/element-address'
 import { ITEM_TREE, treeLang, treeVisible, type TreePage } from '@/lib/web4-items/item-tree'
 import { elementPassport, hasCatalog, isNativeElement } from '@/lib/a2a/element-passport'
 import { treeContextOf } from '@/lib/web4-items/tree-context'
-import { BUILT_IN_STATIC, builtInIds } from '@/lib/web4-items/built-in-elements'
+import { BUILT_IN_STATIC, MEMORY_GROUP, builtInIds } from '@/lib/web4-items/built-in-elements'
 import { hasDoc } from '@/lib/web4-items/element-docs'
 import { web4DraftsUi } from '../_i18n/web4-drafts.i18n'
 import { CreateDraftButton } from '../_components/create-draft-button.client'
@@ -112,5 +112,17 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
   // Зона «Нативные» — от «Ядра» до подписи «Кастомные».
   const end = withCustom.findIndex((m) => m.zoneHead?.id === 'custom')
   const nativeZone = withCustom.slice(c + 1, end)
-  return [...withCustom.slice(0, c + 1), zone(ui.zoneNative, 'native', holds(nativeZone, page)), ...inZone(nativeZone, 'native'), ...withCustom.slice(end)]
+  // 560-2: элементы памяти — подзона «Память» на месте первого из них; их пункты остаются первым уровнем (глубина деревьев не теряется).
+  const memHref = new Map(MEMORY_GROUP.map((id, k) => [at(`${ARCHITECT_HOME}/${addressOf(id)}`), k] as const))
+  const memory = nativeZone.filter((m) => m.href && memHref.has(m.href)).sort((a, b) => memHref.get(a.href!)! - memHref.get(b.href!)!)
+  const first = nativeZone.findIndex((m) => m.href && memHref.has(m.href))
+  const rest = nativeZone.filter((m) => !(m.href && memHref.has(m.href)))
+  const memoryOpen = holds(memory, page)
+  const grouped = memory.length === 0 ? inZone(nativeZone, 'native') : [
+    ...inZone(rest.slice(0, first), 'native'),
+    { label: ui.memoryGroup, icon: 'memory', zone: 'native', zoneHead: { id: 'memory', open: memoryOpen, item: true } },
+    ...inZone(memory, 'native memory'),
+    ...inZone(rest.slice(first), 'native'),
+  ]
+  return [...withCustom.slice(0, c + 1), zone(ui.zoneNative, 'native', holds(nativeZone, page)), ...grouped, ...withCustom.slice(end)]
 }
