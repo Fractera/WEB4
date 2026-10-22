@@ -30,6 +30,8 @@ import { elementDir } from '@/lib/web4-items/element-github'
 import { elementVersions } from '@/lib/web4-items/element-versions'
 import type { Block } from '@/lib/content/blocks/types'
 import { ElementDangerZone } from '../../../_components/element-danger-zone'
+import { ElementPower } from '../../../_components/element-power.client'
+import power from '@/lib/web4-items/element-power.cjs'
 import { DeleteElementButton } from '../../../_components/delete-element-button.client'
 import { elementSettingsUi } from '../../../_i18n/element-settings.i18n'
 import { ElementDescribe } from '../../../_components/element-describe.client'
@@ -385,6 +387,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
           config: <ElementLink id={item} kind="config" on={readLinks(item).config} ui={sui} />,
           design: <ElementLink id={item} kind="design" on={readLinks(item).design} ui={sui} />,
           blocks: <ElementLink id={item} kind="blocks" on={readLinks(item).blocks} ui={sui} />,
+          // 567: включение элемента — признак «выключен» в реестре узла (кнопка — выбор владельца 2026-10-22).
+          power: <ElementPower id={item} lang={lang} ui={sui} dialogUi={appDialogUi(lang)} initial={(() => { const off = power.offOf(entry); return { on: !off, reason: off ? power.reasonIn(off, lang) : null, byDefault: Boolean(off?.byDefault) } })()} />,
           remove: <DeleteElementButton lang={lang} id={item} address={address} ui={sui} dialogUi={appDialogUi(lang)} />,
         }} />
       : <p className="my-4 text-sm text-muted-foreground">{sui.notBorn}</p>)
@@ -519,6 +523,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 559: «Пользователи» элемента входа — все люди узла; таблицу спрашивает островок у двери ядра `/api/node/users`.
   const users = key === 'users' ? <NodeUsers lang={lang} ui={nodeUsersUi(lang)} table={tableUi(lang)} dialogUi={appDialogUi(lang)} /> : null
 
+  // 567: выключенный элемент — плашка на каждой его странице: страницы, Preview и двери молчат намеренно, а не сломаны.
+  const offNow = entry ? power.offOf(entry) : null
+  const offNote = offNow ? (
+    <div role="status" className="my-4 rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground ring-1 ring-warning/50" data-element-off>
+      <span className="font-semibold">{sui.powerDialog.stateOff}</span> {power.reasonIn(offNow, lang)} · {sui.power.title}: <a className="underline" href={`/${lang}/architect/${address}/settings/danger-zone`}>{sui.badge}</a>
+    </div>
+  ) : null
   return (
     <ArchitectPage
       lang={lang}
@@ -526,7 +537,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
       title={words.title}
       lead={words.lead}
       pageTitle={address}
-      widget={<>{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}{backupSettings}{users}</>}
+      widget={<>{offNote}{bar}{lagrix}{about}{list}{preview}{github}{deployPanel}{copyNote}{deploymentsNote}{environment}{domainSettings}{settings}{siteSettings}{agent}{passport}{capabilities}{doc}{orders}{messengerSettings}{payments}{productQuiz}{reverseEngineering}{backupSettings}{users}</>}
       children={[...dashboardBlocks, ...tables]}
     />
   )

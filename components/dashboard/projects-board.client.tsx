@@ -9,7 +9,7 @@ import type { TableUi } from "@/sections/table.i18n"
 // открытии (опроса нет: его не заказывали). Таблица — стандартная `TableTools`: поиск сверху, страницы снизу, горизонтальная
 // прокрутка; над ней два чекбокса «нативные» и «кастомные». Поиск идёт по служебному адресу, своему домену, заголовку и описанию.
 
-type Status = "running" | "stopped" | "building" | "unborn"
+type Status = "running" | "stopped" | "building" | "unborn" | "off"
 type Row = {
   id: string
   custom: boolean
@@ -19,6 +19,7 @@ type Row = {
   domain: string | null
   commit: { hash: string; subject: string } | null
   status: Status
+  offReason?: string | null
   date: string | null
   commits: number | null
   link: string | null
@@ -43,6 +44,7 @@ const TONE: Record<Status, string> = {
   stopped: "text-destructive",
   building: "text-primary",
   unborn: "text-muted-foreground",
+  off: "text-muted-foreground",
 }
 
 export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang: string }) {
@@ -85,7 +87,11 @@ export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang
       <td className={cell}>{r.domain ?? DASH}</td>
       <td className={cell}>{DASH}</td>
       <td className={wide}>{r.commit ? <><code className="text-foreground">{r.commit.hash}</code> {r.commit.subject}</> : DASH}</td>
-      <td className={`${cell} ${TONE[r.status]}`} data-status={r.status}>{words.status[r.status]}</td>
+      <td className={`${cell} ${TONE[r.status]}`} data-status={r.status}>
+        {words.status[r.status]}
+        {/* 567: выключенный — с причиной, чтобы «не работает» не читалось как поломка. */}
+        {r.status === "off" && r.offReason ? <span className="block text-xs">{r.offReason}</span> : null}
+      </td>
       <td className={cell}>{r.date ? new Date(r.date).toLocaleString(lang) : DASH}</td>
       <td className={cell}>{r.commits ?? DASH}</td>
       <td className={cell}>{r.link ? <a className={link} href={r.link} rel="noopener noreferrer" target="_blank">{r.link.replace(/^https?:\/\//, "")}</a> : DASH}</td>

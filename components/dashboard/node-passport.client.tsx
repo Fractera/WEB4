@@ -33,6 +33,7 @@ type Card = {
   described: boolean
   open: string
   generate: string | null
+  off?: string | null
   reputation: null
 }
 
@@ -55,6 +56,8 @@ export type NodePassportWords = {
   fullDescription: string
   provides: string
   openElement: string
+  /** 567: «Выключен:» перед причиной. */
+  off: string
   wallet: NodeWalletWords
   /** 553-9 → 564: карточка режима узла — название, описание текущего режима, общее для обоих, где сменить. */
   mode: { label: string; project: string; factory: string; byDefault: string; projectText: string; factoryText: string; both: string; chosen: string; change: string }
@@ -169,7 +172,11 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
                 words={kind}
                 marker={dot}
                 title={<a href={`${BASE}/${lang}${c.open}`} className="relative z-10 underline-offset-4 hover:underline" title={words.openElement}>{c.name}</a>}
-                lead={<span className="line-clamp-1">{c.lead ?? words.noDescription}</span>}
+                lead={<>
+                  <span className="line-clamp-1">{c.lead ?? words.noDescription}</span>
+                  {/* 567: выключенный элемент — с причиной. */}
+                  {c.off != null ? <span className="block text-sm font-medium text-muted-foreground" data-passport-off>{words.off} {c.off}</span> : null}
+                </>}
               >
                 {c.described && c.summary ? (
                   <Accordion type="single" collapsible>

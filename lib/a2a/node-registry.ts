@@ -6,6 +6,7 @@ import { listServices, serviceUrl } from "@/lib/microservices/registry"
 import { fingerprintOf, messengersOf, passportProblems, registryEntryOf } from "@/lib/a2a/passport.mjs"
 import { addressOf } from "@/lib/web4-items/address-file.mjs"
 import elementProps from "@/lib/web4-items/element-props.cjs"
+import power from "@/lib/web4-items/element-power.cjs"
 
 // РЕЕСТР A2A УЗЛА — ЯДРО КАК ЦЕНТР ОБНАРУЖЕНИЯ (шаг 406-6; владелец 2026-10-05: «центр … это будет ядро»; вызов — напрямую,
 // ядро подсказывает адрес). Запись элемента (уровень 1) выводится из его визитки и пишется в реестр при `describe:publish`
@@ -47,7 +48,9 @@ export function entryForRegistry(id: string, kind: string): Entry | null {
 /** Все элементы узла с их записями и состоянием свежести. */
 export function nodeEntries(): NodeEntry[] {
   const out: NodeEntry[] = []
-  for (const s of listServices() as unknown as { id: string; kind?: string; a2a?: Entry }[]) {
+  for (const s of listServices() as unknown as { id: string; kind?: string; a2a?: Entry; off?: unknown }[]) {
+    // 567: выключенный элемент соседям не предлагается — его порт молчит намеренно.
+    if (power.isOff(s)) continue
     const kind = s.kind === "user" ? "user" : "core"
     const live = readPassport(s.id, kind)
     const url = serviceUrl(s.id)

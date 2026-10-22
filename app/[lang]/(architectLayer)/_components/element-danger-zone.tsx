@@ -11,10 +11,11 @@ import type { ElementSettingsUi } from '../_i18n/element-settings.i18n'
 // Удаление — в тоне предупреждения: это единственное необратимое действие страницы.
 
 // 324-7: три связи с узлом (CONFIG, Дизайн, Блоки) — по карточке на связь, перед удалением.
-type Key = 'describe' | 'address' | 'mirror' | 'signIn' | 'config' | 'design' | 'blocks' | 'remove'
+// 567: «Включение элемента» — признак узла «выключен», перед удалением.
+type Key = 'describe' | 'address' | 'mirror' | 'signIn' | 'config' | 'design' | 'blocks' | 'power' | 'remove'
 
 // 443-5: «Главное зеркало» и «Адрес элемента» живут на странице «Настройки → Домен» — та же сетка карточек, без метки опасности.
-export function ElementDangerZone({ ui, actions = {}, cards = ['describe', 'config', 'design', 'blocks', 'remove'], badge = true }: {
+export function ElementDangerZone({ ui, actions = {}, cards = ['describe', 'config', 'design', 'blocks', 'power', 'remove'], badge = true }: {
   ui: ElementSettingsUi; actions?: Partial<Record<Key, ReactNode>>; cards?: Key[]; badge?: boolean
 }) {
   return (

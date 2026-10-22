@@ -22,6 +22,7 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     fullDescription: 'Full description',
     provides: 'What it provides',
     openElement: 'Open the element',
+    off: 'Turned off:',
     mode: {
       label: 'Node mode',
       project: 'Single project',
@@ -50,6 +51,7 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     fullDescription: 'Полное описание',
     provides: 'Что он даёт',
     openElement: 'Открыть элемент',
+    off: 'Выключен:',
     mode: {
       label: 'Режим узла',
       project: 'Единый проект',

@@ -12,6 +12,7 @@ import { domainRecord } from "@/lib/web4-items/element-domain"
 import { birthState } from "@/lib/web4-items/birth"
 import paths from "@/lib/web4-items/paths.cjs"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"
+import power from "@/lib/web4-items/element-power.cjs"
 
 // СТРОКИ ТАБЛИЦЫ «Dashboard → Проекты» (339). Слово владельца 2026-09-29: «В каждой строке: порядковый номер · служебный адрес ·
 // заголовок из мета · описание из мета · отдельно адрес если существует · выставлен на продажу в web3 · последний коммит ·
@@ -22,7 +23,8 @@ import deployLock from "@/lib/deploy/deploy-lock.cjs"
 // 🔒 «НАТИВНЫЕ» И «КАСТОМНЫЕ» ДЕЛЯТСЯ ТАК ЖЕ, КАК ЛЕВОЕ МЕНЮ (`_lib/draft-menu.tsx`): кастомные — черновики узла, остальное — нативные.
 // 🛑 web3 и «онлайн» — источника в узле нет; поле `null` = «не знаю», а не «нет» (решение владельца 2026-09-30: колонки с «—»).
 
-export type ProjectStatus = "running" | "stopped" | "building" | "unborn"
+// 567: «off» — человек выключил элемент (или он пришёл выключенным по паспорту): процесса нет намеренно, порт не опрашивается.
+export type ProjectStatus = "running" | "stopped" | "building" | "unborn" | "off"
 
 export type ProjectRow = {
   id: string
@@ -36,6 +38,8 @@ export type ProjectRow = {
   web3: null
   commit: { hash: string; subject: string } | null
   status: ProjectStatus
+  /** 567: причина выключения на языке страницы, если `status === "off"`. */
+  offReason: string | null
   /** Дата последнего коммита, ISO. */
   date: string | null
   commits: number | null
@@ -134,9 +138,10 @@ async function row(id: string, entry: RegistryEntry | null, custom: boolean, lan
   const [hash, date, subject] = log ? log.split("\t") : []
   const count = dir ? git(dir, ["rev-list", "--count", "HEAD"]) : null
   const port = entry && typeof entry.port === "number" ? entry.port : null
-  const seen = port !== null ? await probe(port, lang) : { up: false, title: null, description: null }
+  const off = entry ? power.offOf(entry) : null
+  const seen = port !== null && !off ? await probe(port, lang) : { up: false, title: null, description: null }
   const passport = port !== null && seen.up ? await passportShort(port) : { short: null, native: false }
-  const status: ProjectStatus = building(id) ? "building" : !entry ? "unborn" : seen.up ? "running" : "stopped"
+  const status: ProjectStatus = building(id) ? "building" : !entry ? "unborn" : off ? "off" : seen.up ? "running" : "stopped"
   return {
     id,
     custom: custom && !passport.native,
@@ -147,6 +152,7 @@ async function row(id: string, entry: RegistryEntry | null, custom: boolean, lan
     web3: null,
     commit: hash ? { hash, subject: subject ?? "" } : null,
     status,
+    offReason: off ? power.reasonIn(off, lang) : null,
     date: date ?? null,
     commits: count && /^\d+$/.test(count) ? Number(count) : null,
     link: own ? `https://${own.domain}` : d?.zone ? `https://${service}` : null,

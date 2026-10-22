@@ -31,6 +31,8 @@ export type PassportCard = {
   open: string
   /** Терминал элемента с задачей «опиши себя»; у нерождённого черновика — `null`. */
   generate: string | null
+  /** 567: причина, если элемент выключен (признак узла); включён — `null`. */
+  off: string | null
   reputation: null
 }
 
@@ -51,6 +53,7 @@ export async function passportCards(lang: string): Promise<PassportCard[]> {
       described: d !== null,
       open: r.open,
       generate: born.has(r.id) ? terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK }) : null,
+      off: r.status === "off" ? r.offReason ?? "" : null,
       reputation: null,
     }
   })

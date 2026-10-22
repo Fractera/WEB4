@@ -26,6 +26,9 @@ export type ElementSettingsUi = {
   linkCard: { on: string; off: string; turnOn: string; turnOff: string; busy: string; failed: string }
   remove: Card
   removeDialog: { title: string; text: string; label: string; confirm: string; deleting: string; cancel: string; mismatch: string; failed: string; riskNever: string; riskAhead: string; riskNone: string }
+  /** 567: включение элемента — признак узла «выключен» с причиной. */
+  power: Card
+  powerDialog: { stateOn: string; stateOff: string; stateOffDefault: string; turnOn: string; turnOff: string; onTitle: string; onText: string; offTitle: string; offText: string; reasonLabel: string; reasonPlaceholder: string; working: string; cancel: string; failed: string }
 }
 
 const DICT: Record<string, ElementSettingsUi> = {
@@ -167,6 +170,28 @@ const DICT: Record<string, ElementSettingsUi> = {
       text: "Connect your own second domain to the root of this element; the current subdomain then redirects to it.",
       action: "Connect the main mirror",
       pending: "Planned (step 324).",
+    },
+    power: {
+      title: "Element power",
+      text: "A turned-off element stays in the node: in the menu, the Passport and the projects list. Its process does not run, it takes no memory, and neighbours do not offer it work. Some elements arrive turned off on purpose.",
+      action: "Turn off",
+      pending: "",
+    },
+    powerDialog: {
+      stateOn: "On: the element runs.",
+      stateOff: "Off:",
+      stateOffDefault: "Arrived turned off:",
+      turnOn: "Turn on",
+      turnOff: "Turn off",
+      onTitle: "Turn the element on?",
+      onText: "The node starts its process and its watcher and waits up to a minute for it to answer. It takes memory again, and its pages and doors work again.",
+      offTitle: "Turn the element off?",
+      offText: "Its process and watcher stop and do not start again with the node, its site stops answering on this computer, and neighbours stop offering it work. Its code, data and settings stay. Say why — you will see the reason in the core.",
+      reasonLabel: "Reason",
+      reasonPlaceholder: "For example: payments are not built yet",
+      working: "Working…",
+      cancel: "Cancel",
+      failed: "Did not work:",
     },
     remove: {
       title: "Delete the element",
@@ -326,6 +351,28 @@ const DICT: Record<string, ElementSettingsUi> = {
       text: "Подключить второй собственный домен к корню этого элемента; текущий поддомен будет переадресовывать на него.",
       action: "Подключить главное зеркало",
       pending: "Запланировано (шаг 324).",
+    },
+    power: {
+      title: "Включение элемента",
+      text: "Выключенный элемент остаётся в узле: в меню, в Паспорте и в списке проектов. Его процесс не запускается, память он не занимает, соседи не предлагают ему работу. Некоторые элементы приходят выключенными намеренно.",
+      action: "Выключить",
+      pending: "",
+    },
+    powerDialog: {
+      stateOn: "Включён: элемент работает.",
+      stateOff: "Выключен:",
+      stateOffDefault: "Пришёл выключенным:",
+      turnOn: "Включить",
+      turnOff: "Выключить",
+      onTitle: "Включить элемент?",
+      onText: "Узел запустит его процесс и сторожа и подождёт ответа до минуты. Элемент снова займёт память, его страницы и двери снова заработают.",
+      offTitle: "Выключить элемент?",
+      offText: "Его процесс и сторож остановятся и не будут запускаться вместе с узлом, его сайт перестанет отвечать на этом компьютере, соседи перестанут предлагать ему работу. Код, данные и настройки остаются. Напишите причину — вы увидите её в ядре.",
+      reasonLabel: "Причина",
+      reasonPlaceholder: "Например: приём оплаты ещё не построен",
+      working: "Выполняю…",
+      cancel: "Отмена",
+      failed: "Не получилось:",
     },
     remove: {
       title: "Удалить элемент",

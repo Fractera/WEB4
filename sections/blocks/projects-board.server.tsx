@@ -10,7 +10,7 @@ const WORDS: Record<string, Omit<ProjectsBoardWords, 'table'>> = {
     native: 'Show native WEB4 ITEMS',
     custom: 'Show custom WEB4 ITEMS',
     head: ['#', 'Service address', 'Meta title', 'Meta description', 'Own domain', 'For sale in web3', 'Last commit', 'Status', 'Date', 'Commits', 'Link', 'Open', 'Users online'],
-    status: { running: 'running', stopped: 'stopped', building: 'building', unborn: 'not born yet' },
+    status: { running: 'running', stopped: 'stopped', building: 'building', unborn: 'not born yet', off: 'turned off' },
     openLabel: 'Open',
   },
   ru: {
@@ -19,7 +19,7 @@ const WORDS: Record<string, Omit<ProjectsBoardWords, 'table'>> = {
     native: 'Показывать нативные WEB4 ITEMS',
     custom: 'Показывать кастомные WEB4 ITEMS',
     head: ['№', 'Служебный адрес', 'Заголовок из мета', 'Описание из мета', 'Свой домен', 'На продаже в web3', 'Последний коммит', 'Статус', 'Дата', 'Коммитов', 'Ссылка', 'Открыть', 'Пользователи онлайн'],
-    status: { running: 'работает', stopped: 'остановлен', building: 'идёт сборка', unborn: 'ещё не рождён' },
+    status: { running: 'работает', stopped: 'остановлен', building: 'идёт сборка', unborn: 'ещё не рождён', off: 'выключен' },
     openLabel: 'Открыть',
   },
 }
