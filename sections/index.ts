@@ -18,6 +18,7 @@ import { dialogSample } from './blocks/dialog-sample.server'
 import { separator } from './blocks/separator.server'
 import { deployBoard } from './blocks/deploy-board.server'
 import { projectsBoard } from './blocks/projects-board.server'
+import { machineBoard } from './blocks/machine-board.server'
 import { nodePassport } from './blocks/node-passport.server'
 import { a2aFeed } from './blocks/a2a-feed.server'
 import { elementPreview } from './blocks/element-preview.server'
@@ -85,5 +86,5 @@ import { chat } from './blocks/chat.server'
 // и лежат по файлу на вид. Разбор того сценария сохранён в `SECTIONS.md`, чтобы
 // следующая сессия не проектировала его заново.
 export const SECTIONS: SectionSet = {
-  p, h2, h3, h4, h5, quote, list, olist, figure, code, note, cta, callout, table, docref, founder, columns, group, heroBadge, heroSplit, badges, panel, metrics, flow, personaCases, problemSolution, cards, card, statement, invite, noBill, faq, toc, languageMarquee, projectTypeMarquee, voiceField, workspace, accordion, accordionItem, benefitCards, splitPair, logoCards, carousel, support, showcaseCarousel, featureGrid, promoBand, priceTable, spotlightPair, platformGrid, chartArea, chartBar, chartLine, chartPie, chartRadar, chartRadial, chartTooltip, orbitLayers, chat, domainLadder, servicePort, designSection, deployBoard, projectsBoard, nodePassport, a2aFeed, elementPreview, authGoogleSetup, authResendSetup, dialogSample, separator,
+  p, h2, h3, h4, h5, quote, list, olist, figure, code, note, cta, callout, table, docref, founder, columns, group, heroBadge, heroSplit, badges, panel, metrics, flow, personaCases, problemSolution, cards, card, statement, invite, noBill, faq, toc, languageMarquee, projectTypeMarquee, voiceField, workspace, accordion, accordionItem, benefitCards, splitPair, logoCards, carousel, support, showcaseCarousel, featureGrid, promoBand, priceTable, spotlightPair, platformGrid, chartArea, chartBar, chartLine, chartPie, chartRadar, chartRadial, chartTooltip, orbitLayers, chat, domainLadder, servicePort, designSection, deployBoard, projectsBoard, machineBoard, nodePassport, a2aFeed, elementPreview, authGoogleSetup, authResendSetup, dialogSample, separator,
 }

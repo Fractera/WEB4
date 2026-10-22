@@ -1254,6 +1254,12 @@ export const SPECIMEN: SpecimenSection[] = [
     blocks: [{ kind: 'projectsBoard', lang: 'en' }],
   },
   {
+    kind: 'machineBoard',
+    when: 'This computer: the machine the node runs on (system, processor and cores, memory, disk of the node folder, uptime, Node.js), how much memory each element holds by pm2, and the comparison with the Lagrix Tier-2 super-node profile. Asked in the browser when opened and on Refresh; the page stays prerendered.',
+    whenRu: 'Этот компьютер: машина узла (система, процессор и ядра, память, диск папки узла, время работы, Node.js), сколько памяти держит каждый элемент по pm2, и сравнение с профилем супер-узла Lagrix Tier-2. Спрашивается в браузере при открытии и по «Обновить»; страница остаётся предрендеренной.',
+    blocks: [{ kind: 'machineBoard', lang: 'en' }],
+  },
+  {
     kind: 'nodePassport',
     when: 'The node passport: on top the Lagrix reputation card of the whole node (six indicators: all orders, likes, dislikes, cancelled orders, unreviewed — each count · sum — and negative ratings, a percent by weight with the count · weight of the dislikes given; and the proven-violation line — «—» until the network exists), under it the same card for root and every custom element with its name, the first line of its description, the full description in an accordion (one open at a time), and for an element without a description a red dot and a red button that orders it in the element terminal. Asked in the browser, the page stays prerendered.',
     whenRu: 'Паспорт узла: сверху карточка репутации Lagrix для всего узла (шесть показателей: все заказы, лайки, дизлайки, отменённые заказы, без отзыва — каждый «число · сумма» — и негативные оценки, процент по весу с «числом · весом» поставленных дизлайков; и строка доказанного нарушения — «—», пока нет сети), под ней та же карточка для root и каждого кастомного элемента: название, первая строка описания, полное описание аккордеоном (открыто одно), у элемента без описания — красная точка и красная кнопка, заказывающая описание в терминале элемента. Спрашивается в браузере, страница остаётся предрендеренной.',

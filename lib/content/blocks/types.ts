@@ -126,6 +126,8 @@ export type LeafBlock =
   | { kind: 'deployBoard'; lang: string }
   // 339: таблица всех WEB4 ITEMS узла (Dashboard → Проекты); строки спрашиваются в браузере у `/api/node/projects`.
   | { kind: 'projectsBoard'; lang: string }
+  // 572: Dashboard → «Этот компьютер» — машина, память по элементам, сравнение с Tier-2; числа спрашивает островок у /api/node/machine.
+  | { kind: 'machineBoard'; lang: string }
   // 478-1: карточки элементов «Паспорта» узла; спрашиваются в браузере у `/api/node/passport`.
   | { kind: 'nodePassport'; lang: string }
   | { kind: 'a2aFeed'; lang: string }

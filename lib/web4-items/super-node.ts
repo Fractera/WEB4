@@ -133,14 +133,12 @@ export async function remote(part: RemotePart): Promise<{ ok: true; data: unknow
   }
 }
 
-/** «Пройти тест»: оборудование машины супер-узла против профиля Tier-2; итог сохраняется. Канал и адреса — только если сервер их измерил. */
-export async function runTest(): Promise<{ ok: true; test: SuperNodeTest } | { ok: false; error: string; status: number }> {
-  const got = await remote("hardware")
-  if (!got.ok) return got
-  const h = got.data as Hardware
+/** Оборудование против профиля Tier-2 — строки «нужно / есть». Одна функция на два места: тест сервера супер-узла и Dashboard → «Этот
+ *  компьютер» (572). Что не измерено (`null`) — «—» и «не измерено», не догадка. */
+export function tier2Rows(h: Hardware): TestRow[] {
   const v = (cond: boolean | null): TestRow["verdict"] => (cond === null ? "unknown" : cond ? "ok" : "short")
   const num = (n: number | null | undefined, unit: string) => (typeof n === "number" ? `${n} ${unit}` : "—")
-  const rows: TestRow[] = [
+  return [
     { name: "cpus", need: `${TIER2.cpus} vCPU`, have: `${h.cpus}${h.cpuModel ? ` · ${h.cpuModel}` : ""}`, verdict: v(typeof h.cpus === "number" ? h.cpus >= TIER2.cpus : null) },
     { name: "aes", need: "AES-NI", have: h.aes === null ? "—" : h.aes ? "AES-NI" : "—", verdict: v(h.aes) },
     { name: "ram", need: `${TIER2.ramGb} GB`, have: num(h.ramGb, "GB"), verdict: v(typeof h.ramGb === "number" ? h.ramGb >= TIER2.ramGb : null) },
@@ -150,6 +148,14 @@ export async function runTest(): Promise<{ ok: true; test: SuperNodeTest } | { o
     { name: "ipv4", need: "IPv4", have: h.publicIPv4 ?? "—", verdict: v(h.publicIPv4 ? true : null) },
     { name: "ipv6", need: "/64", have: h.ipv6 ?? "—", verdict: v(h.ipv6 ? true : null) },
   ]
+}
+
+/** «Пройти тест»: оборудование машины супер-узла против профиля Tier-2; итог сохраняется. Канал и адреса — только если сервер их измерил. */
+export async function runTest(): Promise<{ ok: true; test: SuperNodeTest } | { ok: false; error: string; status: number }> {
+  const got = await remote("hardware")
+  if (!got.ok) return got
+  const h = got.data as Hardware
+  const rows = tier2Rows(h)
   const test: SuperNodeTest = { at: new Date().toISOString(), verdict: rows.some((r) => r.verdict === "short") ? "short" : "ok", rows, platform: h.platform ?? "" }
   const s = read()
   s.lastTest = test
