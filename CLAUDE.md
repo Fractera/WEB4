@@ -3323,6 +3323,23 @@ Owner, verbatim (all words — `/code` `completed-steps/553-main.md`): «эти 
 - 🪦 *Closed by step 554 (2026-10-22): «sign-in is shared by every element» — see the next section.* 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
   menu of built-in elements still uses the old service pages — the next step (owner: «Сразу после 553-7»).
 
+## A turned-off element: in the node, but not running (step 567, 2026-10-22)
+
+Owner, verbatim: «архитектура должна понимать что они есть но они выключены»; «некоторые элементы приходят по дефолту выключенные такие
+как редис, такие как будущий риверс инжиниринг, а некоторые приходят по дефолту включенные такие как обычные например кастомные элемент»;
+the switch — «Кнопка в «Опасной зоне»». All words — `/code` `completed-steps/567-main.md`.
+- **The state is the node's:** `off: { reason, at[, byDefault] }` in the registry entry (working copy — like versions, not committed);
+  `powerChosenAt` marks a person's choice. **The default is the element's:** passport field `power: { default: "off", reason }` (a string
+  or `{ en, ru }`); no field — on. The installer (after writing ports) and the birth seed the flag from the passport until a person chose
+  (`seedPower`, `lib/web4-items/element-power.cjs`).
+- **Nothing starts it:** `ecosystem.config.cjs` builds neither the element nor its watcher; install, birth, Accept, move, import and
+  `serve:start` say «off — not starting»; the snapshot `pm2 save` does not hold it, so `pm2 resurrect` does not bring it back.
+- **Who switches:** a person — `npm run element:power -- <id> off "<reason>" | on | status`, the «Element power» card of the Danger zone
+  (door `POST /api/node/power`, architect/admin, runs the same script), or the main agent (`npm run power`) after the person's «yes».
+- **The core shows it:** Projects — status «off» with the reason; Passport — «Turned off: <reason>»; every page of the element — a banner
+  with a link to the Danger zone; A2A neighbours (`nodeEntries`, `a2a find`, `/api/node/a2a`) do not get it.
+- Stripe and Lava.top are off: «Приём оплаты ещё не построен» (owner's choice).
+
 ## Factory sign-in: one auth element, own people per application (step 554, 2026-10-22)
 
 Owner, verbatim (all words — `/code` `completed-steps/554-main.md`): the model «своя запись в каждом приложении»; «Когда создается новый

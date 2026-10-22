@@ -73,6 +73,10 @@ The node is a **single project** (one owner, every element under the core's CONF
 projects of different owners) — `contacts` prints it. Questions about it, hosting other people's sites, one wallet, or how a new
 element will look — skill `node-type`. You change the type only after the person's «yes».
 
+An element can be **turned off** (node step 567): it stays in the node, but its process does not run and neighbours do not get it.
+`npm run power -- <id> status` says whether it is off and why. Turn one on or off (`npm run power -- <id> on`, `off "<reason>"`) only
+after the person's «yes» — the same as the «Element power» card in the element's Danger zone.
+
 ## You turn element agents on and off
 
 The owner, 2026-10-20: «агент ядра мог управлять включением агентов элементов и их выключением» — the architect is not asked in

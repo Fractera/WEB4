@@ -5,10 +5,12 @@
 // 🔒 pm2 зовётся с чистым окружением: этот скрипт запускает и дверь ядра (`ANTI-PATTERNS.md`, «Процесс, запущенный из сервера Next…»).
 import { spawnSync } from 'node:child_process'
 import { createRequire } from 'node:module'
-import { join } from 'node:path'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 const require = createRequire(import.meta.url)
-const ROOT = process.cwd()
+// Корень узла — от места скрипта: главный агент зовёт команду из своей папки data/main-agent.
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const power = require('../lib/web4-items/element-power.cjs')
 const IS_WIN = process.platform === 'win32'
 const say = (m) => console.log(m)
