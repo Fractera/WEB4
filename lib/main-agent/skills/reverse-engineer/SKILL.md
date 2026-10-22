@@ -19,6 +19,14 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
    by hand, scenario by scenario, or similar sites that do the same job. `ALLOWED` → read the terms it links and look for a ban on
    scraping, crawling, automated access or reverse engineering: a ban → the same answer, quoting the clause; no terms found → ask the
    asker to read them first. A package or an SDK: its license instead of robots.txt.
+0a. **Internal pages** — what is behind the sign-in (owner 2026-10-22: the agent studies them itself, in an account that «не должен быть
+   реальным пользователем … не страшно потерять это пользователь должен подтвердить лично»). `npm run study -- list`: the site needs a
+   test account the person confirmed and signed in to after the consent. None → ask the person to create one on that site — not their
+   main account and not someone else's, with no personal or payment data, one they are not afraid to lose — and open the login window
+   on this computer: `npm run study -- login <site> --lang <their language>`; they tick three statements, type the site name and sign in
+   themselves. Never ask for a password and never create an account. The site's terms must not forbid automating an account (decision
+   R1); a ban → screenshots only. With a confirmed account, the task text names it: «… internal pages in the test account of <site>
+   (npm run browser:start -- <url> --site <site>) …».
 1. **One at a time.** `npm run power -- reverse status`: on means another analysis is running — tell the asker their task is next and
    stop here; never start a second one.
 2. Name the task: `YYYY-MM-DD-<short-english-slug>` (lowercase, digits, hyphens).
@@ -38,6 +46,8 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 ## Never
 
 - Leave reverse on after the task, or turn it on for anything but an analysis.
-- Turn it on for a site whose robots.txt or terms forbid automated access, scraping or reverse engineering.
+- Turn it on for a site whose robots.txt or terms forbid automated access, scraping or reverse engineering (public pages), or whose
+  terms forbid automating an account (internal pages).
+- Ask anyone for a password, create an account on a site, or study internal pages without a test account the person confirmed.
 - Ask it to sign in, pass a paywall or protection, or copy a product's code, texts, images, design or data — it refuses, and so do you.
 - Install engines it names as missing (JADX, a JDK, WABT, Ghidra…) — that is the owner's decision; pass the name on.

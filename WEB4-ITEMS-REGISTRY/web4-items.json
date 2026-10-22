@@ -144,7 +144,7 @@
     {
       "id": "reverse",
       "repo": "https://github.com/Fractera/fractera-reverse-engineering-starter.git",
-      "version": "v0.2.0",
+      "version": "v0.2.1",
       "port": 24696,
       "provides": [
         "reverse-engineering"
@@ -157,7 +157,7 @@
     {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
-      "version": "v2.1.6",
+      "version": "v2.1.7",
       "port": 24683,
       "provides": [
         "site"
