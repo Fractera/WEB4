@@ -41,7 +41,7 @@ if (action === 'status') {
 }
 
 if (action === 'off') {
-  try { power.setOff(id, rest.join(' ')) } catch (e) { say(`===POWER_FAILED=== ${e.message}`); process.exit(1) }
+  try { power.setOff(id, rest.join(' '), ROOT) } catch (e) { say(`===POWER_FAILED=== ${e.message}`); process.exit(1) }
   for (const n of names) pm2(['delete', n])
   pm2(['save'])
   say(`===POWER_OFF=== ${id}: ${power.reasonIn(power.offOf(power.readRegistry(ROOT).services.find((s) => s.id === id)))}`)
@@ -49,7 +49,7 @@ if (action === 'off') {
 }
 
 // on
-power.setOn(id)
+power.setOn(id, ROOT)
 const r = pm2(['start', join(ROOT, 'ecosystem.config.cjs'), '--only', names.join(',')])
 if (r.status !== 0) { say(`===POWER_FAILED=== pm2 start: ${(r.stderr || r.stdout || '').trim().split('\n').pop()}`); process.exit(1) }
 const health = require('../lib/web4-items/element-props.cjs').readElementProps(require('../lib/web4-items/paths.cjs').entryDir(entry))?.health?.path ?? '/'
