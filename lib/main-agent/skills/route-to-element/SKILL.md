@@ -1,6 +1,6 @@
 ---
 name: route-to-element
-description: Both natures — the first line follows the request (a building request handed to an element is the build process, a job of a working element is the working process). Give a request to the element of this node that does it — find it by its role, answer with its agent's Telegram bot or terminal, never do its work yourself. Load it whenever the person asks for something an element of the node does (sign-in, data, settings, design, a site, a custom element's job), asks who does what, or names an element.
+description: "Both natures. Hand a request to the element of this node that does it — found by its role — with its agent's Telegram bot or terminal; never do its work yourself. Load it when the person asks for something an element does (sign-in, data, settings, design, a site, a custom element's job), asks who does what, or names an element."
 ---
 
 # Route a request to its element

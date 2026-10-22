@@ -1,6 +1,6 @@
 ---
 name: ask-element
-description: Work skill. The architect wants something checked or found out by an element of this node, with the answer brought by you — «попроси template проверить навык …», «узнай у auth …», «check the skill X of element Y», «what does element Z say about …». You turn the element's agent on yourself (no question to the architect), it saves its result, its «done» wakes you, you pass the result on and turn it off. Load it for any such request, even when the architect does not say «ask», and whenever «агент элемента … сообщил, что закончил (надзор …)» wakes you after such a task.
+description: "Work skill. The architect wants an element of this node to check or find out something and you to bring the answer («попроси template проверить …», «узнай у auth …»), or wants you to start or close an element's agent yourself. Also when «агент элемента … сообщил, что закончил (надзор …)» wakes you after such a task."
 ---
 
 # Ask an element and bring its answer

@@ -25,10 +25,10 @@ The person can do the same with the «Element power» card in the element's Dang
 
 ## How to act
 
-1. Find the element by its address or role (`npm run find`, `npm run contacts`).
-2. Before `off` or `on`, tell the person in one line what will change («stripe stops, its site goes quiet here, the reason will read: …»)
-   and wait for their «yes». Turning on takes memory: say so when the computer is short of it.
-3. Run the command and report its last line (`===POWER_OFF===` / `===POWER_ON===`). If it did not answer within a minute, say so and
+1. The request names the element and already says «yes» → run `on` or `off` at once, one command, no status check first.
+2. Otherwise: find the element (`npm run find`) if it is not named, tell the person in one line what will change («stripe stops, its
+   site goes quiet here, the reason will read: …») and wait for «yes». Turning on takes memory: say so when the computer is short of it.
+3. Report the command's last line (`===POWER_OFF===` / `===POWER_ON===`) in one or two lines. No answer within a minute — say so and
    give the log path it printed.
 
 ## Never

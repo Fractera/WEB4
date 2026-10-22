@@ -147,6 +147,10 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // 2026-10-20 на erpxd: пустой ввод, журнала нет). Поэтому — первым, и за ним всегда другой флаг.
   const ownData = path.join(process.cwd(), 'data', 'services', element)
   if (existsSync(ownData) && !args.includes(ownData)) args = ['--add-dir', ownData, ...(args.length ? args : ['--permission-mode', 'auto'])]
+  // 569-3: свои встроенные инструменты папки агента (`.claude/launch-tools.txt`, `lib/agent-kit/modes.cjs`). 🛑 `--tools` забирает СПИСОК
+  // значений, как `--add-dir`: первым, и за ним всегда другой флаг — иначе съел бы первое поручение.
+  const tools = typeof modes.launchTools === 'function' ? modes.launchTools(cwd) : null
+  if (tools) args = ['--tools', tools, ...(args.length ? args : ['--permission-mode', 'auto'])]
   // 548-20 (✗ 2026-10-20: Telegram молчал у разбуженных сессий): у Claude Code ОДИН на машину кэш неудачных подключений MCP
   // (`~/.claude/mcp-needs-auth-cache.json`, ключ — имя сервера, 15 минут). Плагин канала включён у человека глобально и стартует в
   // любой сессии; без бота токена нет — он падает, и 15 минут ВСЕ сессии машины пишут «Skipping connection (recent failure cached…)»
