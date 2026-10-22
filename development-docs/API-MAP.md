@@ -7,13 +7,14 @@
 Имя маршрута — то, чем его находят: 6–12 слов, глагол первым. Правило проверяется `npm run check:api`,
 который стоит в `prebuild` — маршрут без имени роняет сборку.
 
-Всего маршрутов: **71**
+Всего маршрутов: **83**
 
 | Адрес | Методы | Что делает | Продукт |
 |---|---|---|---|
 | `/api/agents/done` | POST | woken element agent reports work done or closes its terminal | — |
 | `/api/agents/person-lang` | POST | element agent reports the language its person now writes in | — |
 | `/api/agents/sessions` | GET, POST | list and stop the live Claude Code terminals of born WEB4 elements | — |
+| `/api/agents/telegram` | POST | list an element's Telegram bots or write through one | — |
 | `/api/agents/wake` | POST | wake the Claude Code agent of a node element without a browser | — |
 | `/api/architect/design-config` | GET, POST | read and change the site element's design settings from the core | — |
 | `/api/architect/drafts` | GET, POST | create a new microservice draft with its own architect page group | — |
@@ -54,26 +55,37 @@
 | `/api/node/a2a-log` | GET, POST | write and read the log of agent-to-agent calls between node elements | — |
 | `/api/node/a2a-log/pin` | POST | pin one agent conversation so the log keeps it | — |
 | `/api/node/attention` | GET | list open element terminals and previews waiting for the architect | — |
+| `/api/node/automation` | GET, POST | read and switch the cron automation of an element in its passport | — |
+| `/api/node/catalog` | GET, POST | the node elements catalog for the All projects tab | — |
 | `/api/node/deploy` | GET, POST | list node elements with pending changes and start their deployment | — |
 | `/api/node/element-docs` | GET | read one development document of a WEB4 ITEM | — |
 | `/api/node/element-orders` | GET | list the order summaries one WEB4 ITEM saved | — |
 | `/api/node/github-backup` | GET, POST | report and create the GitHub repositories of every element | — |
+| `/api/node/machine` | GET | describe this computer: machine, memory per element, comparison with the super-node profile | — |
 | `/api/node/messenger-settings` | GET, POST | read and save an element's messenger settings in its passport | — |
 | `/api/node/official` | GET, POST, DELETE | read save or drop the node's official mark application draft | — |
 | `/api/node/online` | GET | ask Cloudflare whether the node's site is online right now | — |
 | `/api/node/origin` | GET | tell how far this node's fork is behind the original | — |
 | `/api/node/own-service-props` | GET | read an element passport through its door with the node key | — |
 | `/api/node/passport` | GET | list every element of the node as a passport card | — |
+| `/api/node/payments` | GET, POST | read and save the payment settings of an element in its passport | — |
 | `/api/node/place` | GET, POST | read or set where this node stands | — |
+| `/api/node/power` | GET, POST | turn an element of the node on or off | — |
 | `/api/node/preview-url` | GET | tell the address where an element of this node can be previewed | — |
+| `/api/node/product-quiz` | GET | read the product quiz of a WEB4 ITEM | — |
 | `/api/node/projects` | GET | list every WEB4 ITEM with its state and last commit | — |
+| `/api/node/rea` | GET, POST | read REA status in the core and start its one-time install | — |
 | `/api/node/reach` | GET, POST | measure and connect a service's address on the node's own domain | — |
+| `/api/node/reverse-report` | GET | read a finished reverse engineering report of the node by its task id | — |
 | `/api/node/review-inbox` | POST | element agent leaves a self-review finding about something outside it | — |
 | `/api/node/state` | GET | report how this node is reachable and whether it is walled off | — |
 | `/api/node/stripe` | GET, POST | read which Stripe keys are set and save checked new ones | — |
 | `/api/node/super-node` | GET, POST | read the super node application and settings and change them | — |
 | `/api/node/super-node/remote` | GET | read one part of the super node server through its operator API | — |
+| `/api/node/type` | GET, POST | the node type: a single project or an app factory | — |
+| `/api/node/users/[[...path]]` | — | list, edit and anonymize node users through the auth element | — |
 | `/api/node/wallet` | GET, POST, DELETE | manage the node or element wallet and its key backup | — |
+| `/api/node/web4` | GET, POST | put an element into the Web4 network or take it out | — |
 | `/api/openai-models` | GET | list the live model names this key can actually use | — |
 | `/api/project-types/[lang]/[id]` | GET | describe one project direction for the home page window | — |
 | `/api/revalidate` | POST | rebuild public pages after the owner changes app settings | — |

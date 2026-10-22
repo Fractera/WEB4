@@ -4,6 +4,7 @@
 // по факту, снимок переписывается. Строки `===POWER_OFF===` / `===POWER_ON===` / `===POWER_STATUS===` — для двери ядра и главного агента.
 // 🔒 pm2 зовётся с чистым окружением: этот скрипт запускает и дверь ядра (`ANTI-PATTERNS.md`, «Процесс, запущенный из сервера Next…»).
 import { spawnSync } from 'node:child_process'
+import { existsSync, readFileSync, rmSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -44,6 +45,21 @@ if (action === 'off') {
   try { power.setOff(id, rest.join(' '), ROOT) } catch (e) { say(`===POWER_FAILED=== ${e.message}`); process.exit(1) }
   for (const n of names) pm2(['delete', n])
   pm2(['save'])
+  // 563-3: an element may keep a browser of its own outside pm2 (reverse: `npm run browser:start`, its state in
+  // data/services/<id>/browser.json). Turning the element off stops it too: a browser left alone holds hundreds of MB (9 processes,
+  // ~375 MB of its own memory measured on 2026-10-22) and nobody would close it.
+  const browserState = join(ROOT, 'data', 'services', id, 'browser.json')
+  if (existsSync(browserState)) {
+    try {
+      const { pid } = JSON.parse(readFileSync(browserState, 'utf8'))
+      if (Number.isInteger(pid)) {
+        if (IS_WIN) spawnSync('taskkill', ['/PID', String(pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' })
+        else { try { process.kill(-pid, 'SIGTERM') } catch { try { process.kill(pid, 'SIGTERM') } catch { /* already gone */ } } }
+        say(`  the browser of ${id} is stopped (pid ${pid})`)
+      }
+    } catch { /* an unreadable state file: nothing to stop */ }
+    rmSync(browserState, { force: true })
+  }
   say(`===POWER_OFF=== ${id}: ${power.reasonIn(power.offOf(power.readRegistry(ROOT).services.find((s) => s.id === id)))}`)
   process.exit(0)
 }
