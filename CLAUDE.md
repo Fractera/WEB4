@@ -3359,6 +3359,21 @@ the switch — «Кнопка в «Опасной зоне»». All words — `/
   and drafts, the passport via `diskPassport` (element-props) — no `git`, no element home pages, no HTTP. ✗ Built from `projectRows` it took
   ~3 s (now ~0.3 s). Projects: passport from disk, `git` async, home page read to `</head>`. A new field on the Passport — from disk first.
 
+## The fast store element `cache` and the Memory group (step 560, 2026-10-22)
+
+Owner, verbatim: «пятый элемент в слой данных и это Redis … отслеживание лайков, комментариев, и других высоконагруженных действий»;
+«раздел память раскрывающийся внутри которого было бы пять этих элементов»; then «1- mac and linux// 2- final dev will in server later ,
+now only base and body with turn off state». Repository — `Fractera/fractera-redis-cache-starter` (created by the owner).
+- **A body, off by its passport:** `WEB4-ITEMS/core/cache` (native template v0.1.20, tag v0.1.0, port 24695), `power.default: "off"` —
+  «Works on macOS and Linux; Redis itself is not connected yet». No Redis, no doors, no transfer of totals, no timer; no backup section
+  (`MEMORY_ELEMENTS` stays data, storage, vectors, graph — it is a buffer, the truth is in data). Not built yet: turning it on needs
+  `node scripts/services-install.mjs --only cache` first.
+- **Memory group:** `MEMORY_GROUP` (`lib/web4-items/built-in-elements.ts`) — a sub-zone of Native items (`zoneHead.item`, icon `memory`,
+  `_lib/draft-menu.tsx`); its five items stay top-level with `zone: "native memory"` (the shell hides by `data-zone~=`), so element trees
+  keep their depth. 🛑 The menu item type exists twice (`lib/content/blocks/types.ts` and `components/workspace/workspace-shell.tsx`) —
+  change both (✗ 560-2: the build type check failed on the second copy).
+- The core section `architect/cache` (port, live preview, agent kit); its tree pages come from `[item]` with the «turned off» banner.
+
 ## Factory sign-in: one auth element, own people per application (step 554, 2026-10-22)
 
 Owner, verbatim (all words — `/code` `completed-steps/554-main.md`): the model «своя запись в каждом приложении»; «Когда создается новый
