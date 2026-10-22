@@ -4,6 +4,8 @@ import { projectRows } from "@/lib/web4-items/dashboard-rows"
 import { registryDescription, TASK as DESCRIBE_TASK } from "@/lib/web4-items/element-describe"
 import { addressOf } from "@/lib/web4-items/address-file.mjs"
 import { listServices } from "@/lib/microservices/registry"
+import paths from "@/lib/web4-items/paths.cjs"
+import elementProps from "@/lib/web4-items/element-props.cjs"
 import { terminalLink } from "@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs"
 
 // КАРТОЧКИ ЭЛЕМЕНТОВ «ПАСПОРТА» УЗЛА (478-1). Слово владельца 2026-10-14: «для каждого элемента покажи его название, и …
@@ -33,6 +35,8 @@ export type PassportCard = {
   generate: string | null
   /** 567: причина, если элемент выключен (признак узла); включён — `null`. */
   off: string | null
+  /** 566: элемент в сети Web4 — паспорт `visibility: network`. */
+  web4: boolean
   reputation: null
 }
 
@@ -54,6 +58,7 @@ export async function passportCards(lang: string): Promise<PassportCard[]> {
       open: r.open,
       generate: born.has(r.id) ? terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK }) : null,
       off: r.status === "off" ? r.offReason ?? "" : null,
+      web4: (() => { const e = listServices().find((s) => s.id === r.id); return e ? elementProps.readElementProps(paths.entryDir(e))?.visibility === "network" : false })(),
       reputation: null,
     }
   })

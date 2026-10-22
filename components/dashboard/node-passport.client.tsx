@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Star } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { buttonVariants } from "@/components/ui/button"
 import { Card as UiCard, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
@@ -35,6 +37,7 @@ type Card = {
   open: string
   generate: string | null
   off?: string | null
+  web4?: boolean
   reputation: null
 }
 
@@ -62,6 +65,9 @@ export type NodePassportWords = {
   /** 567-5: метки состояния у каждой карточки. */
   powerOn: string
   powerOff: string
+  /** 566: подсказки звёздочки Web4 (слова владельца). */
+  web4On: string
+  web4Off: string
   wallet: NodeWalletWords
   /** 553-9 → 564: карточка режима узла — название, описание текущего режима, общее для обоих, где сменить. */
   mode: { label: string; project: string; factory: string; byDefault: string; projectText: string; factoryText: string; both: string; chosen: string; change: string }
@@ -181,6 +187,17 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
                   <Badge variant={c.off != null ? "outline" : "secondary"} className={c.off != null ? "text-muted-foreground" : undefined} data-passport-power={c.off != null ? "off" : "on"}>
                     {c.off != null ? words.powerOff : words.powerOn}
                   </Badge>
+                  {/* 566 (владелец 2026-10-22): звёздочка — элемент в сети Web4 (паспорт `visibility: network`), подсказка — его слова. */}
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="relative z-10 inline-flex" aria-label={c.web4 ? words.web4On : words.web4Off} data-passport-web4={c.web4 ? "on" : "off"}>
+                          <Star className={c.web4 ? "size-4 fill-primary text-primary" : "size-4 text-muted-foreground"} aria-hidden />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent>{c.web4 ? words.web4On : words.web4Off}</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </span>}
                 lead={<>
                   <span className="line-clamp-1">{c.lead ?? words.noDescription}</span>
