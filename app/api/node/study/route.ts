@@ -54,7 +54,8 @@ export async function POST(req: NextRequest) {
   if (body.action === "end") return NextResponse.json(endStudy(site, killTree), { headers: HEADERS })
   if (body.action !== "open") return NextResponse.json({ ok: false, error: "unknown-action" }, { status: 400, headers: HEADERS })
   if (stateOf(site)?.window?.open) return NextResponse.json({ ok: true, already: true }, { headers: HEADERS })
-  const env: Record<string, string> = {}
+  // Окружение собирается, а не наследуется (закон 280-6): без меток Next и ядра. Тип — ProcessEnv: у Next в нём объявлен NODE_ENV.
+  const env = {} as NodeJS.ProcessEnv
   for (const [k, v] of Object.entries(process.env)) if (v !== undefined && !/^(__NEXT|NEXT_|AGI_|PORT$|HOSTNAME$|NODE_ENV$)/.test(k)) env[k] = v
   const lang = body.lang === "ru" ? "ru" : "en"
   const child = spawn(process.execPath, [join(process.cwd(), "scripts", "spawn-free.mjs"), join(process.cwd(), "scripts", "study-login.mjs"), site, "--lang", lang],
