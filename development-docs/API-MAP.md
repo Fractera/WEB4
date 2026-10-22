@@ -7,7 +7,7 @@
 Имя маршрута — то, чем его находят: 6–12 слов, глагол первым. Правило проверяется `npm run check:api`,
 который стоит в `prebuild` — маршрут без имени роняет сборку.
 
-Всего маршрутов: **85**
+Всего маршрутов: **87**
 
 | Адрес | Методы | Что делает | Продукт |
 |---|---|---|---|
@@ -82,6 +82,8 @@
 | `/api/node/site-rules` | GET | check a site's robots.txt and find its terms before analysis | — |
 | `/api/node/state` | GET | report how this node is reachable and whether it is walled off | — |
 | `/api/node/stripe` | GET, POST | read which Stripe keys are set and save checked new ones | — |
+| `/api/node/study` | GET, POST | list test accounts for analysis, open a login window, end one | — |
+| `/api/node/study/consent` | GET, POST | the consent page of a test account login window | — |
 | `/api/node/super-node` | GET, POST | read the super node application and settings and change them | — |
 | `/api/node/super-node/remote` | GET | read one part of the super node server through its operator API | — |
 | `/api/node/type` | GET, POST | the node type: a single project or an app factory | — |
