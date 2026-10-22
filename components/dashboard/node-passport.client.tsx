@@ -200,9 +200,10 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
                       567-7: «отличаются буквально одной буквой … для включённого … зелёным цветом а для выключенного … оранжевым». */}
                   <Badge
                     variant="outline"
+                    // Токены темы (обе темы): зелёный `tone-data`, оранжевый `tone-access` — как ярлыки секций (`sections/tone.ts`).
                     className={c.off != null
-                      ? "border-orange-500/50 bg-orange-500/15 text-orange-700 dark:text-orange-300"
-                      : "border-emerald-500/50 bg-emerald-500/15 text-emerald-700 dark:text-emerald-300"}
+                      ? "border-tone-access/50 bg-tone-access/15 text-tone-access"
+                      : "border-tone-data/50 bg-tone-data/15 text-tone-data"}
                     data-passport-power={c.off != null ? "off" : "on"}
                   >
                     {c.off != null ? words.powerOff : words.powerOn}
