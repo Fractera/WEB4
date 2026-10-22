@@ -3,9 +3,9 @@ import { collectionMetadata } from '../../../_lib/collection-metadata'
 import { data } from './_data'
 import { content } from './_components'
 
-export const generateMetadata = collectionMetadata(data, '/architect/storage')
+export const generateMetadata = collectionMetadata(data, '/architect/cache')
 
 export default async function Page({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params
-  return <CollectionPage lang={lang} dir="/architect/storage" page={data} content={content(lang)} />
+  return <CollectionPage lang={lang} dir="/architect/cache" page={data} content={content(lang)} />
 }
