@@ -47,6 +47,8 @@ function serviceApps() {
 
   const apps = []
   for (const s of registry.services || []) {
+    // 567: выключенный человеком элемент есть в реестре, но ни он, ни его сторож не запускаются (`lib/web4-items/element-power.cjs`).
+    if (require('./lib/web4-items/element-power.cjs').isOff(s)) continue
     const dir = paths.entryDir(s)
     const stampFile = path.join(dir, '.install-stamp.json')
     // Блок объявлен, но не установлен — его нечем запускать, и придумывать

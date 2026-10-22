@@ -80,7 +80,8 @@
     "main-agent:install": "node scripts/main-agent-install.mjs",
     "qa:agent": "node scripts/qa-agent-journal.mjs",
     "agent:screen": "node scripts/agent-screen.mjs",
-    "check:modes": "node scripts/check-modes.mjs"
+    "check:modes": "node scripts/check-modes.mjs",
+    "element:power": "node scripts/element-power.mjs"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.55",
