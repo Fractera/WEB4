@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server"
 
 import { getSession } from "@/lib/auth/get-session"
 import { serviceUrl } from "@/lib/microservices/registry"
+import { withAppNames } from "@/lib/web4-items/app-names"
 
 // ВКЛАДКА «ПОЛЬЗОВАТЕЛИ» ЭЛЕМЕНТА ВХОДА (узел, шаг 559-4). Люди узла живут в базе элемента входа — ядро их не хранит и не открывает
 // их файл: дверь проверяет вход и роль (architect · admin), а дальше пересылает запрос двери элемента `/api/node-users/*` по петле
@@ -37,7 +38,8 @@ async function forward(req: NextRequest, ctx: Ctx): Promise<NextResponse> {
       cache: "no-store",
       signal: AbortSignal.timeout(15_000),
     })
-    const body = await res.json().catch(() => ({ ok: false, error: "bad-answer" }))
+    // 554-1: организация-приложение элемента завода называется живым `short_name` его настроек.
+    const body = withAppNames(await res.json().catch(() => ({ ok: false, error: "bad-answer" })))
     return NextResponse.json(body, { status: res.status, headers: { "Cache-Control": "no-store" } })
   } catch {
     return NextResponse.json({ ok: false, error: "auth-not-answering" }, { status: 502 })
