@@ -103,7 +103,9 @@ export function NodeUsers({ lang, ui, table, dialogUi }: { lang: string; ui: Nod
         <td className={cell}>
           {!gone && <Checkbox aria-label={ui.cols.select} checked={selected.includes(r.id)} onCheckedChange={() => setSelected((s) => (s.includes(r.id) ? s.filter((x) => x !== r.id) : [...s, r.id]))} />}
         </td>
-        <td className={cell}>
+        {/* 559-7 (владелец 2026-10-22): «Для каждого пользователя установи максимальное количество строк две добавь ширину для электронного
+            адреса а если поля не помещаются поставь три точки». Строка человека — не выше двух строк текста: имя и подпись по одной строке. */}
+        <td className={`${cell} min-w-[180px] max-w-[240px]`}>
           <div className="flex items-center gap-3">
             {r.avatar && !gone
               ? <img alt="" className="size-8 shrink-0 rounded-full object-cover" referrerPolicy="no-referrer" src={r.avatar} />
@@ -114,21 +116,26 @@ export function NodeUsers({ lang, ui, table, dialogUi }: { lang: string; ui: Nod
             </div>
           </div>
         </td>
-        <td className={`${cell} break-all`}>{gone ? ui.noName : r.email}</td>
+        {/* ✗ Было `break-all` без ширины: таблица шире экрана, колонка сжималась до 4 знаков, и адрес гостя вставал столбиком в 10 строк.
+            Теперь своя ширина, одна строка, хвост — «…», полный адрес — в подсказке. */}
+        <td className={`${cell} w-[280px] min-w-[280px] max-w-[280px]`} data-col="email">
+          <div className="truncate" title={gone ? undefined : r.email ?? undefined}>{gone ? ui.noName : r.email}</div>
+        </td>
         {/* 554-5, ширины по слову владельца: роли — до 200 px, две строки; организации — колонка 400 px, плашка до 180 px, две строки
             (приложение завода — первой); способы входа — до 200 px, одна строка. */}
-        <td className={cell} data-col="roles"><ClampedChips items={r.roles} maxWidth={200} chipMaxWidth={200} /></td>
+        {/* 559-7: своя ширина = пределу плашек. ✗ Без неё широкая таблица сжимала колонку до 97 px, и роли вставали в 4 ряда. */}
+        <td className={`${cell} w-[200px] min-w-[200px]`} data-col="roles"><ClampedChips items={r.roles} maxWidth={200} chipMaxWidth={200} /></td>
         <td className={`${cell} w-[400px] min-w-[400px] max-w-[400px]`} data-col="orgs">
           {r.orgs.length
             ? <ClampedChips items={[...r.orgs].sort((a, b) => Number(!!b.element) - Number(!!a.element)).map((o) => o.name)} maxWidth={400} chipMaxWidth={180} />
             : ui.noName}
         </td>
-        <td className={cell} data-col="methods">
+        <td className={`${cell} whitespace-nowrap`} data-col="methods">
           {r.methods.length
             ? <div className="max-w-[200px] truncate" title={r.methods.map((m) => ui.methods[m] ?? m).join(", ")}>{r.methods.map((m) => ui.methods[m] ?? m).join(", ")}</div>
             : ui.noName}
         </td>
-        <td className={cell}>
+        <td className={`${cell} whitespace-nowrap`}>
           <Badge variant={r.status === "active" ? "secondary" : r.status === "blocked" ? "destructive" : "outline"}>{ui.status[r.status]}</Badge>
         </td>
         <td className={`${cell} whitespace-nowrap`}>{date(r.createdAt)}</td>
