@@ -23,6 +23,8 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     provides: 'What it provides',
     openElement: 'Open the element',
     off: 'Turned off:',
+    powerOn: 'On',
+    powerOff: 'Off',
     mode: {
       label: 'Node mode',
       project: 'Single project',
@@ -52,6 +54,8 @@ const WORDS: Record<string, Omit<NodePassportWords, 'rating' | 'nodeHints' | 'wa
     provides: 'Что он даёт',
     openElement: 'Открыть элемент',
     off: 'Выключен:',
+    powerOn: 'Включён',
+    powerOff: 'Выключен',
     mode: {
       label: 'Режим узла',
       project: 'Единый проект',

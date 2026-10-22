@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Badge } from "@/components/ui/badge"
 import { buttonVariants } from "@/components/ui/button"
 import { Card as UiCard, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
@@ -58,6 +59,9 @@ export type NodePassportWords = {
   openElement: string
   /** 567: «Выключен:» перед причиной. */
   off: string
+  /** 567-5: метки состояния у каждой карточки. */
+  powerOn: string
+  powerOff: string
   wallet: NodeWalletWords
   /** 553-9 → 564: карточка режима узла — название, описание текущего режима, общее для обоих, где сменить. */
   mode: { label: string; project: string; factory: string; byDefault: string; projectText: string; factoryText: string; both: string; chosen: string; change: string }
@@ -171,7 +175,13 @@ export function NodePassport({ words, lang }: { words: NodePassportWords; lang: 
                 item={`el:${c.id}`}
                 words={kind}
                 marker={dot}
-                title={<a href={`${BASE}/${lang}${c.open}`} className="relative z-10 underline-offset-4 hover:underline" title={words.openElement}>{c.name}</a>}
+                title={<span className="flex flex-wrap items-center gap-2">
+                  <a href={`${BASE}/${lang}${c.open}`} className="relative z-10 underline-offset-4 hover:underline" title={words.openElement}>{c.name}</a>
+                  {/* 567-5 (владелец 2026-10-22): «добавь к ним метку включён или выключен» — признак узла, не догадка. */}
+                  <Badge variant={c.off != null ? "outline" : "secondary"} className={c.off != null ? "text-muted-foreground" : undefined} data-passport-power={c.off != null ? "off" : "on"}>
+                    {c.off != null ? words.powerOff : words.powerOn}
+                  </Badge>
+                </span>}
                 lead={<>
                   <span className="line-clamp-1">{c.lead ?? words.noDescription}</span>
                   {/* 567: выключенный элемент — с причиной. */}
