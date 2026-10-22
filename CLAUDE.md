@@ -3509,3 +3509,37 @@ agent turns it on for a task and off after it; the analysis covers SDKs too.
 - 🛑 Measured: REA on the whole Stripe npm SDK 23.0.0 — 1497 files, 2 minutes, a 108 MB answer and partial semantic coverage; give it one
   build of a package. The browser without a window: 9 processes. Not measured yet: a live cycle with the models (step 563-6, only after
   the owner's «yes» with the price).
+
+## A product like an existing one: site rules, references, test accounts for internal pages (step 556, 2026-10-22)
+
+The owner, 2026-10-22: a site whose rules forbid it is never analysed — «он должен предоставить серии скриншотов последовательно»;
+similar sites whose rules allow it are analysed one by one; internal pages the agent studies itself, in an account that «не должен быть
+реальным пользователем … не страшно потерять это пользователь должен подтвердить лично»; decisions R1 (inside the person's session the
+agent is an assistant, robots.txt does not apply; the site's terms do) and R2 (the agent only reads; a point of no return is crossed only
+by the person, in his test account) — «y go».
+
+- **Site rules:** `lib/site-rules.mjs` — robots.txt by RFC 9309 (`*` and Claude agents, the longest rule, Allow on a tie, `*`/`$`, path
+  with query; 4xx — none, 5xx — unknown = closed), `Content-Signal`, the link to the terms (home page, else `/terms` `/tos` `/legal`
+  `/terms-of-service` whose title says so), documents published for agents. Entrances: the main agent's `npm run site-rules -- <url>`,
+  the door `GET /api/node/site-rules?url=` (node key or architect/admin; never private addresses), an element's `npm run site-rules`.
+  The terms are read by the agent; the machine judges robots.txt only.
+- **Test accounts:** `lib/study/study.mjs`; the folder `data/services/reverse/study/<site>/` (profile, pending window key, consent,
+  session fingerprints — never values; outside git). `scripts/study-login.mjs` opens a VISIBLE Chrome window with the site's profile: the
+  consent page `GET/POST /api/node/study/consent` (three statements, the exact site name, the window's one-time key), then the site, where
+  the person signs in himself. A sign-in counts only when the site stored something new after the consent. The door `/api/node/study`
+  (GET list — also with the node key; POST `open`/`end` — architect/admin), the main agent's `npm run study -- list | login <site> | end
+  <site>`, the card «Test accounts for analysis» on every element's «Reverse engineering» page (the window opens only on this computer).
+- **The study browser and its guard** (element `reverse` v0.2.1): `npm run browser:start -- <url> --site <site>` only with a confirmed
+  account and only on its site; `scripts/study-guard.mjs` attaches first and lets only reads through (writes to any host blocked except a
+  GraphQL query to the site; log-out/delete/unsubscribe/cancel/invite blocked), human pace, a page budget, a stop on a challenge page,
+  429 or Cloudflare challenge; the journal `guard.jsonl` keeps method, host and path only. `--visible` — mode B, the person drives, the
+  guard only writes. Chrome 155 sends request bodies as `postDataEntries`.
+- **Skills:** `reverse-engineer` of the element (modes A screenshots · B a guided walk recorded by REA `observe-web-session` · C the agent's
+  walk by REA `capture-browser-scenario` in connect mode; REA's own investigation method; a report with `screens`, `transitions`,
+  `pointsOfNoReturn`, `coverage`, `activity`, `authority`), the main agent's `reverse-engineer` (step 0 — the site's rules; 0a — internal
+  pages via `npm run study`), the template's `product-clone` (scenarios 1 screenshots, 2 similar sites, 3 internal pages) and
+  `check:product` (`references`: coverage and parity by stage; a test account only with the consent date). The core's quiz page shows
+  «References» and how many scenarios each stage brings.
+- 🛑 Before `serve:rebuild`: a narrow `tsc` of the changed files (a `tsconfig` that extends the core's and includes only them) — the build
+  failed on type checking without printing the errors (`development-docs/ANTI-PATTERNS.md`).
+- Not proven yet: a live run with models (556-5) — only by the owner's separate «yes» with its price.
