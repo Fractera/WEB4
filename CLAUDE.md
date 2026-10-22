@@ -643,6 +643,13 @@ explanations, details by voice) and on «Send» opens a drawer on the right with
 in its paste window (`initialPaste`; nothing reaches the agent without the person's button). «Collapse» closes the drawer,
 the session lives. The paste window is the tool `_tools/terminal-paste` (voice appends). The Preview gets all of it through
 `previewTaskKit(serviceId, lang)` (`sections/blocks/element-preview.server.tsx`); without `task` the button opens nothing.
+**The drawer is the tool `_tools/terminal-drawer`** (step 556-9, owner 2026-10-23: «Посмотри вкладку живой сайт … справа разделяется
+два контейнера там внутри открывается терминал»): the Preview, «Product design → Reverse engineering» (the main agent `build`) and the
+product quiz (the element) use it. With `start` the task goes with the launch (`AgentTerminal` `startTask`: a sleeping agent gets it as its
+first instruction, a running one in the paste window — the same as a `?paste=` link, 551-7); without it the text waits in the paste
+window (the Preview). A new task — a new `key`. 🛑 The terminal is closed ONLY on the temporary address (`isTemporaryPublicAddress` in
+`agent-api/ticket`); on the node own domain after sign-in it works, so a page never swaps the terminal for a Telegram phrase by
+`isLoopbackHostname` — that was a false premise (556-9). Only the Preview frame needs the loop (Private Network Access).
 **OpenAI key for voice** — owner: «если в ядре уже есть ключ то его надо использовать. Если в ядре нет ключа то мы записываем
 ключ в собственный переменные окружения и одновременно спрашиваем стоит ли продублировать». `lib/env-file.ts`
 `openAiKeyFor(item)`: process env → core `.env.local` → the element's; `/api/transcribe?item=<id>`. The tab «Environment
@@ -3054,9 +3061,9 @@ The owner, verbatim: «я считаю что проект должен быть
   `current-step.md`); the state comes from where the file lies; an item sums its steps: in progress (`warning`) > planned (`tone-reach`)
   > done or `builtBefore` (`success`) > none (an empty ring). The window of steps opens on hover for a mouse and on a press for a finger
   (Radix toggles on click — measured: a click after the hover closed it, a tap never opened it).
-- **💬:** the block-task window in its note mode (`quizTaskUi`) → `/<lang>/architect/<address>/build/terminal?paste=` — the task waits
-  in the paste window; not from this computer (`isLoopbackHostname`) the window copies the phrase for Telegram. The Telegram button comes
-  from the element's channel door (`agent-api/channel`: a bot and at least one allowed person).
+- **💬, «Start the quiz», «Continue the quiz» (556-10, owner 2026-10-23: «реальное назначение этой кнопки называется запустить Quiz»):**
+  the buttons open `_tools/terminal-drawer` with the element's terminal on the right at once; 💬 first opens the block-task window in its
+  note mode (`quizTaskUi`), «Send to the agent» opens the drawer. No Telegram phrase and no bot link on the page.
 - **Template:** v0.3.101 carries the `humanizer` skill and the «Texts» rule; the quiz skill and format are in roman and lagrix only —
   moving them into the template is the owner's word.
 - 🛑 **A core rebuild stopped half way leaves the live core without `static/chunks`** (every script and style 500, health still 200):
@@ -3528,7 +3535,13 @@ by the person, in his test account) — «y go».
   consent page `GET/POST /api/node/study/consent` (three statements, the exact site name, the window's one-time key), then the site, where
   the person signs in himself. A sign-in counts only when the site stored something new after the consent. The door `/api/node/study`
   (GET list — also with the node key; POST `open`/`end` — architect/admin), the main agent's `npm run study -- list | login <site> | end
-  <site>`, the card «Test accounts for analysis» on every element's «Reverse engineering» page (the window opens only on this computer).
+  <site>`. 🪦 The card «Test accounts for analysis» on the «Reverse engineering» page was removed by 556-9 (owner's choice 2026-10-23:
+  «Скриншоты, агент спросит»): the page takes screenshots; when the agent needs to sign in itself it asks in the terminal and opens the
+  window with `npm run study -- login <site>` (the window opens on this computer's screen).
+- **The «Reverse engineering» page (556-9, owner 2026-10-23: «Представь все просто в формате карточек аккордеон»):** cards «Site address»
+  (an SDK link too), «Page N» (address, what matters — voice too, screenshots uploaded through `/api/media/upload` into the node storage,
+  given to the agent as links) and «Add another page»; «Start reverse engineering» → the main agent's terminal on the right with the task;
+  below — the finished studies. Details only under «?»; the REA card shows only when REA is missing.
 - **The study browser and its guard** (element `reverse` v0.2.1): `npm run browser:start -- <url> --site <site>` only with a confirmed
   account and only on its site; `scripts/study-guard.mjs` attaches first and lets only reads through (writes to any host blocked except a
   GraphQL query to the site; log-out/delete/unsubscribe/cancel/invite blocked), human pace, a page budget, a stop on a challenge page,

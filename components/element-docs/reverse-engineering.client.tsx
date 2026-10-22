@@ -112,6 +112,7 @@ function PageCard({
   w,
   helpLabel,
   keyHref,
+  mediaLink,
   onChange,
   onRemove,
 }: {
@@ -122,6 +123,7 @@ function PageCard({
   w: ReverseEngineeringWords["page"]
   helpLabel: string
   keyHref: string
+  mediaLink: (id: string) => string
   onChange: (next: PageInput) => void
   onRemove: () => void
 }) {
@@ -141,7 +143,7 @@ function PageCard({
         form.append("title", file.name)
         const r = await fetch(`${BASE}/api/media/upload`, { method: "POST", body: form })
         const j = (await r.json().catch(() => null)) as { ok?: boolean; item?: { id: string; url: string } } | null
-        if (j?.ok && j.item) added.push({ id: j.item.id, url: j.item.url, name: file.name })
+        if (j?.ok && j.item) added.push({ id: j.item.id, url: mediaLink(j.item.id), name: file.name })
         else setError(true)
       } catch {
         setError(true)
@@ -372,6 +374,16 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
   const [pages, setPages] = useState<PageInput[]>([{ key: 1, address: "", note: "", shots: [] }])
   const [open, setOpen] = useState<string[]>(["site"])
   const [drawer, setDrawer] = useState<{ n: number; text: string } | null>(null)
+  // Ссылка на скриншот для агента — через ядро на этом компьютере (`nodeUrl` двери `/api/domain/state`): хранилище напрямую отвечает
+  // 401 без ключа узла (замерено 556-9), а ядро отдаёт файл. Нет ответа — адрес этой страницы.
+  const [nodeUrl, setNodeUrl] = useState<string | null>(null)
+  useEffect(() => {
+    fetch(`${BASE}/api/domain/state`, { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d: { nodeUrl?: string | null } | null) => setNodeUrl(d?.nodeUrl ? d.nodeUrl.replace(/\/+$/, "") : null))
+      .catch(() => setNodeUrl(null))
+  }, [])
+  const mediaLink = (id: string) => `${nodeUrl ?? window.location.origin}${BASE}/api/media/${encodeURIComponent(id)}/file`
 
   function addPage() {
     const key = nextKey.current++
@@ -427,6 +439,7 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
                 w={words.page}
                 helpLabel={words.helpLabel}
                 keyHref={kit.keyHref}
+                mediaLink={mediaLink}
                 onChange={(next) => setPages((all) => all.map((x) => (x.key === next.key ? next : x)))}
                 onRemove={() => setPages((all) => all.filter((x) => x.key !== p.key))}
               />

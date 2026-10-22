@@ -10,7 +10,7 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
     site: {
       title: "Site address",
       lead: "Add the site address to start the study.",
-      placeholder: "tinylaunch.com",
+      placeholder: "for example, tinylaunch.com",
       help: "The agent walks the open pages itself and writes down the sections, scenarios and rules. You can also give an SDK: a link to npm, PyPI or GitHub.",
     },
     page: {
@@ -60,7 +60,7 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
     site: {
       title: "Адрес сайта",
       lead: "Добавьте адрес сайта, чтобы начать разбор.",
-      placeholder: "tinylaunch.com",
+      placeholder: "например, tinylaunch.com",
       help: "Агент сам пройдёт по открытым страницам и опишет разделы, сценарии и правила. Можно указать и SDK: ссылку на npm, PyPI или GitHub.",
     },
     page: {
