@@ -7,7 +7,7 @@
 Имя маршрута — то, чем его находят: 6–12 слов, глагол первым. Правило проверяется `npm run check:api`,
 который стоит в `prebuild` — маршрут без имени роняет сборку.
 
-Всего маршрутов: **83**
+Всего маршрутов: **84**
 
 | Адрес | Методы | Что делает | Продукт |
 |---|---|---|---|
@@ -60,6 +60,7 @@
 | `/api/node/deploy` | GET, POST | list node elements with pending changes and start their deployment | — |
 | `/api/node/element-docs` | GET | read one development document of a WEB4 ITEM | — |
 | `/api/node/element-orders` | GET | list the order summaries one WEB4 ITEM saved | — |
+| `/api/node/elements` | GET | list every element of the node with its role and power | — |
 | `/api/node/github-backup` | GET, POST | report and create the GitHub repositories of every element | — |
 | `/api/node/machine` | GET | describe this computer: machine, memory per element, comparison with the super-node profile | — |
 | `/api/node/messenger-settings` | GET, POST | read and save an element's messenger settings in its passport | — |
