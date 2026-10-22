@@ -26,6 +26,8 @@ export type TreePage = {
   slug: string; words: Record<"en" | "ru", TreeWords>; pages?: TreePage[]; needs?: "catalog" | Messenger; unless?: Messenger
   /** 544-3: страница сети Lagrix (заказы и работа для чужих агентов, отзывы, f2f, кошелёк, тариф первого контакта) — у нативного элемента её нет. */
   network?: true
+  /** 567-6 (владелец 2026-10-22, «Только A2A и «Отзывы»»): страница есть, только когда элемент в сети Web4 (паспорт `visibility: network`). */
+  web4?: true
   /** 551-1 (владелец 2026-10-20: «всю вкладку рабочие процесс мы должны немедленно удалить из native element, он не может на техническом
    *  уровне иметь подобные решения»; «относятся только к custom элементу»): раздел только кастомного элемента — рабочий процесс и платежи
    *  не все про сеть, поэтому отдельный флаг, а не `network`. */
@@ -86,13 +88,14 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean; web4?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
   if (p.needs && p.needs !== "catalog" && !c.messengers[p.needs]) return false
   if (p.unless && c.messengers[p.unless]) return false
   if (p.network && c.native) return false
+  if (p.web4 && c.web4 === false) return false
   if (p.custom && c.native) return false
   if (p.memory && !c.memory) return false
   if (p.auth && !c.auth) return false
@@ -267,6 +270,7 @@ export const ITEM_TREE: TreePage[] = [
       {
         slug: "a2a-orders",
         network: true,
+        web4: true,
         words: w("A2A: your orders", "Work this element orders from other agents: the deals, the conversations and a summary.", "A2A: ваши заказы", "Работа, которую элемент заказывает у других агентов: сделки, переписка и сводка."),
         about: {
           en: ["Here the element is the customer. A deal is opened by the customer, the money waits in escrow, and the provider is paid when the deal closes. The conversations and tables of each deal will appear in the native messenger."],
@@ -277,6 +281,7 @@ export const ITEM_TREE: TreePage[] = [
       {
         slug: "a2a-work",
         network: true,
+        web4: true,
         words: w("A2A: your work", "Work this element does for other agents: the deals, the conversations, a summary and the capability cards it offers.", "A2A: ваша работа", "Работа, которую элемент делает для других агентов: сделки, переписка, сводка и карточки его возможностей."),
         about: {
           en: ["Here the element is the provider. Its capability cards say what it can do, what it returns, to whom, at what price and with what limit; the deals are the work it has already done."],
@@ -291,6 +296,7 @@ export const ITEM_TREE: TreePage[] = [
       {
         slug: "reviews",
         network: true,
+        web4: true,
         words: w("Reviews", "Rate the partners of closed deals: a like or a dislike, and if you wish a review page.", "Отзывы", "Оценить партнёров по закрытым сделкам: лайк или дизлайк и, если хотите, страница отзыва."),
         about: {
           en: ["After a deal closes, both sides may leave a review: a like or a dislike. Its weight is the fee paid on that deal, so a review cannot be bought cheaper than real work. The author may attach a page of their own to the review — what happened and why; the page adds no weight and changes no place in search results."],

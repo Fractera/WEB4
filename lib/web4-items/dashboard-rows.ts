@@ -13,6 +13,7 @@ import { birthState } from "@/lib/web4-items/birth"
 import paths from "@/lib/web4-items/paths.cjs"
 import deployLock from "@/lib/deploy/deploy-lock.cjs"
 import power from "@/lib/web4-items/element-power.cjs"
+import web4 from "@/lib/web4-items/element-web4.cjs"
 
 // СТРОКИ ТАБЛИЦЫ «Dashboard → Проекты» (339). Слово владельца 2026-09-29: «В каждой строке: порядковый номер · служебный адрес ·
 // заголовок из мета · описание из мета · отдельно адрес если существует · выставлен на продажу в web3 · последний коммит ·
@@ -40,6 +41,8 @@ export type ProjectRow = {
   status: ProjectStatus
   /** 567: причина выключения на языке страницы, если `status === "off"`. */
   offReason: string | null
+  /** 567-6: элемент в сети Web4 (паспорт `visibility: network`). */
+  web4: boolean
   /** Дата последнего коммита, ISO. */
   date: string | null
   commits: number | null
@@ -153,6 +156,7 @@ async function row(id: string, entry: RegistryEntry | null, custom: boolean, lan
     commit: hash ? { hash, subject: subject ?? "" } : null,
     status,
     offReason: off ? power.reasonIn(off, lang) : null,
+    web4: web4.visibilityOf(id, process.cwd()) === "network",
     date: date ?? null,
     commits: count && /^\d+$/.test(count) ? Number(count) : null,
     link: own ? `https://${own.domain}` : d?.zone ? `https://${service}` : null,

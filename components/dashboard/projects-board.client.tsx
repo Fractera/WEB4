@@ -20,6 +20,7 @@ type Row = {
   commit: { hash: string; subject: string } | null
   status: Status
   offReason?: string | null
+  web4?: boolean
   date: string | null
   commits: number | null
   link: string | null
@@ -31,6 +32,8 @@ export type ProjectsBoardWords = {
   unavailable: string
   native: string
   custom: string
+  /** 567-6: кастомные в сети Web4 — свой чекбокс (владелец 2026-10-22). */
+  customWeb4: string
   head: string[]
   status: Record<Status, string>
   openLabel: string
@@ -108,7 +111,9 @@ export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang
       texts={rows.map((r) => [r.service, r.domain, r.title, r.description].filter(Boolean).join(" "))}
       toggles={[
         { label: words.native, match: rows.map((r) => !r.custom) },
-        { label: words.custom, match: rows.map((r) => r.custom) },
+        // 567-6: строка видна, если её отмечает хоть один включённый чекбокс — поэтому кастомные делятся на два непересекающихся отбора.
+        { label: words.custom, match: rows.map((r) => r.custom && !r.web4) },
+        { label: words.customWeb4, match: rows.map((r) => r.custom && !!r.web4) },
       ]}
       words={words.table}
     />

@@ -44,6 +44,7 @@ import { readStaticCopy } from '@/lib/web4-items/static-copy-state'
 import { readLinks } from '@/lib/web4-items/element-links'
 import { ElementLink } from '../../../_components/element-link.client'
 import { ElementSiteSettings } from '../../../_components/element-site-settings'
+import { ElementWeb4 } from '../../../_components/element-web4.client'
 import { addressOf, idOfAddress } from '@/lib/web4-items/element-address'
 import { registryDescription, TASK as DESCRIBE_TASK } from '@/lib/web4-items/element-describe'
 import { terminalLink } from '@/app/[lang]/(architectLayer)/architect/kits/_agent-kit/core/client/terminal-paste.mjs'
@@ -395,7 +396,11 @@ export default async function Page({ params }: { params: Promise<Params> }) {
     : null
   const siteSettings = key === 'settings/site-settings'
     ? (entry
-      ? <ElementSiteSettings lang={lang} ui={sui} siteUrl={domainRecord(item)?.url ?? `https://${address}`} configOn={readLinks(item).config} />
+      ? <>
+          <ElementSiteSettings lang={lang} ui={sui} siteUrl={domainRecord(item)?.url ?? `https://${address}`} configOn={readLinks(item).config} />
+          {/* 567-6: «элемент в сети Web4» — только у кастомного: у нативного сети нет. */}
+          {!treeCtx.native ? <ElementWeb4 id={item} ui={sui} dialogUi={appDialogUi(lang)} initialOn={treeCtx.web4 !== false} /> : null}
+        </>
       : <p className="my-4 text-sm text-muted-foreground">{sui.notBorn}</p>)
     : null
 

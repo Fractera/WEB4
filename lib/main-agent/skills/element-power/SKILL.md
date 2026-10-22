@@ -23,6 +23,10 @@ Some elements arrive off on purpose (their passport says `power.default: "off"` 
 
 The person can do the same with the «Element power» card in the element's Danger zone.
 
+**Web4 — in the network of agents or not** (step 567-6), the same way: `npm run web4 -- <id> status | on | off`. On — agents of other nodes
+find the element and send it orders, its menu has A2A and Reviews; off — only inside the node. Change it only after the person's «yes»;
+the person's switch is on the element's «Settings → Site settings».
+
 ## How to act
 
 1. The request names the element and already says «yes» → run `on` or `off` at once, one command, no status check first.

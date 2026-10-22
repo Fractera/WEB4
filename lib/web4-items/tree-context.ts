@@ -3,6 +3,7 @@ import { elementMessengers, hasCatalog, isNativeElement } from "@/lib/a2a/elemen
 import type { TreeContext } from "@/lib/web4-items/item-tree"
 import nodeType from "@/lib/web4-items/node-type.cjs"
 import { AUTH_ELEMENT, MEMORY_ELEMENTS } from "@/lib/web4-items/built-in-elements"
+import web4 from "@/lib/web4-items/element-web4.cjs"
 
 // КОНТЕКСТ ДЕРЕВА ЭЛЕМЕНТА — ОДНА СБОРКА ДЛЯ МЕНЮ, МАРШРУТА И СПИСКОВ (узел, шаг 553-6; прежде — четыре копии одной строки).
 //
@@ -24,5 +25,7 @@ export function treeContextOf(id: string): TreeContext {
     nodeType: nodeType.readNodeType(process.cwd()) as "project" | "factory",
     memory: MEMORY_ELEMENTS.includes(id),
     auth: id === AUTH_ELEMENT,
+    // 567-6: вне сети Web4 (паспорт `visibility: node`) меню прячет A2A и «Отзывы»; нет поля — как прежде.
+    web4: web4.visibilityOf(id, process.cwd()) !== "node",
   }
 }

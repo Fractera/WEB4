@@ -28,6 +28,8 @@ export type ElementSettingsUi = {
   removeDialog: { title: string; text: string; label: string; confirm: string; deleting: string; cancel: string; mismatch: string; failed: string; riskNever: string; riskAhead: string; riskNone: string }
   /** 567: включение элемента — признак узла «выключен» с причиной. */
   power: Card
+  /** 567-6: «Элемент в сети Web4» на «Настройках сайта». */
+  web4: { title: string; lead: string; networkTitle: string; networkText: string; web2Title: string; web2Text: string; choose: string; chosen: string; toNetworkTitle: string; toNetworkText: string; toWeb2Title: string; toWeb2Text: string; confirm: string; cancel: string; working: string; failed: string }
   powerDialog: { stateOn: string; stateOff: string; stateOffDefault: string; turnOn: string; turnOff: string; onTitle: string; onText: string; offTitle: string; offText: string; reasonLabel: string; reasonPlaceholder: string; working: string; cancel: string; failed: string }
 }
 
@@ -170,6 +172,24 @@ const DICT: Record<string, ElementSettingsUi> = {
       text: "Connect your own second domain to the root of this element; the current subdomain then redirects to it.",
       action: "Connect the main mirror",
       pending: "Planned (step 324).",
+    },
+    web4: {
+      title: "Use this element in the Web4 network",
+      lead: "Choose with the star. Web4 is the network of agents: other nodes' agents find this element and send it orders through Lagrix.",
+      networkTitle: "In the Web4 network",
+      networkText: "Agents of other nodes can find this element and send it orders; it earns reputation from paid deals. Its menu has «A2A: your orders», «A2A: your work» and «Reviews».",
+      web2Title: "Only Web2",
+      web2Text: "An ordinary site and service: pages, sign-in, card payments. Agents of other nodes do not see it, and its menu has no A2A and no Reviews.",
+      choose: "Choose",
+      chosen: "Chosen",
+      toNetworkTitle: "Put the element into the Web4 network?",
+      toNetworkText: "Its A2A card starts answering outside this computer, agents of other nodes can find it and send it orders, and «A2A: your orders», «A2A: your work» and «Reviews» appear in its menu.",
+      toWeb2Title: "Take the element out of the Web4 network?",
+      toWeb2Text: "Agents of other nodes stop seeing it: its A2A card answers outside as if it did not exist. «A2A: your orders», «A2A: your work» and «Reviews» leave its menu. Its orders and reviews are kept.",
+      confirm: "Confirm",
+      cancel: "Cancel",
+      working: "Saving…",
+      failed: "Did not work:",
     },
     power: {
       title: "Element power",
@@ -351,6 +371,24 @@ const DICT: Record<string, ElementSettingsUi> = {
       text: "Подключить второй собственный домен к корню этого элемента; текущий поддомен будет переадресовывать на него.",
       action: "Подключить главное зеркало",
       pending: "Запланировано (шаг 324).",
+    },
+    web4: {
+      title: "Использовать этот элемент в сети Web4",
+      lead: "Выберите звёздочкой. Web4 — сеть агентов: агенты других узлов находят этот элемент и присылают ему заказы через Lagrix.",
+      networkTitle: "В сети Web4",
+      networkText: "Агенты других узлов могут найти этот элемент и прислать ему заказ; он копит репутацию по оплаченным сделкам. В его меню есть «A2A: ваши заказы», «A2A: ваша работа» и «Отзывы».",
+      web2Title: "Только Web2",
+      web2Text: "Обычный сайт и сервис: страницы, вход, оплата картой. Агенты других узлов его не видят, в меню нет A2A и «Отзывов».",
+      choose: "Выбрать",
+      chosen: "Выбрано",
+      toNetworkTitle: "Включить элемент в сеть Web4?",
+      toNetworkText: "Его визитка A2A начнёт отвечать за пределами этого компьютера, агенты других узлов смогут найти его и прислать заказ, а в меню появятся «A2A: ваши заказы», «A2A: ваша работа» и «Отзывы».",
+      toWeb2Title: "Убрать элемент из сети Web4?",
+      toWeb2Text: "Агенты других узлов перестанут его видеть: снаружи его визитка ответит так, будто его нет. «A2A: ваши заказы», «A2A: ваша работа» и «Отзывы» уйдут из меню. Заказы и отзывы сохранятся.",
+      confirm: "Подтвердить",
+      cancel: "Отмена",
+      working: "Сохраняю…",
+      failed: "Не получилось:",
     },
     power: {
       title: "Включение элемента",
