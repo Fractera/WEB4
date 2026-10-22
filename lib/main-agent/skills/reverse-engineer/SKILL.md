@@ -13,6 +13,12 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 … отработать задачу и выключить»). The request for an analysis IS the «yes» to turn it on — do not ask again. While it works it holds
 ~160 MB, its agent ~300 MB and its browser ~375 MB (measured 2026-10-22): say so in one line when the computer is short of memory.
 
+0. **The site's rules first** (owner 2026-10-22: a site whose rules forbid it is never analysed — the person gives a series of
+   screenshots instead; similar sites whose rules allow it are analysed one by one). A website: `npm run site-rules -- <url>`.
+   `DISALLOWED` or `UNKNOWN` → reverse stays off: tell the asker the rule it printed and offer both ways — a series of screenshots taken
+   by hand, scenario by scenario, or similar sites that do the same job. `ALLOWED` → read the terms it links and look for a ban on
+   scraping, crawling, automated access or reverse engineering: a ban → the same answer, quoting the clause; no terms found → ask the
+   asker to read them first. A package or an SDK: its license instead of robots.txt.
 1. **One at a time.** `npm run power -- reverse status`: on means another analysis is running — tell the asker their task is next and
    stop here; never start a second one.
 2. Name the task: `YYYY-MM-DD-<short-english-slug>` (lowercase, digits, hyphens).
@@ -32,5 +38,6 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 ## Never
 
 - Leave reverse on after the task, or turn it on for anything but an analysis.
+- Turn it on for a site whose robots.txt or terms forbid automated access, scraping or reverse engineering.
 - Ask it to sign in, pass a paywall or protection, or copy a product's code, texts, images, design or data — it refuses, and so do you.
 - Install engines it names as missing (JADX, a JDK, WABT, Ghidra…) — that is the owner's decision; pass the name on.

@@ -17,6 +17,7 @@
     "telegram": "node ../../scripts/main-agent-cli.mjs telegram",
     "node-type": "node ../../scripts/node-type.mjs",
     "power": "node ../../scripts/element-power.mjs",
-    "web4": "node ../../scripts/element-web4.mjs"
+    "web4": "node ../../scripts/element-web4.mjs",
+    "site-rules": "node ../../scripts/site-rules.mjs"
   }
 }
