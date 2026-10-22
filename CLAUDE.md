@@ -3243,7 +3243,16 @@ work as it works, but fully on the template architecture». Choices: «Шабл�
 | `data` | 24682 | v2.0.0 | the database: `/db/*`, `/deploy-runs`, `/a2a-log`, `/panel-settings`, `/platform/openai-key`, `/service/<name>/*`, `/capabilities` |
 | `storage` | 24693 | v1.0.0 | files: `/media/*` (upload ≤ 200 MB, thumbnails, video trim, icon sets) — `data/media.db`, `storage/`, `icons/` |
 | `vectors` | 24694 | v1.0.0 | vectors: `/vectors/*` on a sqlite-vec index partitioned by collection — `data/vectors.db` |
-| `graph` | 24689 | v1.0.0 | the knowledge graph element (549-4); the LightRAG server itself is a separate step |
+| `graph` | 24689 | v1.1.9 | the knowledge graph: LightRAG 1.5.7 inside the element, one operation per call (step 540) |
+
+- **The graph (step 540, owner 2026-10-22: «На каждый вызов (Рекомендую)»).** `npm run graph:python` in the element puts uv 0.12.23,
+  Python 3.12 and the exact lock (`lightrag-hku==1.5.7`) into its `.uv/` and `.venv/` (outside git, nothing in the system); `prebuild`
+  runs it with `--soft`. There is no resident graph process: each call of the doors runs `services/graph/graph.py` for one operation
+  (~2 s, ~200 MB while it lasts; a resident service held 190–225 MB), one run at a time (`lib/graph/run.mjs`), the data in
+  `data/services/graph/lightrag/`. No language model is ever called: elements bring a ready graph (`POST /api/graph-insert`) and their
+  own keywords (`POST /api/graph-query`), `GET /api/graph-status` — all with the node key; OpenAI computes only the vectors (the core's
+  key first, then the element's). The architect's page — `/<lang>/admin/graph` of the element. How to call it — the element's README,
+  «Using the graph». 🛑 On 2026-10-22 OpenAI refused the node's key (401): the path with real vectors is not measured yet.
 
 - **Consumers did not change.** Every element and the core still call `REMOTE_DATA_URL` (data) with `X-Data-Secret`; data passes
   `/media/*` and `/vectors/*` as they are (method, headers, streamed body) to `STORAGE_URL` and `VECTORS_URL` — the installer
