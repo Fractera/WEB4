@@ -175,6 +175,14 @@ in its frontmatter and the line «Subagent: allowed — <why>» in its body. No 
 pays only when it does much work inside; a one-command action is cheaper in the session itself. This holds for every agent of the
 project — the core, its main agent, both element templates and every element (each instruction carries the same line).
 
+## Model by kind of work (owner, 2026-10-22, step 570)
+
+Owner, verbatim: «написание текста это всегда модель Sonnet, а генерация кода то есть режим строительства это всегда максимальная модель»;
+«Под старшей моделью я всегда имел старшую модель доступную по подписке». The bridge starts every agent session with `--model`
+(`lib/agent-kit/modes.cjs` `launchModel`): a build session (and Telegram attached to it) — `opus`; a working-process session — `sonnet`; a folder
+may name its own in `.claude/launch-model.txt` — the main agent `sonnet` (it routes and answers; elements build). A primitive action — the weakest
+model; a skill field `model:` does not switch the session model (measured, step 569). `best`/Fable needs paid credits on this account — not used.
+
 ## How this application runs on a human machine (step 232, 2026-09-18)
 
 🔒 **The port is 24680, and it is chosen in exactly one place — `lib/server-port.cjs`.** Never hard-code
