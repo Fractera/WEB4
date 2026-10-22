@@ -13,6 +13,7 @@ import { ALL_ROLES } from "@/lib/roles"
 import type { TableUi } from "@/sections/table.i18n"
 import type { NodeUsersUi } from "./node-users.i18n"
 import { BatchBar } from "./batch-bar.client"
+import { ClampedChips } from "./clamped-chips.client"
 import { UserDialog } from "./user-dialog.client"
 
 // ВКЛАДКА «ПОЛЬЗОВАТЕЛИ» ЭЛЕМЕНТА ВХОДА (узел, шаг 559). Страница ядра предрендерена; людей островок спрашивает в браузере у двери
@@ -22,7 +23,7 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 export type NodeUserRow = {
   id: string; email: string; nickname: string | null; firstName: string | null; lastName: string | null; avatar: string | null
-  roles: string[]; orgs: { id: string; name: string }[]; methods: string[]; status: "active" | "blocked" | "anonymized"
+  roles: string[]; orgs: { id: string; name: string; element?: string | null }[]; methods: string[]; status: "active" | "blocked" | "anonymized"
   createdAt: string; lastLoginAt: string | null; wallet: string | null; guest: boolean
   marketing: { granted: boolean; at: string } | null; tracking: { granted: boolean; at: string } | null; messengerCount: number
 }
@@ -114,9 +115,19 @@ export function NodeUsers({ lang, ui, table, dialogUi }: { lang: string; ui: Nod
           </div>
         </td>
         <td className={`${cell} break-all`}>{gone ? ui.noName : r.email}</td>
-        <td className={cell}><div className="flex flex-wrap gap-1">{r.roles.map((role) => <Badge key={role} variant="outline">{role}</Badge>)}</div></td>
-        <td className={cell}>{r.orgs.length ? r.orgs.map((o) => o.name).join(", ") : ui.noName}</td>
-        <td className={cell}>{r.methods.length ? r.methods.map((m) => ui.methods[m] ?? m).join(", ") : ui.noName}</td>
+        {/* 554-5, ширины по слову владельца: роли — до 200 px, две строки; организации — колонка 400 px, плашка до 180 px, две строки
+            (приложение завода — первой); способы входа — до 200 px, одна строка. */}
+        <td className={cell} data-col="roles"><ClampedChips items={r.roles} maxWidth={200} chipMaxWidth={200} /></td>
+        <td className={`${cell} w-[400px] min-w-[400px] max-w-[400px]`} data-col="orgs">
+          {r.orgs.length
+            ? <ClampedChips items={[...r.orgs].sort((a, b) => Number(!!b.element) - Number(!!a.element)).map((o) => o.name)} maxWidth={400} chipMaxWidth={180} />
+            : ui.noName}
+        </td>
+        <td className={cell} data-col="methods">
+          {r.methods.length
+            ? <div className="max-w-[200px] truncate" title={r.methods.map((m) => ui.methods[m] ?? m).join(", ")}>{r.methods.map((m) => ui.methods[m] ?? m).join(", ")}</div>
+            : ui.noName}
+        </td>
         <td className={cell}>
           <Badge variant={r.status === "active" ? "secondary" : r.status === "blocked" ? "destructive" : "outline"}>{ui.status[r.status]}</Badge>
         </td>
