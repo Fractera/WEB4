@@ -1,4 +1,4 @@
-// @api read a finished reverse engineering report of the node by its task id
+// @api read a finished reverse engineering report by its task id
 import { timingSafeEqual } from "node:crypto"
 import { existsSync, readdirSync, readFileSync } from "node:fs"
 import { join } from "node:path"

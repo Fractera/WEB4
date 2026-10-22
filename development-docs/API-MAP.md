@@ -76,7 +76,7 @@
 | `/api/node/projects` | GET | list every WEB4 ITEM with its state and last commit | — |
 | `/api/node/rea` | GET, POST | read REA status in the core and start its one-time install | — |
 | `/api/node/reach` | GET, POST | measure and connect a service's address on the node's own domain | — |
-| `/api/node/reverse-report` | GET | read a finished reverse engineering report of the node by its task id | — |
+| `/api/node/reverse-report` | GET | read a finished reverse engineering report by its task id | — |
 | `/api/node/review-inbox` | POST | element agent leaves a self-review finding about something outside it | — |
 | `/api/node/state` | GET | report how this node is reachable and whether it is walled off | — |
 | `/api/node/stripe` | GET, POST | read which Stripe keys are set and save checked new ones | — |
