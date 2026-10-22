@@ -225,7 +225,12 @@ const pm2 = (args) => spawnSync(IS_WIN ? 'pm2.cmd' : 'pm2', args, { cwd: ROOT, e
   if (power.seedPower(id, require('../lib/web4-items/element-props.cjs').readElementProps(dir), ROOT)) {
     const off = power.offOf((power.readRegistry(ROOT).services || []).find((s) => s.id === id))
     stage(`выключен по умолчанию своего паспорта (${power.reasonIn(off, 'ru')}) — не запускаю; включить: npm run element:power -- ${id} on`)
-    say(`===BIRTH_OK=== ${id} port ${port} off`)
+    // 560-4 (владелец 2026-10-22, выбор «Подключать всегда (Рекомендую)»): адрес подключается и выключенному — красной карточки «не
+    // подключён» у нового элемента не бывает. ✗ До этого ветка 567 выходила раньше `connectAddress` (551-6). Ответа снаружи не ждём:
+    // процесса нет, адрес ответит после включения.
+    const address = await connectAddress({ wait: false })
+    stage(address.note)
+    say(`===BIRTH_OK=== ${id} port ${port} off url ${address.url}`)
     process.exit(0)
   }
 }
@@ -277,7 +282,7 @@ spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cw
 // странице элемента (`POST /api/node/reach`: маршрут туннеля, запись DNS, копия страниц в Workers), и «Проверить» — замер снаружи
 // (`GET /api/node/reach`: DNS Cloudflare и https с настоящим именем) по факту, пока адрес не ответит, не дольше 90 с. Не вышло — рождение не
 // падает, но последняя строка говорит это вслух; своего домена нет — адрес только на этой машине.
-async function connectAddress() {
+async function connectAddress({ wait = true } = {}) {
   let domain = null
   try { domain = JSON.parse(readFileSync(join(ROOT, 'logs', 'domain.json'), 'utf8')) } catch { /* своего домена нет */ }
   if (!domain?.zone || !domain?.tunnelId) return { url: 'local', note: `адрес только на этой машине: http://localhost:${port} (у узла нет своего домена)` }
@@ -291,6 +296,7 @@ async function connectAddress() {
     const r = await fetch(door, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ service: id }), signal: AbortSignal.timeout(60000) })
     let m = await r.json().catch(() => ({}))
     if (!r.ok || m.ok === false) return { url: 'none', note: `адрес не подключён: ${m.reason ?? r.status} — ${manual}` }
+    if (!wait) return { url: m.url ?? 'none', note: `адрес подключён: ${m.url ?? '—'} (маршрут и DNS); элемент выключен — снаружи ответит после включения` }
     for (let i = 0; i < 30 && !ok(m); i++) {
       await new Promise((res) => setTimeout(res, 3000))
       m = await fetch(`${door}?service=${id}`, { signal: AbortSignal.timeout(20000) }).then((x) => x.json()).catch(() => m)
