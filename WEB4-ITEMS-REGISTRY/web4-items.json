@@ -142,6 +142,19 @@
       "address": "cache"
     },
     {
+      "id": "reverse",
+      "repo": "https://github.com/Fractera/fractera-reverse-engineering-starter.git",
+      "version": "v0.1.0",
+      "port": 24696,
+      "provides": [
+        "reverse-engineering"
+      ],
+      "required": false,
+      "note": "Реверс-инжиниринг узла (563): разбор готового сайта или приложения для продуктового квиза. Выключен паспортом; узел включает его на время задачи и выключает после.",
+      "kind": "core",
+      "address": "reverse"
+    },
+    {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
       "version": "v2.1.4",
