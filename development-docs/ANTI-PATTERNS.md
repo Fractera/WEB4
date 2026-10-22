@@ -471,3 +471,23 @@ two environments will drift apart on. → `use-database`
 машине мертва**, потому что узел работает в продакшне по решению владельца. Плашка установки PWA несла
 такую проверку и всплывала вопреки ей. Работает признак АДРЕСА: петля и быстрый туннель — адреса без
 будущего, и установленное с них приложение назавтра открывает ошибку.
+
+# A status colour from the palette with a manual dark: pair
+
+> Defect · paid 2026-10-22, one failed core build (~10 min with the node stopped)
+
+The On/Off label of the Passport (567-7) was written `bg-emerald-500/15 text-emerald-700 dark:text-emerald-300` (and the orange twin).
+The shadcn guard `no-manual-dark` in `prebuild` rejects it — a palette colour fits one theme and breaks the other — and the build stopped
+only after the node was already down. **A status colour is a theme token that knows both themes:** `tone-data` (green), `tone-access`
+(orange), `primary`, `destructive` (`sections/tone.ts`). **Before `serve:rebuild` run `npm run prebuild` alone** — every guard in
+seconds, with the node still up; the build only adds the type check.
+
+# A light page door built from a heavy one
+
+> Defect · paid 2026-10-22, the owner: «каждый раз когда в паспорте подгружаются элементы … это занимает слишком много времени»
+
+`/api/node/passport` built its cards from `projectRows` — the whole Projects table: per element two synchronous `git` calls (1.45 s
+blocking the server), the full home page (1.7 MB HTML for one `<title>`) and the passport over HTTP (0.4–0.86 s each) — and then threw
+the native elements away. ~3 s for five cards. **A door reads only what its page shows, and from disk when the node holds it:**
+`diskPassport` (element-props) equals `/api/own-service-props` on every live element; `git` goes async; a home page is read to
+`</head>`. Measure the door before and after with `curl -w %{time_total}` on localhost.
