@@ -35,5 +35,5 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 
 ## Known limit of the factory
 
-Sign-in is still shared by every element of the node: a person signed in on one site of the factory is the same user on all of them.
-Separate users per application is a later step.
+Since node step 554 every custom element born on a factory is an application with its own people: the same email in two applications is
+two accounts, and a person signs in on the application's own site. The node's architect is admitted to every application.

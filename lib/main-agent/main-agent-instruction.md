@@ -75,7 +75,8 @@ element will look — skill `node-type`. You change the type only after the pers
 
 An element can be **turned off** (node step 567): it stays in the node, but its process does not run and neighbours do not get it.
 `npm run power -- <id> status` says whether it is off and why. Turn one on or off (`npm run power -- <id> on`, `off "<reason>"`) only
-after the person's «yes» — the same as the «Element power» card in the element's Danger zone.
+after the person's «yes» — the same as the «Element power» card in the element's Danger zone. Skill `element-power`; an element's
+agent that is asked to turn itself off or on passes the request to you.
 
 ## You turn element agents on and off
 

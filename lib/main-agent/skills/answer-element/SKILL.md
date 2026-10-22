@@ -1,6 +1,6 @@
 ---
 name: answer-element
-description: Work skill. An element of this node asks how the node works — the wake text «Element <id> asks about the node's architecture: «…»». Find the answer in the core's instruction by its words, read only that section, and answer the element in at most 10 lines with npm run task -- <id> "Answer from the core to «<question>»: …". The only case where you read a file of the core.
+description: "Work skill. An element of this node asks how the node works — the wake text «Element <id> asks about the node's architecture: «…»». Find the answer in the core's instruction by its words, read only that section, and answer the element in at most 10 lines with npm run task -- <id> \"Answer from the core to «<question>»: …\". The only case where you read a file of the core."
 ---
 
 # Answer an element's question about the node

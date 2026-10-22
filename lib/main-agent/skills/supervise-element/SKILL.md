@@ -1,6 +1,6 @@
 ---
 name: supervise-element
-description: Build process. Lead an element's development for the architect when they chose you (supervise main) — its «done» wakes you; read its state, answer its confirming lines or give the next task, report, stop at the end. Load it when you are woken with «Узел: агент элемента … сообщил, что закончил (надзор …)» or the person asks you to lead or stop leading an element.
+description: "Build process. Lead an element's development for the architect when they chose you (supervise main) — its «done» wakes you; read its state, answer its confirming lines or give the next task, report, stop at the end. Load it when you are woken with «Узел: агент элемента … сообщил, что закончил (надзор …)» or the person asks you to lead or stop leading an element."
 ---
 
 # Lead an element for the architect
