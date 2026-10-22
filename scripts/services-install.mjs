@@ -1061,6 +1061,20 @@ if (newNodeVars.size > 0) {
 // целиком — дело `npm run serve:start`.
 const running = runningAtStart
 
+// 567: умолчание элемента из паспорта (`power.default: "off"`) — в реестр узла, пока человек не выбирал сам; выключенный — строкой.
+// Ниже поднимается только то, что работало, а выключенный не работает и в ecosystem его нет — запуска не будет.
+{
+  const power = require('../lib/web4-items/element-power.cjs')
+  const { readElementProps } = require('../lib/web4-items/element-props.cjs')
+  for (const s of summary) {
+    const entry = (power.readRegistry(ROOT).services || []).find((e) => e.id === s.id)
+    if (!entry) continue
+    if (power.seedPower(s.id, readElementProps(entryDir(entry)), ROOT)) say(`  ${s.id}: выключен по умолчанию своего паспорта — включить: npm run element:power -- ${s.id} on`)
+    const off = power.offOf((power.readRegistry(ROOT).services || []).find((e) => e.id === s.id))
+    if (off) say(`  ${s.id}: выключен (${power.reasonIn(off, 'ru')}) — не запускаю`)
+  }
+}
+
 const refreshed = []
 for (const s of summary) {
   for (const suffix of ['', '-watch']) {

@@ -219,6 +219,16 @@ const IS_WIN = process.platform === 'win32'
 // первого запуска, поэтому ошибка рождения живёт до первого чистого `delete` + `start`.
 const cleanEnv = Object.fromEntries(Object.entries(process.env).filter(([k]) => !(k.startsWith('__NEXT') || k.startsWith('NEXT_') || k.startsWith('WEB4_') || k === 'PORT' || k === 'HOSTNAME' || k === 'NODE_ENV')))
 const pm2 = (args) => spawnSync(IS_WIN ? 'pm2.cmd' : 'pm2', args, { cwd: ROOT, encoding: 'utf8', shell: IS_WIN, windowsHide: true, env: cleanEnv })
+// 567: элемент, чей паспорт приходит выключенным (`power.default: "off"`), рождается записанным в реестре, но не запускается.
+{
+  const power = require('../lib/web4-items/element-power.cjs')
+  if (power.seedPower(id, require('../lib/web4-items/element-props.cjs').readElementProps(dir), ROOT)) {
+    const off = power.offOf((power.readRegistry(ROOT).services || []).find((s) => s.id === id))
+    stage(`выключен по умолчанию своего паспорта (${power.reasonIn(off, 'ru')}) — не запускаю; включить: npm run element:power -- ${id} on`)
+    say(`===BIRTH_OK=== ${id} port ${port} off`)
+    process.exit(0)
+  }
+}
 for (const name of [`fractera-svc-${id}`, `fractera-svc-${id}-watch`]) {
   const r = pm2(['start', 'ecosystem.config.cjs', '--only', name])
   if (r.status !== 0) {

@@ -234,6 +234,8 @@ for (const suffix of ['', '-watch']) {
   spawnSync(pm2, ['start', 'ecosystem.config.cjs', '--only', name], { cwd: ROOT, shell: IS_WIN, windowsHide: true, env: childEnv() })
 }
 spawnSync(pm2, ['save'], { cwd: ROOT, shell: IS_WIN, windowsHide: true, env: childEnv() })
+// 567: выключенный элемент в pm2 не стоит — новая версия принята, но не запущена; поднимет её включение.
+if (require('../lib/web4-items/element-power.cjs').isOffById(id, ROOT)) console.log(`«${id}» выключен — версия принята, но не запущена; включить: npm run element:power -- ${id} on`)
 writeFileSync(join(ROOT, 'logs', 'deploy-history.jsonl'), JSON.stringify({ id, version: `${base}+${current.commit}`, ok: true, at: new Date().toISOString(), via: 'preview' }) + '\n', { flag: 'a' })
 rmSync(FILE, { force: true })
 // 344-3: принятая версия уходит и в копию публичных страниц в Cloudflare (только у элемента со своим доменом).

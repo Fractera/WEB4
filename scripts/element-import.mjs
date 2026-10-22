@@ -20,6 +20,7 @@ import { dirname, join } from 'node:path'
 import { spawnSync } from 'node:child_process'
 import paths from '../lib/web4-items/paths.cjs'
 import { syncRegistryMap } from '../lib/web4-items/registry-map.mjs'
+import elementPower from '../lib/web4-items/element-power.cjs'
 
 const ROOT = process.cwd()
 const IS_WIN = process.platform === 'win32'
@@ -147,7 +148,10 @@ syncRegistryMap(ROOT)
 save('building', { previous: state.repo, replacedFolder: trash })
 const inst = spawnSync(process.execPath, [join(ROOT, 'scripts', 'services-install.mjs'), '--only', id], { cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: 1_800_000, env: cleanEnv })
 const ok = /===SERVICES_INSTALL_OK===/.test(`${inst.stdout ?? ''}`)
-for (const n of names) pm2(['start', 'ecosystem.config.cjs', '--only', n])
+// 567: выключенный элемент не поднимается — его нет в ecosystem.
+const offNow = elementPower.isOffById(id, ROOT)
+if (offNow) console.log(`«${id}» выключен — после импорта не запускаю`)
+for (const n of offNow ? [] : names) pm2(['start', 'ecosystem.config.cjs', '--only', n])
 pm2(['save'])
 if (!ok) fail('новый проект не собрался — прежняя версия лежит в WEB4-ITEMS/.replaced и в прежнем репозитории; журнал — в выводе установщика')
 save('done', { previous: state.repo, replacedFolder: trash, detached: detach })

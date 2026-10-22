@@ -127,6 +127,14 @@ async function start() {
   // Туннелем распоряжается только `publish()`, ниже.
   const require = createRequire(import.meta.url)
   const names = require(ecosystem).apps.map((a) => a.name).filter((n) => n !== 'fractera-web4-tunnel')
+  // 567: выключенные элементы в ecosystem не попадают — назвать их, чтобы «не поднялся» не читалось как отказ.
+  {
+    const power = require('../lib/web4-items/element-power.cjs')
+    for (const s of power.readRegistry(root).services || []) {
+      const off = power.offOf(s)
+      if (off) console.log(`  ${s.id}: выключен (${power.reasonIn(off, 'ru')}) — не запускаю`)
+    }
+  }
   const result = pm2run(['start', ecosystem, '--only', names.join(',')])
   if (result.status !== 0) {
     console.error('Запустить не удалось. Журнал: logs/web4-err.log')

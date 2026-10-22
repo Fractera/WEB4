@@ -19,6 +19,7 @@ import { homedir } from 'node:os'
 import paths from '../lib/web4-items/paths.cjs'
 import elementProps from '../lib/web4-items/element-props.cjs'
 import deployLock from '../lib/deploy/deploy-lock.cjs'
+import elementPower from '../lib/web4-items/element-power.cjs'
 import { addressOf } from '../lib/web4-items/address-file.mjs'
 
 const ROOT = join(paths.ITEMS_DIR, '..')
@@ -109,7 +110,10 @@ if (existsSync(hOld) && !existsSync(hNew)) {
 }
 
 for (const n of names) run(['delete', n])
-for (const n of [`fractera-svc-${id}`, `fractera-svc-${id}-watch`]) {
+// 567: выключенный элемент после переноса не поднимается — его нет в ecosystem.
+const offNow = elementPower.isOffById(id, ROOT)
+if (offNow) say(`«${id}» выключен — после переноса не запускаю`)
+for (const n of offNow ? [] : [`fractera-svc-${id}`, `fractera-svc-${id}-watch`]) {
   if (wasOnline.size === 0 || wasOnline.has(n)) {
     const r = run(['start', 'ecosystem.config.cjs', '--only', n])
     say(`pm2 start ${n}: ${r.status === 0 ? 'ok' : (r.stderr || r.stdout).trim().slice(-200)}`)
