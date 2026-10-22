@@ -3374,6 +3374,14 @@ now only base and body with turn off state». Repository — `Fractera/fractera-
   change both (✗ 560-2: the build type check failed on the second copy).
 - The core section `architect/cache` (port, live preview, agent kit); its tree pages come from `[item]` with the «turned off» banner.
 
+## Dashboard → This computer (step 572, 2026-10-22)
+
+Owner, verbatim: «покажи в нём технические характеристики компьютера»; fields «Машина + что ест память», super-node «Да, строкой сравнения».
+Door `GET /api/node/machine` (architect/admin) → `lib/web4-items/machine.ts`: `machineFacts` (system, CPU and cores, memory, disk of the node
+folder, uptime, Node; AES only on Linux), `elementMemory` (`pm2 jlist` async: process + watcher per element, core, residents; off → 0),
+Tier-2 rows from `tier2Rows` — ONE function shared with the super-node test (`lib/web4-items/super-node.ts`). Block `machineBoard`, page
+`dashboard/this-computer`: skeleton, Refresh, three cards; no timer. A super-node still runs on its own machine (531) — this is a comparison.
+
 ## Factory sign-in: one auth element, own people per application (step 554, 2026-10-22)
 
 Owner, verbatim (all words — `/code` `completed-steps/554-main.md`): the model «своя запись в каждом приложении»; «Когда создается новый
