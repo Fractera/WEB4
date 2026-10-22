@@ -3350,6 +3350,14 @@ the switch — «Кнопка в «Опасной зоне»». All words — `/
 - **The core shows it:** Projects — status «off» with the reason; Passport — «Turned off: <reason>»; every page of the element — a banner
   with a link to the Danger zone; A2A neighbours (`nodeEntries`, `a2a find`, `/api/node/a2a`) do not get it.
 - Stripe and Lava.top are off: «Приём оплаты ещё не построен» (owner's choice).
+- **Passport card (567-5, 567-7):** label «On» in `tone-data` (green) / «Off» in `tone-access` (orange); Web4 is the BIG star on the right
+  (`LagrixRating` prop `star`: filled = `visibility: network`, owner's tooltip) — no second star. While loading: 4 skeleton cards; Projects —
+  a skeleton table of 10 rows.
+- **In the Web4 network or not (567-6):** `npm run element:web4 -- <id> on|off|status`, door `/api/node/web4`, two cards on the element's
+  Site settings; off hides «A2A: your orders», «A2A: your work», «Reviews» (404); main agent `npm run web4` after «yes».
+- 🛑 **The Passport door reads only what it shows, from disk (567-7):** `passportCards` takes root and custom elements from the registry
+  and drafts, the passport via `diskPassport` (element-props) — no `git`, no element home pages, no HTTP. ✗ Built from `projectRows` it took
+  ~3 s (now ~0.3 s). Projects: passport from disk, `git` async, home page read to `</head>`. A new field on the Passport — from disk first.
 
 ## Factory sign-in: one auth element, own people per application (step 554, 2026-10-22)
 
