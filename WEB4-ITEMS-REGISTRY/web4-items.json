@@ -129,6 +129,19 @@
       "address": "graph"
     },
     {
+      "id": "cache",
+      "repo": "https://github.com/Fractera/fractera-redis-cache-starter.git",
+      "version": "v0.1.0",
+      "port": 24695,
+      "provides": [
+        "cache"
+      ],
+      "required": false,
+      "note": "Быстрое хранилище узла (560): счётчики и очереди горячих действий в Redis, итоги — в data. Пока только тело: выключено паспортом (macOS и Linux; Redis не подключён).",
+      "kind": "core",
+      "address": "cache"
+    },
+    {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
       "version": "v2.1.4",
