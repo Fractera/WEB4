@@ -157,7 +157,7 @@
     {
       "id": "stripe",
       "repo": "https://github.com/Fractera/fractera-stripe-starter.git",
-      "version": "v1.3.0",
+      "version": "v1.3.1",
       "port": 24691,
       "provides": [
         "payments"
