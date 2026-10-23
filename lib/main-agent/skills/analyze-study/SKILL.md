@@ -1,33 +1,39 @@
 ---
 name: analyze-study
-description: "Work skill. «Проанализируй итог разбора <task> …» — the architect pressed «Analyse the result» under a finished study on an element's «Reverse engineering» page, or asks whether a study is enough to build the element's product. Decide: continue the study (name the missing screens) or send it to the element's product quiz; record the decision with npm run verdict; answer in three lines."
+description: "Work skill. «Подвергни критическому анализу итог разбора <task> …» or «Проанализируй итог разбора …» — the architect pressed «Analyse the result» under a finished study on an element's «Reverse engineering» page. Audit the study against a 100% bar: can the closest or an identical product be built from it — every page at full depth, every function, every business task? List every gap, decide continue or quiz, record it with npm run verdict, answer in two lines."
 ---
 
-# Is a finished study enough to build the element's product?
+# Critical audit of a finished study
 
 **Process: working** — the decision is data next to the report (`verdict.json`); nothing changes in git.
 
 A hint, not a law: models of late 2026 work worse under rigid step-by-step instructions.
 
-**Why.** A study does not say by itself whether it is enough. The owner, 2026-10-23: «кнопку проанализировать итог … выдаёшь мне
-рекомендацию … и дальше ты рисуешь кнопку например продолжить разбор или кнопка отправить в продуктовый Quiz». Your decision appears under
-the study with two buttons; the recommended one is highlighted, and the person chooses. ✗ The first study (tinylaunch, 2026-10-23) saw only
-public pages, and nobody said that the product itself sits behind the sign-in: the owner called it «облизывать банку с мёдом».
+**The question**, the owner's words of 2026-10-23: «подверг критическому анализу полученный в результате реверс-инжиниринга результат и
+подтверди можно ли с уверенностью 100% создать максимально близкий или абсолютно аналогичный продукт включающий все страницы на всю
+глубину все функции и все бизнес задачи». You are the auditor, not the author: look for what is missing, not for what is good.
+✗ 2026-10-23 the first version asked «хватает ли его», and the agent asked back and answered with «if … then …» branches. The owner: «it is
+100% traush», «такое ощущение что ты его спросил скажи что я молодец».
 
-1. `npm run report -- <task> --item <element id>` — target, summary, roles, scenarios, entities, pages, the **limits** (what the study did
-   not see) and the element's goal from its product quiz.
-2. No quiz yet — the goal is **a product like the studied one**: the page lives in «Product design», a person studies a reference to
-   build their own like it. Decide on that goal and do not ask. Ask only when the task names a different goal and it is unclear.
-   ✗ 2026-10-23 the agent asked «что строим» and answered with two «if … then …» branches and no decision — the owner: «it is 100% traush».
-3. Decide by the goal, not by the size of the report:
-   - **continue** — the scenarios that carry the goal were inferred or not seen at all (usually the screens behind a sign-in: a
-     dashboard, a submission form, settings, payment). Each missing screen is a page: its address if the report knows it, and what to
-     capture there — fields, states, buttons, messages.
-   - **quiz** — what the element must build is seen, or the rest is cheap to settle in the quiz conversation.
-4. `npm run verdict -- <task> continue|quiz "<2–3 sentences in the person's language: what is enough, what is missing, why>" --page "<address> | <what to capture>"`
-   — one `--page` per missing screen; none for quiz. The button «Continue the study» fills the page cards with these pages.
-5. Answer in two lines: the decision with its main reason, and what the highlighted button under the study does. One decision — never
-   «if it is X, then …; if it is Y, then …»: the second button under the study is there for the person to choose otherwise.
+**The goal** is a product like the studied one (the page lives in «Product design»); the element's quiz vision, if it has one, narrows it.
+Do not ask what to build.
+
+1. `npm run report -- <task> --full` — the whole report and its limits.
+2. Audit three layers. Mark every item **seen** (observed on a page or in a captured response), **inferred** (from documents, script
+   strings, guesses) or **not seen**:
+   - **Pages at full depth** — every page and state of the product: public pages, everything behind the sign-in (the user's and the
+     maker's cabinets, settings), every form with its fields and validation messages, empty, error and loading states, emails and
+     notifications, the operator's or admin side.
+   - **Functions** — every action of every role, with its rule: limits, prices, order of steps, who may do it.
+   - **Business tasks** — how the product earns and runs: payments and their states, refunds, moderation, ranking, anti-abuse, support,
+     the operator's tools.
+3. The bar is 100%. If anything the product needs is inferred or not seen, the decision is **continue**. **quiz** only when every page,
+   function and business task is seen, or when the person accepts the listed gaps in so many words.
+4. `npm run verdict -- <task> continue|quiz "<seen X, inferred Y, not seen Z; the three biggest gaps>" --page "<address> | <what to capture: fields, states, buttons, messages>"`
+   — one `--page` per page a screenshot or a sign-in can close; several gaps on one page go into one `--page`. Gaps no page can close
+   (the admin side, the payment provider) go into the summary.
+5. Answer in two lines: «Нет, со 100% уверенностью не построить: видено X из N, не видели главного — …» (or «Да …»), and what the
+   highlighted button under the study does. No praise of the study and no «if … then …».
 
 Stay in the session for the person's reply: the answer is read in the terminal on the page, and closing yourself closes their terminal.
 Never start a new study from this skill and never edit the report — a new study starts from the page or from the person's words.

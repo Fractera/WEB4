@@ -51,7 +51,7 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
       continueStudy: "Continue the study",
       toQuiz: "Send to the product quiz",
       refresh: "Refresh",
-      taskAnalyze: "Analyse the result of the study {job} ({target}) for element {item}: is it enough to build the element's product? Skill analyze-study.",
+      taskAnalyze: "Critically analyse the result of the study {job} ({target}) for element {item} and confirm whether the closest or an identical product can be built from it with 100% certainty: every page at full depth, every function, every business task. Skill analyze-study.",
       taskQuiz: "Product quiz: let's start from the study {job} ({target}). The report: npm run reverse -- get {job}.",
     },
     tool: {
@@ -111,7 +111,7 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
       continueStudy: "Продолжить разбор",
       toQuiz: "Отправить в продуктовый квиз",
       refresh: "Обновить",
-      taskAnalyze: "Проанализируй итог разбора {job} ({target}) для элемента {item}: хватает ли его, чтобы построить продукт элемента. Навык analyze-study.",
+      taskAnalyze: "Подвергни критическому анализу итог разбора {job} ({target}) для элемента {item} и подтверди, можно ли со 100% уверенностью построить по нему максимально близкий или такой же продукт: все страницы на всю глубину, все функции и все бизнес-задачи. Навык analyze-study.",
       taskQuiz: "Продуктовый квиз: начнём по разбору {job} ({target}). Отчёт: npm run reverse -- get {job}.",
     },
     tool: {

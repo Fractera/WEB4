@@ -369,7 +369,7 @@ if (cmd === 'create') {
 // «Реверс-инжиниринг» показывает его с кнопками. Навык — analyze-study.
 if (cmd === 'report') {
   const [job] = rest
-  if (!job) fail('report <task> [--item <element id>] | report list')
+  if (!job) fail('report <task> [--item <element id>] [--full] | report list')
   if (job === 'list') {
     const r = await core('/api/node/reverse-report').catch((e) => fail(`the core did not answer: ${e.message}`))
     for (const it of r.body?.items ?? []) console.log(`${it.job} · ${it.target} · ${it.verdict ? `verdict ${it.verdict.verdict}` : 'no verdict'}`)
@@ -388,7 +388,8 @@ if (cmd === 'report') {
   console.log(`pages: ${names(rep.pages).join(' ')}`)
   console.log('limits — what the study did not see:')
   for (const l of rep.limits ?? []) console.log(`- ${l}`)
-  console.log(`full report: data/services/reverse/reports/${job}/report.md`)
+  if (has('--full') && r.body.markdown) console.log(`\n===REPORT_MD===\n${r.body.markdown}`)
+  else console.log(`full report: npm run report -- ${job} --full`)
   // Цель — замысел квиза элемента; квиза нет — цель спрашивается у человека одной фразой (навык analyze-study).
   const item = flag('--item')
   if (item) {
