@@ -21,11 +21,17 @@
 // 🛑 Копия — снимок момента выкладки: правка текста без развёртывания в неё не попадает (владелец выбрал: копия обновляется
 //   после «Принять» и «Развернуть», шаг 344-3). С 458-10 это касается только выключенного компьютера: включённый отдаёт свежее.
 // Состояние — `data/services/<id>/static-copy.json`, журнал — `logs/static-copy-<id>.log`.
+// 576-1 (владелец 2026-10-23: «почему если наш Cloud Flyer умеет отдавать статические страницы с выключенным сервером у нас это
+// опции не реализуется для выключаемых элементов?»): `--port <n>` — страницы берутся у прогретой новой сборки на запасном порту
+// петли (так зовёт установщик, пока прогрев жив); адреса — по-прежнему по порту элемента из его отметки. Выключенный элемент без
+// `--port` снимать не с чего: его копия остаётся как есть (`===COPY_OFF_KEPT===`), а не затирается отказом «no-pages» после 90 с
+// ожидания пустого порта. `--all` его пропускает — и элементы, которые эта же установка уже сняла (`--since=<время>`).
 
 import { createHash } from 'node:crypto'
 import { existsSync, readFileSync, readdirSync, statSync, writeFileSync, appendFileSync, mkdirSync } from 'node:fs'
 import { join, relative, extname } from 'node:path'
 import paths from '../lib/web4-items/paths.cjs'
+import power from '../lib/web4-items/element-power.cjs'
 
 const ROOT = join(paths.ITEMS_DIR, '..')
 const id = process.argv[2]
@@ -73,18 +79,25 @@ if (id === '--all') {
       try { if (r.hostname) { const p = Number(new URL(r.service).port); hostsByPort.set(p, [...(hostsByPort.get(p) ?? []), r.hostname]) } } catch { /* не адрес */ }
     }
   }
+  // 576-1: установщик снимает копии своих элементов с прогрева и зовёт проход с `--since=<начало установки>` — их второй раз не трогаем.
+  const since = Date.parse(process.argv.find((a) => a.startsWith('--since='))?.slice('--since='.length) ?? '')
   for (const s of readJson(paths.REGISTRY_FILE)?.services ?? []) {
     const st = readJson(join(paths.entryDir(s), '.install-stamp.json'))
     const own = readJson(join(ROOT, 'data', 'services', s.id, 'domain.json'))
     const prev = readJson(join(ROOT, 'data', 'services', s.id, 'static-copy.json'))
     const hosts = own?.url ? [new URL(own.url).host] : (st?.port ? hostsByPort.get(Number(st.port)) ?? [] : [])
-    const action = hosts.length ? 'copy' : prev?.ok ? 'remove' : 'skip'
-    job.plan.push({ id: s.id, address: addressOf(s.id, ROOT) || s.id, hosts, action, removedHosts: action === 'remove' ? (prev.hosts ?? [prev.host]) : undefined })
+    // 576-1: выключенный элемент не отвечает — его копия остаётся, обновляет её установка новой версии; строка табло покажет её дату.
+    const why = !hosts.length ? null : power.isOff(s) ? 'off' : Number.isFinite(since) && prev?.ok && Date.parse(prev.at) >= since ? 'fresh' : null
+    const action = hosts.length ? (why ? 'skip' : 'copy') : prev?.ok ? 'remove' : 'skip'
+    job.plan.push({ id: s.id, address: addressOf(s.id, ROOT) || s.id, hosts, action, ...(why ? { why } : {}), removedHosts: action === 'remove' ? (prev.hosts ?? [prev.host]) : undefined })
   }
   job.total = job.plan.filter((p) => p.action !== 'skip').length
   write()
   for (const p of job.plan) {
-    if (p.action === 'skip') continue
+    if (p.action === 'skip') {
+      if (p.why) note(`${p.id}: ${p.why === 'off' ? 'выключен — копия оставлена как есть' : 'копия уже снята этой установкой'}`)
+      continue
+    }
     job.current = p.id
     job.phase = p.action === 'remove' ? 'remove' : 'start'
     write()
@@ -98,7 +111,8 @@ if (id === '--all') {
     write()
   }
   const bad = job.results.filter((x) => !x.ok).length
-  note(`итог: адресов ${job.results.length}, отказов ${bad}, без адреса ${job.plan.filter((p) => p.action === 'skip').length}`)
+  const skipped = (why) => job.plan.filter((p) => p.action === 'skip' && (p.why ?? null) === why).length
+  note(`итог: адресов ${job.results.length}, отказов ${bad}, без адреса ${skipped(null)}, выключено (копия оставлена) ${skipped('off')}, уже снято этой установкой ${skipped('fresh')}`)
   console.log(bad ? '===COPY_ALL_PARTIAL===' : '===COPY_ALL_OK===')
   finish(bad ? 1 : 0)
 }
@@ -141,7 +155,12 @@ if (process.argv.includes('--remove')) {
 }
 
 const entry = (readJson(paths.REGISTRY_FILE)?.services ?? []).find((s) => s.id === id)
-if (!entry) { console.error('usage: static-copy.mjs <id> [--dry | --remove]'); process.exit(2) }
+const USAGE = 'usage: static-copy.mjs <id> [--dry | --remove | --port <n>] | --all [--since=<время>]'
+if (!entry) { console.error(USAGE); process.exit(2) }
+// 576-1: откуда брать страницы — прогрев установщика на запасном порту петли; без параметра — сам элемент на своём порту.
+const portAt = process.argv.indexOf('--port')
+const fromPort = portAt > 0 ? Number(process.argv[portAt + 1]) : null
+if (fromPort !== null && !(Number.isInteger(fromPort) && fromPort > 0 && fromPort < 65536)) { console.error(USAGE); process.exit(2) }
 const dir = paths.entryDir(entry)
 // 488-1 (владелец 2026-10-15: «публичный страницу делай доступную только по паролю архитектора»): сайт элемента закрыт
 // (`config/site-access.json` элемента несёт `site`) — копии быть не должно. Её снимают с петли, где хозяин проходит замок, и
@@ -198,6 +217,19 @@ if (!hosts.length) {
 }
 const host = hosts[0]
 
+// 576-1: выключенный элемент свой порт не слушает — снимать не с чего (зовут «Обновить копии», «Принять», подключение адреса).
+// Копия, снятая установкой с прогрева, остаётся как есть: иначе 90 с ожидания и отказ «no-pages» затёрли бы её состояние.
+if (fromPort === null && power.isOff(entry)) {
+  const last = readJson(STATE)
+  const was = last?.ok ? (last.hosts ?? [last.host]) : []
+  const moved = last?.ok && (was.length !== hosts.length || hosts.some((h) => !was.includes(h)))
+  say(last?.ok
+    ? `выключен — копия ${last.version ?? ''} от ${last.at} остаётся${moved ? `; адреса сменились (${hosts.join(', ')}) — копия по ним появится при установке новой версии или после включения` : ''}`
+    : 'выключен — снимать не с чего; копию снимет установка его новой версии')
+  console.log('===COPY_OFF_KEPT===')
+  process.exit(0)
+}
+
 phase('pages')
 // ── 1. Страницы: корень, главная и каждая страница публичной ветки на каждом языке сайта ─────────────────────────────────────
 const envLocal = (() => { try { return readFileSync(join(dir, '.env.local'), 'utf8') } catch { return '' } })()
@@ -213,7 +245,8 @@ const slugs = []
     walk(p, prefix + e.name + '/')
   }
 })(pagesDir, '')
-const origin = `http://127.0.0.1:${stamp.port}`
+const origin = `http://127.0.0.1:${fromPort ?? stamp.port}`
+if (fromPort !== null) say(`снимок с прогрева: страницы — ${origin}, сборка ${stamp.dist} (${stamp.version}), адреса — порта элемента ${stamp.port}`)
 // 2026-10-01: копия запускается сразу после «Принять»/«Развернуть», а элемент в этот момент ещё перезапускается. ✗ Замерено: 14:45:27
 // копия упала «no-pages» через 7 с после старта элемента, и aifa.dev сутки отдавал прежнюю копию. Ждём ответа ПО ФАКТУ, до 90 с.
 // По `/`, а не `/api/health`: у auth и data этой двери нет (385, замер), а `/` есть у всех (200 или перенаправление).
@@ -437,5 +470,5 @@ for (const h of hosts) {
   } else say(`маршрут ${pattern} уже ведёт на ${script}`)
 }
 
-save({ ok: true, host, hosts, script, files: files.size, pages: pagePaths.length, redirects: Object.keys(redirects).length, version: stamp.version })
+save({ ok: true, host, hosts, script, files: files.size, pages: pagePaths.length, redirects: Object.keys(redirects).length, version: stamp.version, from: fromPort !== null ? 'warm-up' : 'element', fromPort: fromPort ?? Number(stamp.port) })
 console.log('===COPY_OK===')

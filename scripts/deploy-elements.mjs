@@ -38,6 +38,16 @@ const ids = process.argv.slice(2).filter((a) => /^[a-z][a-z0-9-]{0,31}$/.test(a)
   return null
 }).filter(Boolean)
 
+/** 576-1: копия элемента в Cloudflare удалась после `t0` — её снял установщик с прогрева. */
+function copiedSince(id, t0) {
+  try {
+    const c = JSON.parse(readFileSync(join(ROOT, 'data', 'services', id, 'static-copy.json'), 'utf8'))
+    return c.ok === true && Date.parse(c.at) >= t0
+  } catch {
+    return false
+  }
+}
+
 mkdirSync(join(ROOT, 'logs'), { recursive: true })
 // 337-1: `pid` — по нему читающий узнаёт, жив ли этот процесс (`lib/deploy/deploy-lock.cjs`).
 const state = { running: true, pid: process.pid, startedAt: new Date().toISOString(), finishedAt: null, queue: ids, current: null, results: [] }
@@ -79,7 +89,8 @@ for (const id of ids) {
   } catch { /* реестр не прочитан — версия неизвестна */ }
   appendFileSync(join(ROOT, 'logs', 'deploy-history.jsonl'), JSON.stringify({ id, version, ok, at: new Date().toISOString() }) + '\n')
   // 344-3: развёрнутая версия уходит и в копию публичных страниц в Cloudflare (только у элемента со своим доменом).
-  if (ok) startStaticCopy(ROOT, id)
+  // 576-1: установщик уже снял её с прогрева новой сборки; второй раз — только если его копия не удалась.
+  if (ok && !copiedSince(id, t0)) startStaticCopy(ROOT, id)
 }
 
 state.running = false

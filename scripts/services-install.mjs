@@ -524,6 +524,8 @@ const summary = []
 // внутри элемента, а их отпечаток установщик не считает.
 const ONLY = (() => { const i = process.argv.indexOf('--only'); return i > 0 ? process.argv[i + 1] : null })()
 const REBUILD = process.argv.includes('--rebuild')
+// 576-1: начало установки — копии, снятые с прогрева после него, проход «все адреса» в конце второй раз не снимает.
+const INSTALL_STARTED_AT = new Date().toISOString()
 
 // ── Прогрев свежей сборки (280-9) ───────────────────────────────────────────
 //
@@ -531,23 +533,26 @@ const REBUILD = process.argv.includes('--rebuild')
 // а ещё ≥14 с принимал соединения и не отвечал: первый запуск читает тысячи только что записанных
 // файлов, и Windows проверяет каждый. Поэтому новая сборка сначала поднимается на ЗАПАСНОМ порту и
 // отвечает на здоровье и главную — и только потом pm2 переключается на неё: файлы уже прочитаны.
+// 576-1: прогретый сервер живёт, пока установщик не снимет с него копию публичных страниц в Cloudflare, и останавливается
+// вызовом `stop()` после неё. Ответ — строка для журнала (`note`), порт и `stop`; не прогрелся — только `note`, сервер остановлен.
 async function warmUp(start, healthPath) {
   let port = null
   for (const c of blockPorts().reverse()) {
     if (takenByRegistry.has(c) || c === nodePort) continue
     if (await freeOnBothStacks(c)) { port = c; break }
   }
-  if (!port) return 'нет свободного порта для прогрева'
+  if (!port) return { note: 'нет свободного порта для прогрева' }
   const proc = spawn(process.execPath, start.args, {
     cwd: start.cwd, windowsHide: true, stdio: 'ignore',
     env: { ...childEnv(), PORT: String(port), HOSTNAME: '127.0.0.1', NODE_ENV: 'production' },
   })
+  const stop = () => { try { proc.kill() } catch { /* уже вышел */ } }
   const base = `http://127.0.0.1:${port}`
   const t0 = Date.now()
   try {
     for (const path of [healthPath || '/', '/']) {
       for (;;) {
-        if (Date.now() - t0 > 180000) return 'прогрев не дождался ответа за 3 минуты'
+        if (Date.now() - t0 > 180000) { stop(); return { note: 'прогрев не дождался ответа за 3 минуты' } }
         try {
           const res = await fetch(base + path, { signal: AbortSignal.timeout(15000) })
           if (res.status < 500) break
@@ -555,9 +560,46 @@ async function warmUp(start, healthPath) {
         await new Promise((ok) => setTimeout(ok, 1000))
       }
     }
-    return `прогрет за ${Math.round((Date.now() - t0) / 1000)} с на порту ${port}`
-  } finally {
-    proc.kill()
+    return { note: `прогрет за ${Math.round((Date.now() - t0) / 1000)} с на порту ${port}`, port, stop }
+  } catch (e) {
+    stop()
+    throw e
+  }
+}
+
+// ── Копия публичных страниц с прогрева (576-1) ─────────────────────────────
+//
+// Слово владельца 2026-10-23: «Когда элемент активен показывается нормальная страница но когда его выключаю вместо этого рисуется
+// непонятная заглушка … почему если наш Cloud Flyer умеет отдавать статические страницы с выключенным сервером у нас это опции не
+// реализуется для выключаем ых элементов?». ✗ Измерено тем же днём: копия снимается только с РАБОТАЮЩЕГО элемента, а новая версия
+// ставится этим установщиком — выключенный Stripe (v1.3.1) отдавал из Cloudflare страницу шаблона от 2026-10-20. Поэтому копию
+// снимает сам установщик с прогретой сборки, пока она жива, — и у включённого, и у выключенного; адреса нет — копировать нечего.
+// Отказ копии установку не роняет: строка в журнале, причина — в `data/services/<id>/static-copy.json`.
+function snapshotCopy(id, port) {
+  const { nodeHasDomain } = require('../lib/web4-items/static-copy-start.cjs')
+  if (!nodeHasDomain(ROOT) && !existsSync(join(ROOT, 'data', 'services', id, 'domain.json'))) return
+  const r = spawnSync(process.execPath, [join(ROOT, 'scripts', 'static-copy.mjs'), id, '--port', String(port)], {
+    cwd: ROOT, encoding: 'utf8', windowsHide: true, timeout: 15 * 60_000, maxBuffer: 16 * 1024 * 1024,
+  })
+  const out = (r.stdout ?? '') + (r.stderr ?? '')
+  let state = null
+  try { state = JSON.parse(readFileSync(join(ROOT, 'data', 'services', id, 'static-copy.json'), 'utf8')) } catch { /* состояния нет */ }
+  if (out.includes('===COPY_OK===')) say(`  копия публичных страниц в Cloudflare снята с прогрева (порт ${port}): ${state?.hosts?.join(', ') ?? ''} — ${state?.files ?? '?'} файлов, версия ${state?.version ?? '?'}`)
+  else if (out.includes('===COPY_NO_ADDRESS===')) say('  копия в Cloudflare: у элемента нет адреса в интернете — копировать нечего')
+  else if (out.includes('===COPY_SITE_CLOSED===')) say('  копия в Cloudflare: сайт элемента закрыт — копии нет')
+  else say(`  копия в Cloudflare НЕ снята (${state?.reason ?? (r.error ? r.error.message : `код ${r.status}`)}) — установка продолжается; журнал: logs/static-copy-${id}.log`)
+}
+
+// Выключенный элемент после установки не отвечает, и снять его копию потом некому. Если сборка не менялась (прогрева не было), а
+// копия в Cloudflare — другой версии, установленная сборка прогревается только ради копии. Лишь у того, чья копия уже была (адрес у
+// него есть): иначе прогрев шёл бы впустую на каждой установке.
+function copyLagsWhileOff(id, version) {
+  if (!require('../lib/web4-items/element-power.cjs').isOffById(id, ROOT)) return false
+  try {
+    const c = JSON.parse(readFileSync(join(ROOT, 'data', 'services', id, 'static-copy.json'), 'utf8'))
+    return c.ok === true && c.version !== version
+  } catch {
+    return false
   }
 }
 
@@ -996,7 +1038,9 @@ for (const entry of registry.services) {
   // Без этого страницы рисуются, а КАЖДЫЙ стиль и скрипт отдают 404 — снаружи
   // это выглядит «сломалась вёрстка», а не «не доделана упаковка».
   const start = resolveStart(dir, props, builtDist ?? currentDist(stamp))
-  if (builtDist && start) say(`  ${await warmUp(start, props.health?.path)}`)
+  // 576-1: прогретая новая сборка живёт до снимка копии ниже и останавливается после него.
+  let warm = builtDist && start ? await warmUp(start, props.health?.path) : null
+  if (warm) say(`  ${warm.note}`)
   if (!start) {
     say('  ОШИБКА: нечем запускать — не нашёл ни standalone-сервера, ни простой команды старта')
     failed += 1
@@ -1004,17 +1048,30 @@ for (const entry of registry.services) {
   }
   say(`  запуск: ${start.cmd} ${start.args.join(' ')}`)
 
-  writeFileSync(stampFile, JSON.stringify({
-    version: version,
-    env: envFingerprint,
-    lockHash,
-    port,
-    start,
-    // 285-4: папка текущей сборки — для служб, чей старт не называет её путём (Express со встроенным Next).
-    ...(props.runtime?.distDirEnv ? { dist: builtDist ?? currentDist(stamp) } : {}),
-    health: props.health?.path ?? null,
-    at: new Date().toISOString(),
-  }, null, 2), 'utf8')
+  try {
+    writeFileSync(stampFile, JSON.stringify({
+      version: version,
+      env: envFingerprint,
+      lockHash,
+      port,
+      start,
+      // 285-4: папка текущей сборки — для служб, чей старт не называет её путём (Express со встроенным Next).
+      ...(props.runtime?.distDirEnv ? { dist: builtDist ?? currentDist(stamp) } : {}),
+      health: props.health?.path ?? null,
+      at: new Date().toISOString(),
+    }, null, 2), 'utf8')
+    // 576-1: копия снимается ПОСЛЕ отметки — `static-copy.mjs` берёт из неё папку сборки и версию, а `--port` меняет только то,
+    // откуда брать страницы. Только у элемента со сборкой в соседнюю папку: у прочих отметка не знает папки сборки.
+    if (!warm && props.runtime?.distDirEnv && copyLagsWhileOff(entry.id, version)) {
+      warm = await warmUp(start, props.health?.path)
+      say(warm.port
+        ? `  выключен, а копия в Cloudflare другой версии — установленная сборка ${warm.note.replace(/^прогрет/, 'прогрета')}, только ради копии`
+        : `  выключен, а копия в Cloudflare другой версии — ${warm.note}`)
+    }
+    if (warm?.port && props.runtime?.distDirEnv) snapshotCopy(entry.id, warm.port)
+  } finally {
+    warm?.stop?.()
+  }
 
   summary.push({ id: entry.id, version: version, port, stack: props.runtime?.stack })
 }
@@ -1127,7 +1184,8 @@ if (failed > 0) {
 
 // 385-3: полная установка пересобрала все элементы — копия в Cloudflare каждому адресу узла (одиночную `--only` копирует
 // `scripts/deploy-elements.mjs` сам). Узел без своего домена — ничего не запускается.
-if (!ONLY && require('../lib/web4-items/static-copy-start.cjs').startStaticCopyAll(ROOT)) say('\n  копии публичных страниц в Cloudflare обновляются в фоне — итог на «Активации домена»')
+// 576-1: элементы, чью копию эта установка уже сняла с прогрева, проход пропускает (`--since`), выключенные — тоже.
+if (!ONLY && require('../lib/web4-items/static-copy-start.cjs').startStaticCopyAll(ROOT, [`--since=${INSTALL_STARTED_AT}`])) say('\n  копии публичных страниц в Cloudflare обновляются в фоне — итог на «Активации домена»')
 
 // 548: граница агента элемента — инструкция ядра не грузится, выход за папку только с ответа человека.
 spawnSync(process.execPath, [join(ROOT, 'scripts', 'element-isolate.mjs')], { cwd: ROOT, windowsHide: true, stdio: 'inherit' })
