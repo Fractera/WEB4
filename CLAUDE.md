@@ -3542,6 +3542,15 @@ by the person, in his test account) — «y go».
   (an SDK link too), «Page N» (address, what matters — voice too, screenshots uploaded through `/api/media/upload` into the node storage,
   given to the agent as links) and «Add another page»; «Start reverse engineering» → the main agent's terminal on the right with the task;
   below — the finished studies. Details only under «?»; the REA card shows only when REA is missing.
+- **The decision on top of «Finished studies» (556-13, owner 2026-10-23: «большая широкая кнопка на всю ширину контейнера с текстом
+  продолжить разбор», «если … мне нужно войти в авторизацию … выйди оранжевую карточку»):** the newest verdict of all studies acts — a
+  wide «Continue the study» (a task for the main agent in the drawer) or a wide «Send to the product quiz» (the element's agent). A verdict
+  with `signIn: { site }` (`npm run verdict -- … --sign-in <site>`, skill `analyze-study`) shows the orange card: four steps, «Open the
+  login window» (`POST /api/node/study` `open`), «Check» and the state from `GET /api/node/study?site=`; the wide button waits for a valid
+  sign-in. The row of a study keeps the decision text and «Analyse again». **Signal «decision recorded»:** the verdict door calls
+  `emitReverse` (`lib/study/reverse-events.ts`, a `globalThis` set of listeners); the page opens `GET /api/node/reverse-report/events`
+  (`text/event-stream`, architect/admin, `Cache-Control: no-transform` so Next does not compress it, a comment every 25 s for the tunnel)
+  only while a drawer the person opened is on screen, and «Collapse» closes it. `npm run report -- <task>` prints the verdict too.
 - **The study browser and its guard** (element `reverse` v0.2.1): `npm run browser:start -- <url> --site <site>` only with a confirmed
   account and only on its site; `scripts/study-guard.mjs` attaches first and lets only reads through (writes to any host blocked except a
   GraphQL query to the site; log-out/delete/unsubscribe/cancel/invite blocked), human pace, a page budget, a stop on a challenge page,

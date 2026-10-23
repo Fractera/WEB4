@@ -388,6 +388,13 @@ if (cmd === 'report') {
   console.log(`pages: ${names(rep.pages).join(' ')}`)
   console.log('limits — what the study did not see:')
   for (const l of rep.limits ?? []) console.log(`- ${l}`)
+  // 556-13: the decision recorded for this study — what «Continue the study» has to capture, and the account it needs.
+  const v = r.body.verdict
+  if (v) {
+    console.log(`verdict (${v.at}): ${v.verdict} — ${v.summary}`)
+    for (const p of v.pages ?? []) console.log(`- capture: ${[p.address, p.note].filter(Boolean).join(' — ')}`)
+    if (v.signIn) console.log(`- sign-in: the test account of ${v.signIn.site} (npm run study -- list)`)
+  }
   if (has('--full') && r.body.markdown) console.log(`\n===REPORT_MD===\n${r.body.markdown}`)
   else console.log(`full report: npm run report -- ${job} --full`)
   // Цель — замысел квиза элемента; квиза нет — цель спрашивается у человека одной фразой (навык analyze-study).
@@ -403,15 +410,20 @@ if (cmd === 'report') {
 if (cmd === 'verdict') {
   const pages = []
   const words = []
+  // 556-13: `--sign-in <site>` — what is missing is seen only after signing in to that site; the page shows the person an orange card
+  // to open the login window of the node's test account, and the wide «Continue the study» waits for the sign-in.
+  let signIn = ''
   for (let i = 0; i < rest.length; i++) {
-    if (rest[i] === '--page') { const [address, ...note] = String(rest[++i] ?? '').split('|'); pages.push({ address: address.trim(), note: note.join('|').trim() }) } else words.push(rest[i])
+    if (rest[i] === '--page') { const [address, ...note] = String(rest[++i] ?? '').split('|'); pages.push({ address: address.trim(), note: note.join('|').trim() }) } else if (rest[i] === '--sign-in') signIn = String(rest[++i] ?? '').trim()
+    else words.push(rest[i])
   }
   const [job, verdict, ...said] = words
   const summary = said.join(' ').trim()
-  if (!job || !['continue', 'quiz'].includes(verdict) || !summary) fail('verdict <task> continue|quiz "<the decision in the person\x27s language>" [--page "<address> | <what to capture>"]...')
-  const r = await core('/api/node/reverse-report', { method: 'POST', body: JSON.stringify({ job, verdict, summary, pages }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
+  if (!job || !['continue', 'quiz'].includes(verdict) || !summary) fail('verdict <task> continue|quiz "<the decision in the person\x27s language>" [--page "<address> | <what to capture>"]... [--sign-in <site>]')
+  const r = await core('/api/node/reverse-report', { method: 'POST', body: JSON.stringify({ job, verdict, summary, pages, ...(signIn ? { signIn } : {}) }) }).catch((e) => fail(`the core did not answer: ${e.message}`))
   if (!r.body?.ok) fail(`verdict ${job}: ${r.body?.error ?? r.status}`)
-  console.log(`===VERDICT_OK=== ${job} ${verdict} · pages ${r.body.verdict.pages.length} — the person sees it under the study on the element\x27s «Reverse engineering» page`)
+  const account = r.body.verdict.signIn ? ` · sign-in ${r.body.verdict.signIn.site}: the page asks the person to open the login window` : ''
+  console.log(`===VERDICT_OK=== ${job} ${verdict} · pages ${r.body.verdict.pages.length}${account} — the person sees it on the element\x27s «Reverse engineering» page`)
   process.exit(0)
 }
 

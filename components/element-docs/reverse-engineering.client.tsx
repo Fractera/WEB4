@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { CircleHelp, FileText, Globe, ImagePlus, Plus, RefreshCw, Trash2, X } from "lucide-react"
+import { Check, CircleHelp, FileText, Globe, ImagePlus, Plus, RefreshCw, Trash2, X } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
@@ -23,7 +23,8 @@ import type { TerminalDrawerWords, TerminalKit } from "@/_tools/terminal-drawer/
 // 2) «Начать реверс-инжиниринг» — справа ящик с терминалом главного агента узла (`build`), задача уходит с запуском (`_tools/terminal-drawer`);
 // 3) ниже — готовые разборы. Страницы после входа — скриншоты; войти самому агент попросит в терминале (выбор владельца 2026-10-23).
 // ✗ До этого: «не петля → фраза для Telegram» — ложная посылка: терминал закрыт только на временном адресе, на своём домене он работает.
-// Всё читается при открытии страницы и по кнопкам — таймеров и опроса нет (запрет незаказанного поведения 2026-09-25).
+// Всё читается при открытии страницы и по кнопкам — таймеров и опроса нет (запрет незаказанного поведения 2026-09-25). 556-13: пока
+// открыт ящик, который открыл человек, страница слушает поток «решение записано» (план согласован владельцем: «go»).
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
@@ -78,6 +79,22 @@ export type ReverseEngineeringWords = {
     taskAnalyze: string
     /** The task for the element's agent. «{job}», «{target}» are replaced. */
     taskQuiz: string
+    /** 556-13: the wide «Continue the study» — the task for the main agent. «{job}», «{target}», «{item}» are replaced. */
+    taskContinue: string
+    /** Appended when the decision needs a sign-in. «{site}» is replaced. */
+    taskContinueAccount: string
+    /** The line above the wide button. «{target}», «{date}» are replaced. */
+    decisionOf: string
+    /** 556-13: the orange card «sign in to the test account». «{site}» is replaced everywhere. */
+    signIn: {
+      title: string
+      steps: string[]
+      help: string
+      open: string
+      opening: string
+      check: string
+      states: { loading: string; none: string; window: string; consent: string; done: string; failed: string }
+    }
   }
   tool: {
     title: string
@@ -253,12 +270,13 @@ function PageCard({
 // 556-11 (владелец 2026-10-23: «кнопку проанализировать итог … выдаёшь мне рекомендацию … продолжить разбор или кнопка отправить в
 // продуктовый Quiz»): у разбора без решения — «Проанализировать итог» (главный агент, навык analyze-study); с решением — оно и две кнопки,
 // рекомендованная выделена, выбирает человек.
-export type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string }
+export type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string; signIn?: { site: string } }
 export type ReportItem = { job: string; target: string; kind: string; summary: string; verdict: Verdict | null }
 type ReportView = { markdown: string | null } | "loading" | "failed"
 type ReportActions = { onAnalyze: (it: ReportItem) => void; onContinue: (it: ReportItem) => void; onQuiz: (it: ReportItem) => void }
 
-function VerdictBlock({ it, w, onAnalyze, onContinue, onQuiz }: { it: ReportItem; w: ReverseEngineeringWords["reports"] } & ReportActions) {
+// 556-13: the decision itself stays in its study row; what to DO with it is the wide button on top of «Finished studies».
+function VerdictBlock({ it, w, onAnalyze }: { it: ReportItem; w: ReverseEngineeringWords["reports"]; onAnalyze: (it: ReportItem) => void }) {
   const v = it.verdict
   if (!v) {
     return (
@@ -267,16 +285,6 @@ function VerdictBlock({ it, w, onAnalyze, onContinue, onQuiz }: { it: ReportItem
       </div>
     )
   }
-  const cont = (
-    <Button key="continue" type="button" variant={v.verdict === "continue" ? "default" : "outline"} onClick={() => onContinue(it)} data-rea-continue={it.job}>
-      {w.continueStudy}
-    </Button>
-  )
-  const quiz = (
-    <Button key="quiz" type="button" variant={v.verdict === "quiz" ? "default" : "outline"} onClick={() => onQuiz(it)} data-rea-to-quiz={it.job}>
-      {w.toQuiz}
-    </Button>
-  )
   return (
     <div className="flex flex-col gap-2 rounded-md border border-border p-3" data-rea-verdict={v.verdict}>
       <p className="font-medium">{w.verdictTitle} · {v.at.slice(0, 10)}</p>
@@ -289,15 +297,126 @@ function VerdictBlock({ it, w, onAnalyze, onContinue, onQuiz }: { it: ReportItem
           </ul>
         </div>
       )}
-      <div className="flex flex-wrap items-center gap-2">
-        {v.verdict === "continue" ? [cont, quiz] : [quiz, cont]}
+      <div>
         <Button type="button" variant="ghost" size="sm" onClick={() => onAnalyze(it)} data-rea-analyze={it.job}>{w.analyzeAgain}</Button>
       </div>
     </div>
   )
 }
 
-function Reports({ w, refresh, onAnalyze, onContinue, onQuiz }: { w: ReverseEngineeringWords["reports"]; refresh: number } & ReportActions) {
+// 556-13. Владелец 2026-10-23: «Если ты считаешь что на следующем этапе мне нужно войти в авторизацию … выйди оранжевую карточку и скажи
+// для дальнейшего углубление в проект необходимо сделать следующее … обязательно напиши в каком браузере я имею в виду e-mail».
+// Окно входа — отдельный Chrome узла на экране компьютера с узлом (дверь `/api/node/study`, шаги 556-6…556-8): человек ставит три отметки
+// согласия, вписывает сайт и входит сам; пароль узел не видит. Состояние читается при открытии карточки и по «Проверить».
+type StudyAccount = { site: string; consent: { at: string } | null; session: { at: string; valid: boolean } | null; window: { at: string; open: boolean } | null } | null
+
+function SignInCard({ site, w, helpLabel, lang, onSignedIn }: {
+  site: string
+  w: ReverseEngineeringWords["reports"]["signIn"]
+  helpLabel: string
+  lang: string
+  onSignedIn: (yes: boolean) => void
+}) {
+  const [acc, setAcc] = useState<StudyAccount | "loading" | "failed">("loading")
+  const [busy, setBusy] = useState(false)
+
+  async function read() {
+    try {
+      const r = await fetch(`${BASE}/api/node/study?site=${encodeURIComponent(site)}`, { cache: "no-store" })
+      const j = (await r.json().catch(() => null)) as { ok?: boolean; account?: StudyAccount } | null
+      if (!j?.ok) { setAcc("failed"); onSignedIn(false); return }
+      setAcc(j.account ?? null)
+      onSignedIn(Boolean(j.account?.session?.valid))
+    } catch {
+      setAcc("failed")
+      onSignedIn(false)
+    }
+  }
+  useEffect(() => {
+    void read()
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- read once per card; the card is keyed by its site
+  }, [])
+
+  async function openWindow() {
+    setBusy(true)
+    try {
+      await fetch(`${BASE}/api/node/study`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "open", site, lang }) })
+    } catch { /* the state line below says what happened */ }
+    await read()
+    setBusy(false)
+  }
+
+  const a = acc === "loading" || acc === "failed" ? null : acc
+  const done = Boolean(a?.session?.valid)
+  const state = acc === "loading" ? w.states.loading
+    : acc === "failed" ? w.states.failed
+    : done ? w.states.done
+    : a?.window?.open ? w.states.window
+    : a?.consent ? w.states.consent
+    : w.states.none
+  return (
+    <section
+      className={`flex flex-col gap-3 rounded-lg border p-4 ${done ? "border-success/50 bg-success/10" : "border-warning/50 bg-warning/10"}`}
+      data-rea-sign-in={done ? "done" : "needed"}
+    >
+      <div className="flex items-start gap-1">
+        <p className="flex-1 pt-2 text-sm font-medium text-foreground">{fill(w.title, { site })}</p>
+        <Help text={fill(w.help, { site })} label={helpLabel} />
+      </div>
+      {!done && (
+        <ol className="list-decimal space-y-1 pl-5 text-sm text-foreground">
+          {w.steps.map((s) => <li key={s}>{fill(s, { site })}</li>)}
+        </ol>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        {!done && (
+          <Button type="button" onClick={() => void openWindow()} disabled={busy || Boolean(a?.window?.open)} data-rea-sign-in-open>
+            {busy ? w.opening : w.open}
+          </Button>
+        )}
+        <Button type="button" variant="outline" size="sm" onClick={() => void read()} data-rea-sign-in-check>{w.check}</Button>
+        <p className="inline-flex items-center gap-1.5 text-sm text-foreground" role="status" data-rea-sign-in-state>
+          {done && <Check className="size-4 text-success" aria-hidden />}
+          {state}
+        </p>
+      </div>
+    </section>
+  )
+}
+
+// 556-13. Владелец 2026-10-23: «Ответ модели должен был создать реальную кнопку … на вкладке готовые разборы большая широкая кнопка на всю
+// ширину контейнера с текстом продолжить разбор». Последнее решение агента — сверху «Готовых разборов»: «продолжить» — широкая
+// «Продолжить разбор» (с входом — ждёт его), «в квиз» — широкая «Отправить в продуктовый квиз».
+function DecisionPanel({ it, w, helpLabel, lang, onContinue, onQuiz }: {
+  it: ReportItem
+  w: ReverseEngineeringWords["reports"]
+  helpLabel: string
+  lang: string
+  onContinue: (it: ReportItem) => void
+  onQuiz: (it: ReportItem) => void
+}) {
+  const v = it.verdict as Verdict
+  const site = v.verdict === "continue" ? v.signIn?.site ?? null : null
+  const [signedIn, setSignedIn] = useState(!site)
+  const target = it.target.trim().split(/\s+/)[0] || it.job
+  return (
+    <div className="flex flex-col gap-3" data-rea-decision={v.verdict} data-rea-decision-job={it.job}>
+      <p className="text-sm text-muted-foreground">{fill(w.decisionOf, { target, date: v.at.slice(0, 10) })}</p>
+      {site && <SignInCard key={site} site={site} w={w.signIn} helpLabel={helpLabel} lang={lang} onSignedIn={setSignedIn} />}
+      {v.verdict === "continue" ? (
+        <Button type="button" size="lg" className="h-12 w-full text-base" disabled={!signedIn} onClick={() => onContinue(it)} data-rea-continue-wide={it.job}>
+          {w.continueStudy}
+        </Button>
+      ) : (
+        <Button type="button" size="lg" className="h-12 w-full text-base" onClick={() => onQuiz(it)} data-rea-to-quiz-wide={it.job}>
+          {w.toQuiz}
+        </Button>
+      )}
+    </div>
+  )
+}
+
+function Reports({ w, refresh, helpLabel, lang, onAnalyze, onContinue, onQuiz }: { w: ReverseEngineeringWords["reports"]; refresh: number; helpLabel: string; lang: string } & ReportActions) {
   const [items, setItems] = useState<ReportItem[] | "loading" | "failed">("loading")
   const [views, setViews] = useState<Record<string, ReportView>>({})
   const [reload, setReload] = useState(0)
@@ -347,7 +466,7 @@ function Reports({ w, refresh, onAnalyze, onContinue, onQuiz }: { w: ReverseEngi
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-3 text-sm text-foreground">
-                <VerdictBlock it={it} w={w} onAnalyze={onAnalyze} onContinue={onContinue} onQuiz={onQuiz} />
+                <VerdictBlock it={it} w={w} onAnalyze={onAnalyze} />
                 {it.summary && <p className="max-w-prose">{it.summary}</p>}
                 {v === undefined || v === "loading" ? (
                   <p className="inline-flex items-center gap-2 text-muted-foreground"><Spinner /> {w.open}</p>
@@ -364,6 +483,11 @@ function Reports({ w, refresh, onAnalyze, onContinue, onQuiz }: { w: ReverseEngi
     </Accordion>
   )
 
+  // 556-13: the newest decision of all studies is the one the wide button acts on.
+  const latest = Array.isArray(items)
+    ? items.filter((it) => it.verdict).sort((a, b) => Date.parse((b.verdict as Verdict).at) - Date.parse((a.verdict as Verdict).at))[0] ?? null
+    : null
+
   return (
     <section className="flex flex-col gap-3" data-rea-reports-section>
       <div className="flex items-center justify-between gap-2">
@@ -373,6 +497,17 @@ function Reports({ w, refresh, onAnalyze, onContinue, onQuiz }: { w: ReverseEngi
           {w.refresh}
         </Button>
       </div>
+      {latest && (
+        <DecisionPanel
+          key={`${latest.job}|${(latest.verdict as Verdict).at}`}
+          it={latest}
+          w={w}
+          helpLabel={helpLabel}
+          lang={lang}
+          onContinue={onContinue}
+          onQuiz={onQuiz}
+        />
+      )}
       {body}
     </section>
   )
@@ -450,7 +585,18 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
   const [open, setOpen] = useState<string[]>(["site"])
   const [drawer, setDrawer] = useState<{ n: number; text: string; service: string } | null>(null)
   const [refresh, setRefresh] = useState(0)
-  const cardsRef = useRef<HTMLDivElement | null>(null)
+  // 556-13: пока на экране ящик, который открыл человек, страница слушает «решение записано» и перечитывает разборы — кнопка
+  // появляется без «Обновить». Ящик свёрнут — соединения нет: решение покажут открытие страницы, «Обновить» и «Свернуть».
+  const drawerOpen = drawer !== null
+  useEffect(() => {
+    if (!drawerOpen) return
+    let events: EventSource | null = null
+    try {
+      events = new EventSource(`${BASE}/api/node/reverse-report/events`)
+      events.addEventListener("verdict", () => setRefresh((n) => n + 1))
+    } catch { /* no stream: the list still reloads on Collapse and Refresh */ }
+    return () => events?.close()
+  }, [drawerOpen])
   // Ссылка на скриншот для агента — через ядро на этом компьютере (`nodeUrl` двери `/api/domain/state`): хранилище напрямую отвечает
   // 401 без ключа узла (замерено 556-9), а ядро отдаёт файл. Нет ответа — адрес этой страницы.
   const [nodeUrl, setNodeUrl] = useState<string | null>(null)
@@ -482,21 +628,22 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
   function toQuiz(it: ReportItem) {
     setDrawer((d) => ({ n: (d?.n ?? 0) + 1, service: item, text: fill(words.reports.taskQuiz, { job: it.job, target: firstUrl(it.target) }) }))
   }
-  // «Продолжить разбор»: карточки получают адрес и недостающие страницы из решения агента — человеку остаётся скриншот или вход.
+  // 556-13: широкая «Продолжить разбор» — задача главному агенту в ящике справа (с входом — в тестовой учётной записи сайта); чего не
+  // хватает, агент берёт из решения (`npm run report`). ✗ 556-11 кнопка лишь заполняла карточки — владелец: «как ты собираешься
+  // продолжать разбор если ты не собираешься заходить в страницы защищенные авторизацией».
   function continueStudy(it: ReportItem) {
-    if (!it.verdict) return
-    const next = it.verdict.pages.map((p) => ({ key: nextKey.current++, address: p.address, note: p.note, shots: [] }))
-    setTarget(firstUrl(it.target))
-    setPages(next.length ? next : [{ key: nextKey.current++, address: "", note: "", shots: [] }])
-    setOpen(["site", ...next.map((p) => `page-${p.key}`)])
-    cardsRef.current?.scrollIntoView({ block: "start" })
+    const v = it.verdict
+    if (!v) return
+    let text = fill(words.reports.taskContinue, { job: it.job, target: firstUrl(it.target), item })
+    if (v.signIn?.site) text += fill(words.reports.taskContinueAccount, { site: v.signIn.site })
+    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, service: "build", text }))
   }
 
   return (
     <div className="my-4 flex flex-col gap-4 lg:flex-row lg:items-start" data-reverse-engineering>
       <div className="flex min-w-0 max-w-3xl flex-1 flex-col gap-8">
         <ToolNotice t={words.tool} />
-        <div ref={cardsRef} className="flex flex-col gap-4" data-rea-form>
+        <div className="flex flex-col gap-4" data-rea-form>
           <Accordion type="multiple" value={open} onValueChange={setOpen} className="rounded-lg border border-border px-4" data-rea-cards>
             <AccordionItem value="site" data-rea-site>
               <AccordionTrigger>
@@ -548,7 +695,7 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
             {words.start}
           </Button>
         </div>
-        <Reports w={words.reports} refresh={refresh} onAnalyze={analyze} onContinue={continueStudy} onQuiz={toQuiz} />
+        <Reports w={words.reports} refresh={refresh} helpLabel={words.helpLabel} lang={lang} onAnalyze={analyze} onContinue={continueStudy} onQuiz={toQuiz} />
       </div>
       {drawer && (
         <TerminalDrawer

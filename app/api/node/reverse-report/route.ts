@@ -4,6 +4,8 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
+import { emitReverse } from "@/lib/study/reverse-events"
+import { siteOf } from "@/lib/study/study.mjs"
 
 // ОТЧЁТ РАЗБОРА (шаг 563-3). Элемент `reverse` выключен почти всегда: узел включает его на одну задачу и сразу выключает (владелец
 // 2026-10-22: «по умолчанию выключенным … отработать задачу и выключить»). Поэтому отчёт отдаёт ядро: файлы лежат в данных узла,
@@ -27,7 +29,9 @@ const read = (file: string) => (existsSync(file) ? readFileSync(file, "utf8") : 
 
 // 556-11 (владелец 2026-10-23: «кнопку проанализировать итог … выдаёшь мне рекомендацию … продолжить разбор или … отправить в продуктовый
 // Quiz»): решение главного агента по итогу разбора — `verdict.json` рядом с отчётом. Пишет только агент узла (ключ узла); страница читает.
-type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string }
+// 556-13 (владелец 2026-10-23: «если … мне нужно войти в авторизацию … выйди оранжевую карточку»): `signIn` — недостающее видно только
+// после входа на этот сайт; страница показывает карточку окна входа тестовой учётной записи, и «Продолжить разбор» ждёт входа.
+type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string; signIn?: { site: string } }
 const verdictOf = (dir: string): Verdict | null => {
   try { const v = JSON.parse(read(join(dir, "verdict.json")) ?? "null") as Verdict | null; return v && (v.verdict === "continue" || v.verdict === "quiz") ? v : null } catch { return null }
 }
@@ -61,14 +65,14 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false, error: "report.json is not JSON" }, { status: 502, headers: HEADERS })
   }
-  return NextResponse.json({ ok: true, job, report, markdown: read(join(dir, "report.md")) }, { headers: HEADERS })
+  return NextResponse.json({ ok: true, job, report, markdown: read(join(dir, "report.md")), verdict: verdictOf(dir) }, { headers: HEADERS })
 }
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "")
 
 export async function POST(req: NextRequest) {
   if (!nodeKeyOk(req.headers.get("x-node-key"))) return NextResponse.json({ ok: false, error: "node key required" }, { status: 401, headers: HEADERS })
-  const b = (await req.json().catch(() => null)) as { job?: unknown; verdict?: unknown; summary?: unknown; pages?: unknown } | null
+  const b = (await req.json().catch(() => null)) as { job?: unknown; verdict?: unknown; summary?: unknown; pages?: unknown; signIn?: unknown } | null
   const job = text(b?.job, 90)
   if (!JOB.test(job)) return NextResponse.json({ ok: false, error: "bad-job" }, { status: 400, headers: HEADERS })
   const dir = join(REPORTS, job)
@@ -78,6 +82,15 @@ export async function POST(req: NextRequest) {
   if (!summary) return NextResponse.json({ ok: false, error: "summary required" }, { status: 400, headers: HEADERS })
   const pages = (Array.isArray(b.pages) ? b.pages : []).slice(0, 12).map((p) => ({ address: text((p as { address?: unknown })?.address, 300), note: text((p as { note?: unknown })?.note, 500) })).filter((p) => p.address || p.note)
   const verdict: Verdict = { verdict: b.verdict, summary, pages, at: new Date().toISOString() }
+  const signInRaw = text(b.signIn, 300)
+  if (signInRaw) {
+    if (b.verdict !== "continue") return NextResponse.json({ ok: false, error: "signIn goes with continue only" }, { status: 400, headers: HEADERS })
+    const t = siteOf(signInRaw)
+    if (t.error || !t.site) return NextResponse.json({ ok: false, error: `signIn: ${t.error ?? "not a site"}` }, { status: 400, headers: HEADERS })
+    verdict.signIn = { site: String(t.site) }
+  }
   writeFileSync(join(dir, "verdict.json"), JSON.stringify(verdict, null, 2) + "\n", "utf8")
+  // 556-13: открытая страница (ящик с терминалом, который открыл человек) получает сигнал и показывает кнопку без «Обновить».
+  emitReverse({ kind: "verdict", job, verdict: verdict.verdict, at: verdict.at })
   return NextResponse.json({ ok: true, job, verdict }, { headers: HEADERS })
 }

@@ -33,7 +33,10 @@ ask what to build.
    - **not observable** — server logic, formulas, the admin side, internal moderation: it goes to the quiz as a decision to make.
 4. Decide: **continue** if at least one observable gap is left; **quiz** when none is left — the not-observable list goes with it.
 5. `npm run verdict -- <task> continue|quiz "<seen X of N observable; not seen: the main gaps; to decide in the quiz: …>" --page "<address> | <what to capture>"`
-   — one `--page` per page that closes observable gaps (several gaps of one page in one `--page`).
+   — one `--page` per page that closes observable gaps (several gaps of one page in one `--page`). When those gaps sit behind the
+   site's sign-in, add `--sign-in <site>`: the page then shows the person an orange card with the login window of the node's test
+   account, and the wide «Continue the study» button waits until they have signed in (owner 2026-10-23: «если … мне нужно войти в
+   авторизацию … выйди оранжевую карточку»). Gaps that a screenshot closes without a sign-in need no `--sign-in`.
 6. Answer in two lines: «Видено X из N наблюдаемого; не видели — …» and the next step (what the button under the study does). No praise of
    the study and no «if … then …».
 
