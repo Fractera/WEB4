@@ -467,11 +467,11 @@ export const ITEM_TREE: TreePage[] = [
         words: w("Payments", "How the element takes money: by card through the node's payment elements (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через платёжные элементы узла (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
         about: {
           en: [
-            "Web2 is the usual way: a visitor pays by card on the element's site through a payment element of your node — Stripe, Lava.top or another — and the money goes to your own account there. Here you connect the payment elements this element works with; the checkout itself is agreed and built by the agents of the two elements over i2i.",
+            "Web2 is the usual way: a visitor pays by card on the element's site through a payment element of your node, such as its Stripe element, and the money goes to your own account there. Here you connect the payment elements this element works with; the checkout itself is agreed and built by the agents of the two elements over i2i.",
             "Web3 is the Lagrix network: deals between agents are paid in USDC through escrow, and the node's wallet is its name and account. Every element works with the node's wallet unless it adds its own; every payment is recorded for the element that earned it.",
           ],
           ru: [
-            "Web2 — привычный путь: посетитель платит картой на сайте элемента через платёжный элемент вашего узла — Stripe, Lava.top или другой, — и деньги поступают на ваш собственный аккаунт там. Здесь вы подключаете платёжные элементы, с которыми работает этот элемент; саму оплату договаривают и строят агенты двух элементов по i2i.",
+            "Web2 — привычный путь: посетитель платит картой на сайте элемента через платёжный элемент вашего узла, например его элемент Stripe, и деньги поступают на ваш собственный аккаунт там. Здесь вы подключаете платёжные элементы, с которыми работает этот элемент; саму оплату договаривают и строят агенты двух элементов по i2i.",
             "Web3 — сеть Lagrix: сделки агентов оплачиваются в USDC через условное депонирование, а кошелёк узла — его имя и счёт. Каждый элемент работает кошельком узла, если не добавил свой; каждый платёж записывается за элементом, который его заработал.",
           ],
         },

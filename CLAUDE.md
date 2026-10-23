@@ -3189,10 +3189,11 @@ and the answers in the choice windows: «В каждый узел при уст�
   · 26), and «Card payments» per connected payment element. Data — passport field `payments` (`lib/web4-items/element-payments.ts`, door
   `GET/POST /api/node/payments`): `web3["a2a-card"].sample` and `web2[<tool>]["a2a-card"].sample`. The nine doors of the template's A2A card
   stay in the card and in Build → i2i → API. 🪦 The showcase view and `A2A-OFFERS.json` (435-4) are gone.
-- **Payment elements** (`WEB4-ITEMS-REGISTRY/payment-elements.json`: `stripe` — Stripe, `lavatop` — Lava.top): born from the custom template
-  by `scripts/payment-elements.mjs` (`npm run items:payments`, `--dry-run`), which `scripts/serve.mjs` calls on every start after the
-  temporary address: an element not yet born is born once; one the person removed is not reborn (`data/node/payment-elements.json`). The
-  passport carries `payment: { tool, name }` (read by `readElementProps`); roles — `WEB4-ITEMS-REGISTRY/roles.json`.
+- 🪦 *«Payment elements are born from the custom template on every start» (551-5) — removed by step 573-2 (owner 2026-10-22: «платёжный шлюз
+  в страйп сделать нативного элементом доступным по умолчанию … По умолчанию … он остается выключен»; the second payment element the owner
+  deletes himself).* **The payment element is native: `stripe`** (`Fractera/fractera-stripe-starter`, registry `kind: core`, port 24691,
+  `WEB4-ITEMS/core/stripe`), installed by the installer and turned off by its passport (`power.default: "off"`, «Card payments are not
+  built yet»). The passport carries `payment: { tool, name }` (read by `readElementProps`); roles — `WEB4-ITEMS-REGISTRY/roles.json`.
 - **Settings → Payments → Web2** of an element (`_components/payment-elements.client.tsx`): the node's payment elements as an accordion —
   «Connect» writes `payments.web2.<tool>.element` (only a record: no agent wakes, i2i does not start by itself); tabs (shadcn `components/ui/tabs.tsx`
   on `radix-ui`) «API and Hook» (what links the two: this element's `consumes` from the payment element and back; nothing — «Give the task to
@@ -3347,7 +3348,7 @@ Owner, verbatim (all words — `/code` `completed-steps/553-main.md`): «эти 
   `GET /api/node/catalog` in the browser), the account button with the orange attention dot always; the project menu from CONFIG is not
   shown here; the footer is only the theme, width and language switches. `components/shell` is again an exact copy of the site
   (`check:shell-kits`). The left menu zones «Native items / Custom items» (ru «Встроенные элементы / Свои элементы») fold like Passport.
-- 🪦 *Closed by step 554 (2026-10-22): «sign-in is shared by every element» — see the next section.* 🛑 **Debts:** stripe and lavatop are on template v0.3.117 (no tab until their next update); the core
+- 🪦 *Closed by step 554 (2026-10-22): «sign-in is shared by every element» — see the next section.* 🛑 **Debts:** 🪦 *stripe and lavatop on template v0.3.117 — gone with step 573-2 (Stripe is native, Lava.top deleted by the owner);* the core
   menu of built-in elements still uses the old service pages — the next step (owner: «Сразу после 553-7»).
 
 ## A turned-off element: in the node, but not running (step 567, 2026-10-22)
@@ -3365,7 +3366,7 @@ the switch — «Кнопка в «Опасной зоне»». All words — `/
   (door `POST /api/node/power`, architect/admin, runs the same script), or the main agent (`npm run power`) after the person's «yes».
 - **The core shows it:** Projects — status «off» with the reason; Passport — «Turned off: <reason>»; every page of the element — a banner
   with a link to the Danger zone; A2A neighbours (`nodeEntries`, `a2a find`, `/api/node/a2a`) do not get it.
-- Stripe and Lava.top are off: «Приём оплаты ещё не построен» (owner's choice).
+- Stripe is off by its passport: «Приём оплаты ещё не построен» (step 573-2; 🪦 the custom Stripe and Lava.top were off by the owner's choice).
 - **Passport card (567-5, 567-7):** label «On» in `tone-data` (green) / «Off» in `tone-access` (orange); Web4 is the BIG star on the right
   (`LagrixRating` prop `star`: filled = `visibility: network`, owner's tooltip) — no second star. While loading: 4 skeleton cards; Projects —
   a skeleton table of 10 rows.

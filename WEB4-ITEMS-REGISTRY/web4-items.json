@@ -155,6 +155,19 @@
       "address": "reverse"
     },
     {
+      "id": "stripe",
+      "repo": "https://github.com/Fractera/fractera-stripe-starter.git",
+      "version": "v1.0.1",
+      "port": 24691,
+      "provides": [
+        "payments"
+      ],
+      "required": false,
+      "note": "Платёжный элемент узла (573): приём оплаты картой через аккаунт Stripe владельца для элементов узла. Пока только тело: выключен паспортом (приём оплаты ещё не построен).",
+      "kind": "core",
+      "address": "stripe"
+    },
+    {
       "id": "root",
       "repo": "https://github.com/Fractera/fractera-root-starter.git",
       "version": "v2.1.7",
