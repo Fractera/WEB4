@@ -128,6 +128,40 @@ if (cmd === 'contacts') {
   process.exit(0)
 }
 
+// 579-5 (владелец 2026-10-23: в каждом кастомном элементе — свои страницы дизайна и CONFIG): где меняют оформление и настройки сайта
+// элемента. Решает его связь с общими «Дизайном» и CONFIG (`data/services/<id>/links.json`, нет файла или ключа — связь включена):
+// включена — общий элемент в ядре, выключена — страница самого элемента. Две строки, без модели.
+if (cmd === 'look') {
+  const [one] = rest
+  if (!one) fail('look <id> — where the design and the site settings of this element are changed')
+  const r = await core('/api/node/projects').catch(() => null)
+  const rows = Array.isArray(r?.body?.rows) ? r.body.rows : []
+  const x = rows.find((y) => y.id === one || y.service === one || addressOf(y.id) === one)
+  if (!x) fail(`no element «${one}» in this node — who does a job: npm run find -- <English words>`)
+  const links = readJson(join(ROOT, 'data', 'services', x.id, 'links.json'), {}) ?? {}
+  const on = (k) => links[k] !== false
+  // Главный адрес элемента — у узла (`domain.json`: свой домен), иначе корень зоны у root и поддомен у остальных.
+  const domainUrl = readJson(join(ROOT, 'data', 'services', x.id, 'domain.json'), null)?.url
+  const site = typeof domainUrl === 'string' && domainUrl ? domainUrl.replace(/\/+$/, '')
+    : x.id === 'root' && ZONE ? `https://${ZONE}` : x.service && x.service.includes('.') ? `https://${x.service}` : null
+  const shared = { design: `${ORIGIN}/${LANG}/architect/design`, config: `${ORIGIN}/${LANG}/architect/config` }
+  const own = { design: site && `${site}/${LANG}/admin/design`, config: site && `${site}/${LANG}/admin/site-settings` }
+  if (!x.custom && x.id !== 'root') {
+    console.log(`${x.id} is a native element: its look and site settings come from the shared Design (${shared.design}) and CONFIG (${shared.config}); it has no workshop of its own.`)
+    process.exit(0)
+  }
+  for (const [k, label] of [['design', 'Design (colours, fonts, shapes)'], ['config', 'Site settings (name, menu, footer, switches)']]) {
+    console.log(on(k)
+      ? `${label}: linked to the shared ${k === 'design' ? 'Design' : 'CONFIG'} — change it there: ${shared[k]} (it applies to every element that follows it)`
+      : `${label}: own — change it on the element: ${own[k] ?? '(the element has no public address yet)'}`)
+  }
+  // У root меню в ядре — папки страниц, «Опасной зоны» с выключателями связей у него нет (замер 2026-10-24: 404).
+  console.log(x.id === 'root'
+    ? 'Give the person the link; never change the values yourself.'
+    : `The switch of these links: ${ORIGIN}/${LANG}/${addressOf(x.id)}/settings/danger-zone. Give the person the link; never change the values yourself.`)
+  process.exit(0)
+}
+
 if (cmd === 'find') {
   const words = rest.join(' ').trim()
   if (!words) fail('find <plain words of the job>')
@@ -440,4 +474,4 @@ if (cmd === 'verdict') {
   process.exit(0)
 }
 
-fail(`unknown command «${cmd ?? ''}» — contacts | find | lagrix | create | task | state | role | supervise | close | person | done | report | verdict`)
+fail(`unknown command «${cmd ?? ''}» — contacts | look | find | lagrix | create | task | state | role | supervise | close | person | done | report | verdict`)

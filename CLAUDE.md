@@ -940,6 +940,17 @@ A born element is not deleted as a draft (409). Not built yet: birth in seconds.
   `admin/_pages/site-settings`, a copy of the CONFIG editor, door `/api/settings/app`) saves only while CONFIG is off (409).
   Languages chosen there reach the site after a rebuild (installer: APP-CONFIG `languages` → `NEXT_PUBLIC_SUPPORTED_LANGUAGES`,
   an «own» value — the last choice sticks); rebuild = «Deployments» of the element.
+- **Own design and full site settings of a custom element (step 579, owner 2026-10-23:** «должно существовать такая же кнопка в левом
+  меню какое мы сделали кнопка блоки и у нас должны быть там две кнопки которые ведут на настройку дизайна и на настройку CONFIG»).
+  Template v0.3.138, root v2.1.12, lagrix: `/<lang>/admin/design` (fonts) with `colors`, `type`, `shape` — the Design element's editors
+  over the element's `DESIGN-CONFIG`, door `/<lang>/admin/api/settings/design`; `/<lang>/admin/site-settings` with `features` (the twelve
+  switches, moved by the owner's «Перенести (Рекомендую)»), `header`, `footer`, `cookie-banner` — the CONFIG editors over its
+  `PLATFORM-CONFIG` / `APP-CONFIG`, door `/<lang>/admin/api/settings/platform` (flat body like CONFIG's, the closed key list
+  `FEATURE_DEFAULTS`). Both doors: architect only, 409 while the link is on; saved — the pages redraw with no build. Parallel routing
+  is not moved: nothing in an element reads it. In the core: «Build → Design» and «Build → Site settings» of every custom element
+  (`custom`, `newTab`), redirects in `[item]/[[...page]]`; root has the folders `architect/root/{blocks,design,site-settings}`
+  (`meta.newTab` of a collection page). The main agent: `npm run look -- <id>`, skill `design-and-settings-of-elements`.
+  The older «Settings → Site settings» page of the core (328) stays as it was.
 - **Languages for search engines (step 340).** People see every enabled language; search engines only English, the default
   language and those the person unlocked on «Site settings» (APP-CONFIG `languages.indexed` → the installer writes
   `NEXT_PUBLIC_INDEXED_LANGUAGES`). 🛑 **Preview never ran the installer**, so it built with the OLD `.env.local`; now

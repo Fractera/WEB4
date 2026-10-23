@@ -21,6 +21,7 @@
     "site-rules": "node ../../scripts/site-rules.mjs",
     "study": "node ../../scripts/study.mjs",
     "report": "node ../../scripts/main-agent-cli.mjs report",
-    "verdict": "node ../../scripts/main-agent-cli.mjs verdict"
+    "verdict": "node ../../scripts/main-agent-cli.mjs verdict",
+    "look": "node ../../scripts/main-agent-cli.mjs look"
   }
 }
