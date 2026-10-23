@@ -17,8 +17,8 @@ import { getService } from "@/lib/microservices/registry"
 export const EDITABLE = ["OPENAI_API_KEY"] as const
 export type EditableName = (typeof EDITABLE)[number]
 // 530-1: ключи Stripe пишет ТОЛЬКО своя дверь `/api/node/stripe` (проверка формата и вызов Stripe до записи), не дверь окружения:
-// в EDITABLE их нет намеренно.
-export const STRIPE_NAMES = ["STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET"] as const
+// в EDITABLE их нет намеренно. 573-4: ключ агента (`rk_…` с меткой агента) — для сервера MCP Stripe агента элемента Stripe.
+export const STRIPE_NAMES = ["STRIPE_SECRET_KEY", "STRIPE_PUBLISHABLE_KEY", "STRIPE_WEBHOOK_SECRET", "STRIPE_AGENT_API_KEY"] as const
 export type StripeName = (typeof STRIPE_NAMES)[number]
 export type EnvTarget = "core" | string
 export type EnvVar = { name: string; group: string; help: string }

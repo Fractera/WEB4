@@ -283,7 +283,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 435-2/3: абзацы под заголовком. 528-1 (владелец 2026-10-18: «описание длинной ленты не показывать скрывать их в аккордеона») —
   // свёрнуты в общий аккордеон продукта (shadcn), под ним список страниц.
   const slot = SLOT_PAGES[key] && entry && hasSkillGroups(item) ? SLOT_PAGES[key] : undefined
-  const aboutText = r.service || slot ? undefined : node.about?.[l]
+  // 573-4: у платёжного элемента («Платежи» нативного Stripe) — свои абзацы раздела, без Web3 и сети Lagrix.
+  const aboutText = r.service || slot ? undefined : (treeCtx.payment && node.aboutPayment ? node.aboutPayment[l] : node.about?.[l])
   const about = aboutText?.length ? (
     <div className="mb-4 max-w-3xl" data-tree-about>
       <AccordionSection

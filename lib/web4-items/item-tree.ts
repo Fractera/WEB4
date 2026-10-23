@@ -32,6 +32,11 @@ export type TreePage = {
    *  уровне иметь подобные решения»; «относятся только к custom элементу»): раздел только кастомного элемента — рабочий процесс и платежи
    *  не все про сеть, поэтому отдельный флаг, а не `network`. */
   custom?: true
+  /** 573-4: раздел кастомного элемента, который есть и у платёжного элемента узла, даже нативного (паспорт `payment`): у элемента
+   *  Stripe здесь его ключи. ✗ После 573-2 Stripe стал нативным, раздел «Платежи» исчез, и ключи Stripe ввести было негде. */
+  orPayment?: true
+  /** 573-4: абзацы раздела для платёжного элемента вместо `about` (у нативного Stripe нет Web3 и ничего о сети Lagrix). */
+  aboutPayment?: Record<"en" | "ru", string[]>
   /** 558 (владелец 2026-10-21: «обновить все четыре нативных элементов связанных с памятью … вкладку на одном уровне с строительства но
    *  ниже которая будет называться резервная копирование»): раздел только элементов памяти — data, storage, vectors, graph. */
   memory?: true
@@ -90,7 +95,7 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean; web4?: boolean }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean; web4?: boolean; payment?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
@@ -98,7 +103,7 @@ export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.unless && c.messengers[p.unless]) return false
   if (p.network && c.native) return false
   if (p.web4 && c.web4 === false) return false
-  if (p.custom && c.native) return false
+  if (p.custom && c.native && !(p.orPayment && c.payment)) return false
   if (p.memory && !c.memory) return false
   if (p.auth && !c.auth) return false
   return true
@@ -464,6 +469,11 @@ export const ITEM_TREE: TreePage[] = [
       {
         slug: "payments",
         custom: true,
+        orPayment: true,
+        aboutPayment: {
+          en: ["This element is the payment element of your node: it takes card payments through your own Stripe account for the other elements, so they need no keys of their own. Web2 holds its Stripe keys, the agent key for the Stripe tools of its agent, and the list of elements that take payments through it."],
+          ru: ["Этот элемент — платёжный элемент вашего узла: он принимает оплату картой через ваш собственный аккаунт Stripe для других элементов, и своих ключей им не нужно. В Web2 — его ключи Stripe, ключ агента для инструментов Stripe его агента и список элементов, которые принимают оплату через него."],
+        },
         words: w("Payments", "How the element takes money: by card through the node's payment elements (Web2) and in USDC through a wallet (Web3) — the node's or its own.", "Платежи", "Как элемент принимает деньги: картой через платёжные элементы узла (Web2) и в USDC через кошелёк (Web3) — узла или свой."),
         about: {
           en: [

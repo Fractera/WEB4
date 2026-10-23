@@ -13,9 +13,10 @@ import type { StripeWords } from "./payments.i18n"
 // «ПЛАТЕЖИ → WEB2» (530-1): ключи Stripe цели — ядра (`core`) или элемента. Состояние (какие заданы, режим) спрашивается у двери
 // `/api/node/stripe` при открытии; «Сохранить» шлёт только заполненные поля, дверь проверяет их у Stripe и пишет в `.env.local`.
 // Значения на страницу не возвращаются никогда — поля после сохранения пустые. Опроса нет.
+// 573-4: ключ агента (`rk_…` с меткой агента) — инструменты MCP Stripe агента элемента; после записи дверь отвечает, готов ли его `.mcp.json`.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
-type Name = "STRIPE_SECRET_KEY" | "STRIPE_PUBLISHABLE_KEY" | "STRIPE_WEBHOOK_SECRET"
+type Name = "STRIPE_SECRET_KEY" | "STRIPE_PUBLISHABLE_KEY" | "STRIPE_WEBHOOK_SECRET" | "STRIPE_AGENT_API_KEY"
 type State = { set: Name[]; mode: "test" | "live" | null }
 
 export function StripeKeys({ target, words }: { target: string; words: StripeWords }) {
@@ -23,6 +24,7 @@ export function StripeKeys({ target, words }: { target: string; words: StripeWor
   const [secretKey, setSecret] = useState("")
   const [publishableKey, setPublishable] = useState("")
   const [webhookSecret, setWebhook] = useState("")
+  const [agentKey, setAgent] = useState("")
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState<{ ok: boolean; text: string } | null>(null)
 
@@ -40,13 +42,14 @@ export function StripeKeys({ target, words }: { target: string; words: StripeWor
       const r = await fetch(`${BASE}/api/node/stripe`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ target, secretKey, publishableKey, webhookSecret }),
+        body: JSON.stringify({ target, secretKey, publishableKey, webhookSecret, agentKey }),
       })
-      const j = (await r.json().catch(() => null)) as ({ ok?: boolean; error?: string } & Partial<State>) | null
+      const j = (await r.json().catch(() => null)) as ({ ok?: boolean; error?: string; mcp?: "on" | "off" | "failed" | "no-script" } & Partial<State>) | null
       if (j?.ok) {
         setState({ set: j.set ?? [], mode: j.mode ?? null })
-        setSecret(""); setPublishable(""); setWebhook("")
-        setNote({ ok: true, text: words.saved })
+        setSecret(""); setPublishable(""); setWebhook(""); setAgent("")
+        const mcp = j.mcp === "on" ? ` ${words.mcpOn}` : j.mcp === "no-script" ? ` ${words.mcpNoScript}` : j.mcp === "failed" ? ` ${words.mcpFailed}` : ""
+        setNote({ ok: j.mcp !== "failed" && j.mcp !== "no-script", text: words.saved + mcp })
       } else setNote({ ok: false, text: `${words.failed} ${words.errors[j?.error ?? ""] ?? j?.error ?? r.status}` })
     } catch {
       setNote({ ok: false, text: words.failed })
@@ -88,8 +91,13 @@ export function StripeKeys({ target, words }: { target: string; words: StripeWor
           <Input id="stripe-webhook" type="password" autoComplete="off" spellCheck={false} className="font-mono" value={webhookSecret} onChange={(e) => setWebhook(e.target.value)} />
           <FieldDescription>{words.webhookHint}</FieldDescription>
         </Field>
+        <Field>
+          <div className="flex items-center gap-2"><FieldLabel htmlFor="stripe-agent">{words.agentLabel}</FieldLabel>{badge("STRIPE_AGENT_API_KEY")}</div>
+          <Input id="stripe-agent" type="password" autoComplete="off" spellCheck={false} className="font-mono" value={agentKey} onChange={(e) => setAgent(e.target.value)} />
+          <FieldDescription>{words.agentHint}</FieldDescription>
+        </Field>
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="button" onClick={save} disabled={busy || (!secretKey.trim() && !publishableKey.trim() && !webhookSecret.trim())} data-stripe-save>
+          <Button type="button" onClick={save} disabled={busy || (!secretKey.trim() && !publishableKey.trim() && !webhookSecret.trim() && !agentKey.trim())} data-stripe-save>
             {busy ? words.saving : words.save}
           </Button>
           {note && <p className={note.ok ? "text-sm text-foreground" : "text-sm text-destructive"} role={note.ok ? "status" : "alert"}>{note.text}</p>}
