@@ -616,6 +616,16 @@ service agent holding only the README install, wire and extend the kit without o
 
 ## Element Preview — Highlight and «Find block» (node steps 317–318)
 
+🔒 **HIGHLIGHT ADDRESSES — EVERY CONTAINER OF ALL CODE, NO EXCEPTIONS (owner 2026-10-23, node step 577).** Verbatim: «непоколебимый
+стандарт по отношению к всему коду всегда требует атрибуты для подсветки контейнеров том числе без каких-либо ограничений это
+распространяется на блоке и все их контейнеры»; «на уровне инструкции для строителя продублируй это категоричные требования любой код
+разрабатывать с этим атрибутом … для двух шаблонов … всех существующих элементов и ядро». Every container written in the core — a page
+of the architect layer, a widget, a tool, a component — carries `data-block="<letter + 4 base36>"`; never remove one that stands.
+🛑 **The core has no stamper and no guard for this yet** (`package.json` has no `widgets:ids`, measured 2026-10-23): write the address by
+hand, unique — check with `git grep 'data-block="<id>"'` before. The elements and both templates carry the same law in their builder
+instruction (`.claude/modes/build.md`, section «Highlight addresses — every container, no exceptions») and stamp with `npm run
+widgets:ids`; the Blocks element stamps its registry blocks at the source (`scripts/registry-ids.mjs`).
+
 🔒 **Preview shows the element as it runs on THIS computer — its build at the loopback address, never its public domain**
 (node step 373, owner 2026-10-02: Preview «вообще должна уметь работать только с режимом Dev mode»; over the internet «Только
 кнопка»). `GET /api/node/preview-url` answers `http://127.0.0.1:<port>/<lang>` for every element; a core page that is not on
