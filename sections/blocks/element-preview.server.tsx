@@ -38,6 +38,9 @@ const WORDS: Record<string, ElementPreviewWords> = {
     drawerTitle: 'Terminal of this element',
     drawerHint: 'Start the terminal and press «Paste» — the task is already in the window. It is the same terminal as in the left menu.',
     drawerCollapse: 'Collapse',
+    offCopy: 'The element is turned off — this is its page from the Cloudflare copy of {time} (version {version}); visitors see the same page.',
+    offNoCopy: 'The element is turned off, and Cloudflare has no copy of its pages: the copy is taken when a new version of the element is installed on a node with its own domain.',
+    offTurnOn: 'Turn it on — Danger zone',
   },
   ru: {
     loading: 'Спрашиваю узел, где отвечает этот элемент…',
@@ -70,6 +73,9 @@ const WORDS: Record<string, ElementPreviewWords> = {
     drawerTitle: 'Терминал этого элемента',
     drawerHint: 'Запустите терминал и нажмите «Вставить» — задача уже в окне. Это тот же терминал, что в левом меню.',
     drawerCollapse: 'Свернуть',
+    offCopy: 'Элемент выключен — это его страница из копии Cloudflare от {time} (версия {version}); посетители видят её же.',
+    offNoCopy: 'Элемент выключен, и копии его страниц в Cloudflare нет: копия снимается при установке новой версии элемента на узле со своим доменом.',
+    offTurnOn: 'Включить — «Опасная зона»',
   },
 }
 

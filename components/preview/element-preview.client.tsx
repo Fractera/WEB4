@@ -77,7 +77,14 @@ export type ElementPreviewWords = {
   drawerTitle: string
   drawerHint: string
   drawerCollapse: string
+  /** 576-2: выключенный элемент — его страница из копии Cloudflare (`{time}`, `{version}`) или слова, что копии нет. */
+  offCopy: string
+  offNoCopy: string
+  offTurnOn: string
 }
+
+/** 576-2: ответ двери `preview-url` о выключенном элементе — причина и копия его страниц в Cloudflare (публичный адрес). */
+type PreviewAnswer = { url: string; publicUrl?: string | null; off?: { reason: string } | null; copy?: { url: string; at: string; version: string | null } | null }
 
 /** 336: всё, что нужно окну задачи и ящику терминала; нет — «Нажми для обновления» ничего не открывает. */
 export type PreviewTaskKit = { ui: BlockTaskUi; dialogUi: AppDialogUi; terminalWords: AgentTerminalWords; keyHref: string }
@@ -109,8 +116,8 @@ const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
 /** `terminalService` — сегмент страницы терминала в `/architect/<…>/terminal`: у служб ядра это их id (по умолчанию), у рождённого
  *  элемента — `<адрес>/build` (356: по id элемента ссылка вела на страницу ошибки). */
-export function ElementPreview({ serviceId, terminalService, lang, words, task, devHref }: { serviceId: string; terminalService?: string; lang: string; words: ElementPreviewWords; task?: PreviewTaskKit; /** 393: вкладка «Развёртывания» — превью режима разработки. */ devHref: string }) {
-  const [state, setState] = useState<{ url: string; publicUrl?: string | null } | "loading" | "failed">("loading")
+export function ElementPreview({ serviceId, terminalService, lang, words, task, devHref, offHref }: { serviceId: string; terminalService?: string; lang: string; words: ElementPreviewWords; task?: PreviewTaskKit; /** 393: вкладка «Развёртывания» — превью режима разработки. */ devHref: string; /** 576-2: «Опасная зона» элемента — там его включают. */ offHref?: string }) {
+  const [state, setState] = useState<PreviewAnswer | "loading" | "failed">("loading")
   // Адрес, открытый в просмотре СЕЙЧАС (человек мог перейти внутри): его и открывает кнопка «в новой вкладке».
   const [current, setCurrent] = useState<string | null>(null)
   const [frameKey, setFrameKey] = useState(0)
@@ -143,7 +150,7 @@ export function ElementPreview({ serviceId, terminalService, lang, words, task, 
     let alive = true
     fetch(`${BASE}/api/node/preview-url?id=${encodeURIComponent(serviceId)}&lang=${encodeURIComponent(lang)}`, { cache: "no-store" })
       .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d: { url: string; publicUrl?: string | null }) => alive && setState(d))
+      .then((d: PreviewAnswer) => alive && setState(d))
       .catch(() => alive && setState("failed"))
     return () => {
       alive = false
@@ -173,6 +180,41 @@ export function ElementPreview({ serviceId, terminalService, lang, words, task, 
 
   if (state === "loading") return <p className="text-muted-foreground text-sm">{words.loading}</p>
   if (state === "failed") return <p className="text-muted-foreground text-sm">{words.unavailable}</p>
+  // 🔒 576-2 (владелец 2026-10-23: «Когда элемент активен показывается нормальная страница но когда его выключаю вместо этого рисуется
+  // непонятная заглушка»): выключенный элемент свой порт не слушает — рамка с петлёй показывала ошибку браузера. Вместо неё — его
+  // страница из копии Cloudflare по публичному адресу (её же видят посетители) и строка, чья это копия и от какого числа. Публичный
+  // https-адрес рамка грузит и со страницы пульта не на петле, поэтому ветка стоит до проверки петли. Подсветки, «Найти» и «Обновить»
+  // здесь нет: они говорят с живым элементом. Копии нет — словами, почему.
+  if (state.off) {
+    const copy = state.copy ?? null
+    const when = copy ? new Date(copy.at).toLocaleString(lang === "ru" ? "ru-RU" : "en-GB", { dateStyle: "short", timeStyle: "short" }) : ""
+    return (
+      <div className="flex flex-col gap-2" data-element-preview={serviceId} data-preview-off={copy ? "copy" : "no-copy"}>
+        <p className="text-muted-foreground text-sm" role="status" data-preview-off-note>
+          {copy ? words.offCopy.replace("{time}", when).replace("{version}", copy.version ?? "—") : words.offNoCopy}
+          {offHref ? <>{" "}<a className="underline" href={offHref}>{words.offTurnOn}</a></> : null}
+        </p>
+        {copy && (
+          <WebPreview defaultUrl={copy.url} className="h-[70vh] min-h-[480px]">
+            <WebPreviewNavigation>
+              <WebPreviewUrl />
+              <a href={copy.url} target="_blank" rel="noopener noreferrer" className={buttonVariants({ variant: "outline", size: "sm", className: "shrink-0 gap-1.5" })} data-preview-open>
+                <ExternalLink className="size-4" aria-hidden />
+                {words.openNew}
+              </a>
+            </WebPreviewNavigation>
+            <div ref={boxRef} className="relative min-h-0 flex-1 overflow-hidden" data-preview-scale={fit ? fit.scale.toFixed(3) : undefined}>
+              <WebPreviewBody
+                className="absolute top-0 left-0 border-0"
+                style={fit ? { width: fit.width, height: fit.height, transform: `scale(${fit.scale})`, transformOrigin: "0 0" } : undefined}
+                data-preview-copy
+              />
+            </div>
+          </WebPreview>
+        )}
+      </div>
+    )
+  }
   // 🔒 373-2 (владелец 2026-10-02: Preview «вообще должна уметь работать только с режимом Dev mode», через интернет — «Только
   // кнопка»). Адрес элемента — всегда петля машины (дверь `preview-url`); страница ядра не на петле (свой домен, временный адрес)
   // её не загрузит НИКОГДА (Private Network Access: «The connection is blocked because it was initiated by a public page…», замерено

@@ -582,6 +582,16 @@ domain activated and full `services:install` → `--all`. «Update» is a merge 
 Domain activation shows the card «Copy in Cloudflare» (`components/domain/static-copy.client.tsx`, door `GET/POST
 /api/domain/static-copy`): a row per address (time, files, refusal with reason) and «Refresh copies». State per element
 `data/services/<id>/static-copy.json`, also shown on the element's Deployments; `--dry` collects only.
+🔒 **The installer takes the copy itself, from the warmed-up build — also of a turned-off element (step 576, owner 2026-10-23: «почему
+если наш Cloud Flyer умеет отдавать статические страницы с выключенным сервером у нас это опции не реализуется для выключаем ых
+элементов?»).** `services-install.mjs` keeps the warm-up server of a new build alive, writes the stamp, runs
+`static-copy.mjs <id> --port <warm-up>` (pages from the warm-up, hosts from the element's own port, dist and version from the stamp)
+and only then stops it — on `--only` and full installs, on and off alike. An off element whose build did not change but whose copy is
+of another version is warmed up only for the copy. A failed copy does not fail the install. State carries `from: warm-up|element`
+and `fromPort`. 🛑 Without `--port` a turned-off element is not copied: its copy stays (`===COPY_OFF_KEPT===`) — before 576 the call
+waited 90 s on the empty port and overwrote the state with `no-pages`. `--all` skips off elements and (`--since=<install start>`,
+passed by the full install) those this install already copied; Deploy (`deploy-elements.mjs`) copies again only if the installer's
+copy failed. Accept (`element-preview.mjs`) of an off element leaves the copy as it was — the next install refreshes it.
 🔒 **Cost: none on Workers Free** — static asset requests are free and unlimited; overflow of 100,000 Worker requests a day is a
 refusal, never a bill, and fail open sends it home. 🛑 **Cloudflare's HTML cache is not a substitute**: «Retention … is not
 configurable» and `stale-if-error` needs an origin 5xx, not a dead tunnel. 🔒 **The key's Workers rights come only through the
@@ -611,7 +621,11 @@ service agent holding only the README install, wire and extend the kit without o
 кнопка»). `GET /api/node/preview-url` answers `http://127.0.0.1:<port>/<lang>` for every element; a core page that is not on
 loopback (own domain, temporary address) draws no frame — the reason and «Open on this computer» (`OpenOnThisComputerButton`,
 now on every non-loopback host). ✗ paid: roman's Preview framed aifa.dev after that zone moved to another Cloudflare account
-(530). 🛑 A live `next dev` per element was offered and **dropped by the owner** («у компьютера есть только 400 МБ») — no
+(530). 🔒 **A turned-off element is the exception (step 576-2):** it does not listen on its port, so the door also answers `off`
+and `copy` (`https://<host of its Cloudflare copy>/<lang>`, time, version), and Preview frames the copy — the page visitors get —
+with the line «turned off — this is its page from the Cloudflare copy of <time> (version …)» and a link to its Danger zone; no
+highlight, «Find» or «Refresh» there (they talk to the live element). The copy is a public https address, so this frame works on
+any panel address, not only on loopback. No copy (no own domain, never taken) — the reason in words. 🛑 A live `next dev` per element was offered and **dropped by the owner** («у компьютера есть только 400 МБ») — no
 second process for Preview; agent edits appear after Deploy/Preview → Accept. The panel tab on loopback reads «This computer ·» /
 «Этот компьютер ·» (was «Dev mode ·», step 372). **Domain activation** removes a domain attached to an element:
 `DELETE /api/domain/list { name, detach: true }` → `detachDomain` (subdomain back) → off the list; without `detach` — 409 `attached`.

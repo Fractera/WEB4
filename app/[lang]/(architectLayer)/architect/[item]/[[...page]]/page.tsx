@@ -301,7 +301,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // подсветкой и «Найти блок». Черновик, ещё не родившийся, — только заголовок раздела: показывать нечего.
   const preview = key === 'preview' && serviceUrl(item)
     // Терминал рождённого элемента — под `build/` (как у «Описания» ниже); путь служб ядра вёл на ошибку (замерено 356-3).
-    ? <ElementPreview serviceId={item} terminalService={`${slug}/build`} devHref={`/${lang}/${slug}/build/deployments`} lang={lang} words={elementPreviewWords(lang)} task={previewTaskKit(item, lang)} />
+    // 576-2: выключенный элемент показывает копию из Cloudflare, строка ведёт в его «Опасную зону» (адрес — как у плашки 567 ниже).
+    ? <ElementPreview serviceId={item} terminalService={`${slug}/build`} devHref={`/${lang}/${slug}/build/deployments`} offHref={`/${lang}/architect/${address}/settings/danger-zone`} lang={lang} words={elementPreviewWords(lang)} task={previewTaskKit(item, lang)} />
     : null
 
   // 326-3: «Подписка Claude Code», «Терминал», «Telegram бот» — острова ОБЩЕЙ копии комплекта агента (`../_agent-kit`, 326-1);

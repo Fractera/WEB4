@@ -12,6 +12,10 @@ export type StaticCopyState = {
   reason?: string
   detail?: string
   removed?: boolean
+  /** Версия элемента, с которой снята копия (отметка установки). */
+  version?: string
+  /** 576-1: откуда снята — прогрев установщика или работающий элемент. */
+  from?: "warm-up" | "element"
 }
 
 export function readStaticCopy(id: string): StaticCopyState | null {

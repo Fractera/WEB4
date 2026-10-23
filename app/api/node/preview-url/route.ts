@@ -7,6 +7,8 @@ import { readFileSync } from "node:fs"
 import { join } from "node:path"
 import { domainRecord } from "@/lib/web4-items/element-domain"
 import { addressOf } from "@/lib/web4-items/address-file.mjs"
+import power from "@/lib/web4-items/element-power.cjs"
+import { readStaticCopy } from "@/lib/web4-items/static-copy-state"
 // АДРЕС ДЛЯ ПРОСМОТРА ЭЛЕМЕНТА (страница Preview, слово владельца 2026-09-24).
 //
 // 🔒 373-2 (владелец 2026-10-02): «задача привью … в том чтобы показывать то как домен работает прямо сейчас режиме локальной
@@ -37,5 +39,15 @@ export async function GET(req: NextRequest) {
       if (d.zone) publicUrl = id === "root" ? `https://${d.hostname ?? d.zone}` : `https://${addressOf(id) || id}.${d.zone}`
     } catch { /* своего домена нет */ }
   }
-  return NextResponse.json({ ok: true, url, publicUrl }, { headers: { "Cache-Control": "no-store" } })
+  // 576-2 (владелец 2026-10-23: «Когда элемент активен показывается нормальная страница но когда его выключаю вместо этого рисуется
+  // непонятная заглушка»): выключенный элемент свой порт не слушает, и рамка с петлёй показывала ошибку браузера. Его страницы есть в
+  // копии Cloudflare (её снимает установка, 576-1): адрес копии — публичный хост из её состояния, Worker отдаёт копию, пока дом молчит.
+  // Копии нет (нет своего домена, не снималась) — `copy: null`, и просмотр говорит это словами.
+  const off = power.offOf(getService(id))
+  const c = off ? readStaticCopy(id) : null
+  const copy = c?.ok && c.host ? { url: `https://${c.host}/${fromRepo ? "" : lang}`, at: c.at, version: c.version ?? null } : null
+  return NextResponse.json(
+    { ok: true, url, publicUrl, off: off ? { reason: power.reasonIn(off, lang) } : null, copy },
+    { headers: { "Cache-Control": "no-store" } },
+  )
 }
