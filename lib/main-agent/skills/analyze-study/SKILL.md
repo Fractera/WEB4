@@ -1,6 +1,6 @@
 ---
 name: analyze-study
-description: "Work skill. «Подвергни критическому анализу итог разбора <task> …» or «Проанализируй итог разбора …» — the architect pressed «Analyse the result» under a finished study on an element's «Reverse engineering» page. Audit the study against a 100% bar: can the closest or an identical product be built from it — every page at full depth, every function, every business task? List every gap, decide continue or quiz, record it with npm run verdict, answer in two lines."
+description: "Work skill. «Подвергни критическому анализу итог разбора <task> …», «Проанализируй итог разбора …» — the architect pressed «Analyse the result» under a finished study on an element's «Reverse engineering» page. Audit the study as an auditor: can a functionally equal product be built from it — every role, every scenario step by step, every business process? Count seen / inferred / not seen, split the gaps into observable and not observable, decide continue or quiz, record it with npm run verdict, answer in two lines."
 ---
 
 # Critical audit of a finished study
@@ -9,31 +9,33 @@ description: "Work skill. «Подвергни критическому анал
 
 A hint, not a law: models of late 2026 work worse under rigid step-by-step instructions.
 
-**The question**, the owner's words of 2026-10-23: «подверг критическому анализу полученный в результате реверс-инжиниринга результат и
-подтверди можно ли с уверенностью 100% создать максимально близкий или абсолютно аналогичный продукт включающий все страницы на всю
-глубину все функции и все бизнес задачи». You are the auditor, not the author: look for what is missing, not for what is good.
-✗ 2026-10-23 the first version asked «хватает ли его», and the agent asked back and answered with «if … then …» branches. The owner: «it is
-100% traush», «такое ощущение что ты его спросил скажи что я молодец».
+**The owner's question** (2026-10-23): «подверг критическому анализу полученный в результате реверс-инжиниринга результат и подтверди можно
+ли с уверенностью 100% создать максимально близкий или абсолютно аналогичный продукт включающий все страницы на всю глубину все функции и
+все бизнес задачи». Read it with three corrections, each the owner asked for when he said «мне не нужен попугай»:
+- **You are the auditor, not the author.** Start from «the study is incomplete until shown otherwise»; a request to confirm pulls a model
+  towards confirming. ✗ The first version asked «хватает ли» and got «if … then …» branches — «it is 100% traush».
+- **The target is a functionally equal product, not a copy.** Every role can do everything it can in the original, by the same rules; the
+  design and the texts are our own — copying someone else's code, texts, images and design is forbidden (node law, step 538).
+- **100% is reached on what can be observed.** Server logic, ranking formulas, the admin side and anti-fraud cannot be seen from outside
+  at all; demanding them would loop the study forever. They become decisions for the product quiz, not a reason to continue.
 
-**The goal** is a product like the studied one (the page lives in «Product design»); the element's quiz vision, if it has one, narrows it.
-Do not ask what to build.
+**The goal** is a product like the studied one (the page lives in «Product design»); the element's quiz vision, if any, narrows it. Do not
+ask what to build.
 
 1. `npm run report -- <task> --full` — the whole report and its limits.
-2. Audit three layers. Mark every item **seen** (observed on a page or in a captured response), **inferred** (from documents, script
-   strings, guesses) or **not seen**:
-   - **Pages at full depth** — every page and state of the product: public pages, everything behind the sign-in (the user's and the
-     maker's cabinets, settings), every form with its fields and validation messages, empty, error and loading states, emails and
-     notifications, the operator's or admin side.
-   - **Functions** — every action of every role, with its rule: limits, prices, order of steps, who may do it.
-   - **Business tasks** — how the product earns and runs: payments and their states, refunds, moderation, ranking, anti-abuse, support,
-     the operator's tools.
-3. The bar is 100%. If anything the product needs is inferred or not seen, the decision is **continue**. **quiz** only when every page,
-   function and business task is seen, or when the person accepts the listed gaps in so many words.
-4. `npm run verdict -- <task> continue|quiz "<seen X, inferred Y, not seen Z; the three biggest gaps>" --page "<address> | <what to capture: fields, states, buttons, messages>"`
-   — one `--page` per page a screenshot or a sign-in can close; several gaps on one page go into one `--page`. Gaps no page can close
-   (the admin side, the payment provider) go into the summary.
-5. Answer in two lines: «Нет, со 100% уверенностью не построить: видено X из N, не видели главного — …» (or «Да …»), and what the
-   highlighted button under the study does. No praise of the study and no «if … then …».
+2. Build the matrix: every role × every scenario × every step — the screen, its fields and their checks, the actions, the resulting state,
+   empty and error states, who may do it. Then the business processes: payment and its states, refunds, moderation, ranking,
+   e-mails and notifications, anti-abuse, support, the operator's tools. Mark every cell **seen** (on a page or in a captured response),
+   **inferred** (documents, script strings, guesses) or **not seen**.
+3. Split every gap that is not «seen»:
+   - **observable** — a sign-in under the person's account or a screenshot would show it (cabinets, forms, settings, states behind the
+     login, the payment page up to the payment);
+   - **not observable** — server logic, formulas, the admin side, internal moderation: it goes to the quiz as a decision to make.
+4. Decide: **continue** if at least one observable gap is left; **quiz** when none is left — the not-observable list goes with it.
+5. `npm run verdict -- <task> continue|quiz "<seen X of N observable; not seen: the main gaps; to decide in the quiz: …>" --page "<address> | <what to capture>"`
+   — one `--page` per page that closes observable gaps (several gaps of one page in one `--page`).
+6. Answer in two lines: «Видено X из N наблюдаемого; не видели — …» and the next step (what the button under the study does). No praise of
+   the study and no «if … then …».
 
 Stay in the session for the person's reply: the answer is read in the terminal on the page, and closing yourself closes their terminal.
 Never start a new study from this skill and never edit the report — a new study starts from the page or from the person's words.
