@@ -341,6 +341,11 @@ export const ITEM_TREE: TreePage[] = [
       // 577-11 (владелец 2026-10-23: «мы не строим внутри страницы архитектора блоки это кнопка просто работает как переадресация на
       // страницу блоке которая находится в элементах»): пункт ведёт на `/<язык>/admin/blocks` самого элемента.
       { slug: "blocks", newTab: true, words: w("Blocks", "The blocks of this element, on the element itself.", "Блоки", "Блоки этого элемента — на самом элементе.") },
+      // 579-4 (владелец 2026-10-23: «должно существовать такая же кнопка в левом меню какое мы сделали кнопка блоки и у нас должны быть
+      // там две кнопки которые ведут на настройку дизайна и на настройку CONFIG то есть на собственные страницы каждого кастомного
+      // элемента»): только переадресация на страницы самого элемента, в ядре ничего не строится. Только у кастомных: 579 — их шаг.
+      { slug: "design", custom: true, newTab: true, words: w("Design", "The element's own design workshop, on the element itself: fonts, colours, type, shapes.", "Дизайн", "Своя мастерская оформления элемента — на самом элементе: шрифты, цвета, текст, формы.") },
+      { slug: "site-settings", custom: true, newTab: true, words: w("Site settings", "The element's own site settings, on the element itself: name, menu, footer, switches.", "Настройки сайта", "Свои настройки сайта элемента — на самом элементе: название, меню, подвал, выключатели.") },
       // 472: у элемента с H2A бот переехал в H2A (`MOVED_WITH`); здесь он остаётся для элементов без H2A.
       { slug: "telegram", unless: "h2a", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram-бот", "Бот, который говорит с той же сессией агента.") },
       { slug: "environment", words: w("Environment variables", "Keys and settings the element reads at start.", "Переменные окружения", "Ключи и настройки, которые элемент читает при старте.") },

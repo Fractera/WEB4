@@ -259,6 +259,9 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const words = node.words[l]
   // 577-11: «Блоки» — только переадресация на страницу блоков самого элемента (владелец: «мы не строим внутри страницы архитектора блоки»).
   if (key === 'build/blocks') redirect(`${domainRecord(item)?.url ?? `https://${address}`}/${lang}/admin/blocks`)
+  // 579-4: «Дизайн» и «Настройки сайта» — тем же путём, на страницы самого элемента (его мастерская и настройки, шаги 579-1, 579-2).
+  if (key === 'build/design') redirect(`${domainRecord(item)?.url ?? `https://${address}`}/${lang}/admin/design`)
+  if (key === 'build/site-settings') redirect(`${domainRecord(item)?.url ?? `https://${address}`}/${lang}/admin/site-settings`)
   const nodePath = `${dir}/${key}`
   const path = r.service ? `${nodePath}/${r.service}` : nodePath
 

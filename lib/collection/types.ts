@@ -52,6 +52,11 @@ export type WorkspacePageMeta = {
    * whatever a page must not show belongs behind `requireRoles`, not behind this flag.
    */
   hidden?: boolean
+  /**
+   * Пункт меню открывается в новой вкладке (579-4): страница ядра — только переадресация на страницу самого элемента
+   * («Блоки», «Дизайн», «Настройки сайта» у root), как `newTab` у страниц дерева элемента (578-5).
+   */
+  newTab?: boolean
 }
 
 /** One theme of a page: a heading with its own anchor, its text, and its label in the top row. */

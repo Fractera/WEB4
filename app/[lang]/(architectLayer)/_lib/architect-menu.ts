@@ -128,7 +128,7 @@ export function architectMenu(lang: string, currentPath: string): WorkspaceItem[
     const kids = n.kids.map(item)
     return kids.length > 0
       ? { label: wordsOf(n.page, lang).title, href: at(n.path), active: n.path === currentPath, open: n.path === currentPath || kids.some((k) => k.active || k.open), children: kids }
-      : { label: wordsOf(n.page, lang).title, href: at(n.path), active: n.path === currentPath }
+      : { label: wordsOf(n.page, lang).title, href: at(n.path), active: n.path === currentPath, ...(n.page.meta.newTab ? { newTab: true } : {}) }
   }
 
   return pagesInOrder(TREE.map((b) => b.page)).map((group) => {
