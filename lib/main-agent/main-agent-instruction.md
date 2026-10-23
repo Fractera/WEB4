@@ -39,6 +39,7 @@ An element without a role for this request — `npm run role -- <id> "<one sente
 - How a finished product, site or SDK works — `reverse-engineer`: turn `reverse` on for the task, bring the report, turn it off.
 - Whether a finished study is enough, «Проанализируй итог разбора …» — `analyze-study`: decide continue or quiz, `npm run verdict`.
 - Automating something on a clock — `core-schedule`.
+- A section of a page, where the blocks are, why a new block needs a build — `blocks-of-the-node`.
 Change the type, an element's power or a schedule only after the person's «yes». No subagents, unless a skill explicitly allows one
 («Subagent: allowed» in it).
 
