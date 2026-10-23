@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react"
 import { MessageSquareText } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { BlockTask } from "@/_tools/block-task/client/block-task.client"
 import type { BlockTaskUi } from "@/_tools/block-task/types/block-task"
 import type { AppDialogUi } from "@/components/dialog/app-dialog.i18n"
@@ -87,6 +87,8 @@ export type ProductQuizWords = {
   askStart: string
   /** 556-10: the drawer with the element's terminal. */
   drawer: TerminalDrawerWords
+  /** 575: the PDF of the quiz with its version, dates, git commit and the screens of its references. */
+  pdf: string
 }
 
 /** 536-3: the window of a quiz task — the block-task tool in its note mode, with the quiz's own words; the server picks them. */
@@ -278,7 +280,18 @@ export function ProductQuizIsland({ item, lang, words, task }: { item: string; l
           <CardDescription>{words.instructionText}</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
-          <div className="flex flex-wrap gap-2">{continueButton}</div>
+          <div className="flex flex-wrap gap-2">
+            {continueButton}
+            {/* 575: «Скачать PDF» — версия, даты, git-коммит квиза и экраны образцов (дверь `/api/node/product-quiz/pdf`). */}
+            <a
+              href={`${BASE}/api/node/product-quiz/pdf?item=${encodeURIComponent(item)}&lang=${encodeURIComponent(lang)}`}
+              download
+              className={buttonVariants({ variant: "outline" })}
+              data-quiz-pdf
+            >
+              {words.pdf}
+            </a>
+          </div>
           <Small className="text-muted-foreground" data-quiz-counters>
             {fill(words.counters, { confirmed: confirmedCount, total: items.length, questions: quiz.openQuestions.length })}
             {" · "}

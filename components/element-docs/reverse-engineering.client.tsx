@@ -85,6 +85,9 @@ export type ReverseEngineeringWords = {
     taskContinueAccount: string
     /** The line above the wide button. «{target}», «{date}» are replaced. */
     decisionOf: string
+    /** 556-15: the badge of a series in one row («parts 1–{n}») and the head of each part («Part {n}»). */
+    parts: string
+    partTitle: string
     /** 556-13: the orange card «sign in to the test account». «{site}» is replaced everywhere. */
     signIn: {
       title: string
@@ -271,7 +274,41 @@ function PageCard({
 // продуктовый Quiz»): у разбора без решения — «Проанализировать итог» (главный агент, навык analyze-study); с решением — оно и две кнопки,
 // рекомендованная выделена, выбирает человек.
 export type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string; signIn?: { site: string } }
-export type ReportItem = { job: string; target: string; kind: string; summary: string; verdict: Verdict | null }
+/** 556-14: a screen of a study kept in the node storage (only its id; the file comes through the core). */
+export type ReportScreen = { name: string; id: string }
+export type ReportItem = { job: string; target: string; kind: string; summary: string; verdict: Verdict | null; series?: string; part?: number; screens?: ReportScreen[] }
+/** 556-15: the parts of one series in one row; the first study names the series and holds its decision. */
+type ReportGroup = { series: string; root: ReportItem; parts: ReportItem[] }
+
+function groupsOf(items: ReportItem[]): ReportGroup[] {
+  const by = new Map<string, ReportItem[]>()
+  for (const it of items) { const s = it.series || it.job; by.set(s, [...(by.get(s) ?? []), it]) }
+  return [...by].map(([series, list]) => {
+    const parts = [...list].sort((a, b) => (a.part ?? 1) - (b.part ?? 1))
+    return { series, root: parts.find((x) => x.job === series) ?? parts[0], parts }
+  })
+}
+
+// 556-14 (владелец 2026-10-23: «скриншоты … в наш файловое хранилище чтобы … можно было подсматривать кнопки карточки»): экраны части —
+// миниатюрами; нажатие открывает снимок целиком. Адрес строится из id, ссылке из отчёта страница не верит.
+function Shots({ screens }: { screens: ReportScreen[] }) {
+  if (!screens.length) return null
+  return (
+    <ul className="flex flex-wrap gap-2" data-rea-part-shots={screens.length}>
+      {screens.map((s) => {
+        const src = `${BASE}/api/media/${encodeURIComponent(s.id)}/file`
+        return (
+          <li key={s.id}>
+            <a href={src} target="_blank" rel="noreferrer" title={s.name} className="block">
+              {/* eslint-disable-next-line @next/next/no-img-element -- снимок из хранилища узла, размеры неизвестны заранее */}
+              <img src={src} alt={s.name} loading="lazy" className="h-24 w-36 rounded-md border border-border object-cover object-top" />
+            </a>
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
 type ReportView = { markdown: string | null } | "loading" | "failed"
 type ReportActions = { onAnalyze: (it: ReportItem) => void; onContinue: (it: ReportItem) => void; onQuiz: (it: ReportItem) => void }
 
@@ -449,39 +486,61 @@ function Reports({ w, refresh, helpLabel, lang, onAnalyze, onContinue, onQuiz }:
   if (items === "loading") body = <p className="inline-flex items-center gap-2 text-sm text-muted-foreground"><Spinner /> {w.loading}</p>
   else if (items === "failed") body = <p className="text-sm text-destructive" role="alert">{w.failed}</p>
   else if (!items.length) body = <p className="text-sm text-muted-foreground" data-rea-reports="empty">{w.empty}</p>
-  else body = (
-    <Accordion type="single" collapsible className="rounded-md border border-border px-3" onValueChange={(v) => void open(v)} data-rea-reports={items.length}>
-      {items.map((it, i) => {
-        const v = views[it.job]
-        const date = /^\d{4}-\d{2}-\d{2}/.test(it.job) ? it.job.slice(0, 10) : ""
-        return (
-          <AccordionItem key={it.job} value={it.job} className={i === items.length - 1 ? "border-b-0" : undefined} data-rea-report={it.job}>
-            <AccordionTrigger>
-              <span className="flex min-w-0 flex-wrap items-center gap-2 text-left">
-                <span className="break-all font-medium text-foreground">{it.target || it.job}</span>
-                <Badge variant="secondary">{w.kinds[it.kind] ?? w.kinds.other}</Badge>
-                {it.verdict && <Badge variant="outline">{it.verdict.verdict === "continue" ? w.continueStudy : w.toQuiz}</Badge>}
-                {date && <span className="text-xs text-muted-foreground">{date}</span>}
-              </span>
-            </AccordionTrigger>
-            <AccordionContent>
-              <div className="flex flex-col gap-3 text-sm text-foreground">
-                <VerdictBlock it={it} w={w} onAnalyze={onAnalyze} />
-                {it.summary && <p className="max-w-prose">{it.summary}</p>}
-                {v === undefined || v === "loading" ? (
-                  <p className="inline-flex items-center gap-2 text-muted-foreground"><Spinner /> {w.open}</p>
-                ) : v === "failed" ? (
-                  <p className="text-destructive" role="alert">{w.openFailed}</p>
-                ) : (
-                  v.markdown && <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-xs leading-relaxed">{v.markdown}</pre>
-                )}
-              </div>
-            </AccordionContent>
-          </AccordionItem>
-        )
-      })}
-    </Accordion>
-  )
+  else {
+    // 556-15: одна строка на серию — первый разбор называет серию и держит решение, части 2…N идут под ним со своими экранами.
+    const groups = groupsOf(items)
+    const markdownOf = (job: string) => {
+      const v = views[job]
+      return v === undefined || v === "loading" ? (
+        <p className="inline-flex items-center gap-2 text-muted-foreground"><Spinner /> {w.open}</p>
+      ) : v === "failed" ? (
+        <p className="text-destructive" role="alert">{w.openFailed}</p>
+      ) : (
+        v.markdown && <pre className="max-h-96 overflow-auto whitespace-pre-wrap rounded-md bg-muted p-3 text-xs leading-relaxed">{v.markdown}</pre>
+      )
+    }
+    body = (
+      <Accordion
+        type="single"
+        collapsible
+        className="rounded-md border border-border px-3"
+        onValueChange={(v) => { for (const p of groups.find((g) => g.series === v)?.parts ?? []) void open(p.job) }}
+        data-rea-reports={groups.length}
+      >
+        {groups.map((g, i) => {
+          const it = g.root
+          const many = g.parts.length > 1
+          const date = /^\d{4}-\d{2}-\d{2}/.test(it.job) ? it.job.slice(0, 10) : ""
+          return (
+            <AccordionItem key={g.series} value={g.series} className={i === groups.length - 1 ? "border-b-0" : undefined} data-rea-report={it.job} data-rea-series-parts={g.parts.length}>
+              <AccordionTrigger>
+                <span className="flex min-w-0 flex-wrap items-center gap-2 text-left">
+                  <span className="break-all font-medium text-foreground">{it.target || it.job}</span>
+                  <Badge variant="secondary">{w.kinds[it.kind] ?? w.kinds.other}</Badge>
+                  {many && <Badge variant="secondary">{fill(w.parts, { n: String(g.parts[g.parts.length - 1].part ?? g.parts.length) })}</Badge>}
+                  {it.verdict && <Badge variant="outline">{it.verdict.verdict === "continue" ? w.continueStudy : w.toQuiz}</Badge>}
+                  {date && <span className="text-xs text-muted-foreground">{date}</span>}
+                </span>
+              </AccordionTrigger>
+              <AccordionContent>
+                <div className="flex flex-col gap-3 text-sm text-foreground">
+                  <VerdictBlock it={it} w={w} onAnalyze={onAnalyze} />
+                  {g.parts.map((p) => (
+                    <div key={p.job} className="flex flex-col gap-2" data-rea-part={p.part ?? 1}>
+                      {many && <p className="font-medium">{fill(w.partTitle, { n: String(p.part ?? 1) })}</p>}
+                      {p.summary && <p className="max-w-prose">{p.summary}</p>}
+                      <Shots screens={p.screens ?? []} />
+                      {markdownOf(p.job)}
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          )
+        })}
+      </Accordion>
+    )
+  }
 
   // 556-13: the newest decision of all studies is the one the wide button acts on.
   const latest = Array.isArray(items)

@@ -397,6 +397,19 @@ if (cmd === 'report') {
   }
   if (has('--full') && r.body.markdown) console.log(`\n===REPORT_MD===\n${r.body.markdown}`)
   else console.log(`full report: npm run report -- ${job} --full`)
+  // 556-15: a series — every next part after the first, so the audit covers what all the parts saw.
+  for (const p of r.body.parts ?? []) {
+    const pr = await core(`/api/node/reverse-report?job=${encodeURIComponent(p.job)}`).catch(() => null)
+    const pb = pr?.body
+    if (!pb?.ok) { console.log(`\n===PART=== ${p.job} (part ${p.part}): not readable`); continue }
+    const prep = pb.report ?? {}
+    console.log(`\n===PART=== ${p.job} (part ${p.part})`)
+    console.log(`summary: ${prep.summary ?? ''}`)
+    console.log(`scenarios: ${names(prep.scenarios).join('; ')}`)
+    console.log(`screens: ${(prep.screens ?? []).map((s) => s?.name ?? s?.id).join('; ')}`)
+    for (const l of prep.limits ?? []) console.log(`- limit: ${l}`)
+    if (has('--full') && pb.markdown) console.log(`\n===PART_MD=== ${p.job}\n${pb.markdown}`)
+  }
   // Цель — замысел квиза элемента; квиза нет — цель спрашивается у человека одной фразой (навык analyze-study).
   const item = flag('--item')
   if (item) {

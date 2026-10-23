@@ -62,6 +62,7 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     askContinue: "Product quiz: let's continue developing it.",
     askStart: "Product quiz: let's start deep planning of this element.",
     drawer: { title: "The element's agent", collapse: "Collapse" },
+    pdf: "Download PDF",
   },
   ru: {
     loading: "Читаю продуктовый квиз…",
@@ -119,6 +120,7 @@ const DICT: Record<"en" | "ru", ProductQuizWords> = {
     askContinue: "Продуктовый квиз: продолжим его развитие.",
     askStart: "Продуктовый квиз: начнём глубокое планирование этого элемента.",
     drawer: { title: "Агент элемента", collapse: "Свернуть" },
+    pdf: "Скачать PDF",
   },
 }
 

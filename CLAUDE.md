@@ -3551,6 +3551,18 @@ by the person, in his test account) — «y go».
   `emitReverse` (`lib/study/reverse-events.ts`, a `globalThis` set of listeners); the page opens `GET /api/node/reverse-report/events`
   (`text/event-stream`, architect/admin, `Cache-Control: no-transform` so Next does not compress it, a comment every 25 s for the tunnel)
   only while a drawer the person opened is on screen, and «Collapse» closes it. `npm run report -- <task>` prints the verdict too.
+- **Series and screens (556-14, 556-15):** a study goes on in parts — `reports/<series>-<n>/report.json` with `"series"`, `"part"`;
+  every studied screen is in the node storage (`npm run shot` of the element reverse v0.2.2 → `screens[].shot.id`). The list door gives
+  each study `series`, `part` and `screens` (ids only — the page builds `/api/media/<id>/file` itself); `GET ?job=` gives `parts`, so
+  `npm run report -- <series> --full` prints every part. The page joins a series in one row («parts 1–N»), the decision stays on the
+  first task; each part shows its screens as thumbnails. The main agent's `reverse-engineer` has «Continue the study» (one scenario per
+  part, the test account from the decision). 🛑 A storage file opens through the core's `/api/media/<id>/file` without a sign-in, from the
+  internet too (as every storage file; the id is not guessable) — screens of internal pages are covered by the same rule.
+- **«Download PDF» of the product quiz (575):** `GET /api/node/product-quiz/pdf?item=&lang=` (architect/admin; no quiz → 404) — a page
+  for printing built by `lib/web4-items/product-quiz-pdf.ts`: the version (export date, the date the quiz last changed, the element's
+  commit of `development-docs/product`, on GitHub or not, the link and `git checkout <commit> -- development-docs/product`; no commit —
+  red «not saved in git»), the quiz, then the screens of its references' studies embedded as data URLs; Chrome without a window prints
+  it (`--print-to-pdf`, asynchronous, a collected environment). The file: `<element>-product-quiz-<date>-<commit7>.pdf`.
 - **The study browser and its guard** (element `reverse` v0.2.1): `npm run browser:start -- <url> --site <site>` only with a confirmed
   account and only on its site; `scripts/study-guard.mjs` attaches first and lets only reads through (writes to any host blocked except a
   GraphQL query to the site; log-out/delete/unsubscribe/cancel/invite blocked), human pace, a page budget, a stop on a challenge page,

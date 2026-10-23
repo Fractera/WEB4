@@ -43,6 +43,17 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 7. `npm run close -- reverse` → `npm run power -- reverse off "Turned on by the node for a reverse engineering task"` (it also stops the
    element's browser) → `npm run done -- --close`.
 
+## «Continue the study <series> …» — the next part (node step 556-14)
+
+The person pressed the wide «Continue the study» under your decision (skill `analyze-study`). `npm run report -- <series>` prints the
+decision: what to capture and, with `sign-in`, the test account. With a sign-in: `npm run study -- list` must show that site signed in
+after the consent — if not, say in one line that the orange card on the page opens the login window, and stop. The part number n is the
+next free one (`npm run report -- list`: `<series>-2`, `<series>-3`…). Then steps 1, 3–7 with the task: «Build process: Task from the
+core's main agent: continue the study <series> — part <n>: <what to capture, from the decision>; the test account of <site> (npm run
+browser:start -- <url> --site <site>). Use the skill reverse-engineer, section «Continue a study»; save every screen with npm run shot;
+the part's task id is <series>-<n>. When the part is saved, finish with npm run reply-core -- \"part <series>-<n>: <one line>\".» One
+scenario per part keeps the cost of a part far below the first study (9.4 million tokens, 2026-10-23).
+
 ## Never
 
 - Leave reverse on after the task, or turn it on for anything but an analysis.

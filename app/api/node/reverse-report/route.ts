@@ -48,11 +48,9 @@ export async function GET(req: NextRequest) {
       : []
     // 556-9: the page names what was studied (target, kind, the first lines of the summary) instead of a task id; `jobs` stays for
     // the element's `npm run reverse -- list`. Newest first.
-    const items = jobs.map((j) => {
-      let r: { target?: { source?: string; name?: string; kind?: string }; summary?: string } = {}
-      try { r = JSON.parse(read(join(REPORTS, j, "report.json")) ?? "{}") } catch { /* a broken report shows its id only */ }
-      return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400), verdict: verdictOf(join(REPORTS, j)) }
-    }).reverse()
+    // 556-14/556-15: a part of a series (`series`, `part` in report.json; the first study is part 1 and names the series) and its
+    // screens in the node storage (`screens[].shot.id`) — the page shows them as thumbnails and joins the parts of a series in one row.
+    const items = jobs.map((j) => summaryOf(j)).reverse()
     return NextResponse.json({ ok: true, jobs, items }, { headers: HEADERS })
   }
   if (!JOB.test(job)) return NextResponse.json({ ok: false, error: "bad-job" }, { status: 400, headers: HEADERS })
@@ -65,7 +63,27 @@ export async function GET(req: NextRequest) {
   } catch {
     return NextResponse.json({ ok: false, error: "report.json is not JSON" }, { status: 502, headers: HEADERS })
   }
-  return NextResponse.json({ ok: true, job, report, markdown: read(join(dir, "report.md")), verdict: verdictOf(dir) }, { headers: HEADERS })
+  // 556-15: the parts of this series after the first, so `npm run report -- <series> --full` prints the whole series.
+  const parts = existsSync(REPORTS)
+    ? readdirSync(REPORTS, { withFileTypes: true }).filter((d) => d.isDirectory() && d.name !== job && existsSync(join(REPORTS, d.name, "report.json")))
+        .map((d) => summaryOf(d.name)).filter((s) => s.series === job).sort((a, b) => a.part - b.part).map((s) => ({ job: s.job, part: s.part }))
+    : []
+  return NextResponse.json({ ok: true, job, report, markdown: read(join(dir, "report.md")), verdict: verdictOf(dir), parts }, { headers: HEADERS })
+}
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+
+/** One study for the list: what was studied, its decision, its place in a series and its stored screens (ids only, never a URL). */
+function summaryOf(j: string) {
+  let r: { target?: { source?: string; name?: string; kind?: string }; summary?: string; series?: unknown; part?: unknown; screens?: unknown } = {}
+  try { r = JSON.parse(read(join(REPORTS, j, "report.json")) ?? "{}") } catch { /* a broken report shows its id only */ }
+  const series = typeof r.series === "string" && JOB.test(r.series) ? r.series : j
+  const part = series !== j && Number.isInteger(r.part) && Number(r.part) > 1 ? Number(r.part) : 1
+  const screens = (Array.isArray(r.screens) ? r.screens : [])
+    .map((s: { name?: unknown; id?: unknown; shot?: { id?: unknown } }) => ({ name: String(s?.name ?? s?.id ?? "").slice(0, 120), id: String(s?.shot?.id ?? "") }))
+    .filter((s) => UUID.test(s.id))
+    .slice(0, 60)
+  return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400), verdict: verdictOf(join(REPORTS, j)), series, part, screens }
 }
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "")

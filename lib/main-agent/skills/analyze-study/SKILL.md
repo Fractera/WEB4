@@ -22,7 +22,8 @@ A hint, not a law: models of late 2026 work worse under rigid step-by-step instr
 **The goal** is a product like the studied one (the page lives in «Product design»); the element's quiz vision, if any, narrows it. Do not
 ask what to build.
 
-1. `npm run report -- <task> --full` — the whole report and its limits.
+1. `npm run report -- <task> --full` — the whole report and its limits. A series (the study went on in parts 2, 3…, step 556-15) prints
+   every part after the first: audit what all the parts saw together, and the decision is recorded on the first task (the series id).
 2. Build the matrix: every role × every scenario × every step — the screen, its fields and their checks, the actions, the resulting state,
    empty and error states, who may do it. Then the business processes: payment and its states, refunds, moderation, ranking,
    e-mails and notifications, anti-abuse, support, the operator's tools. Mark every cell **seen** (on a page or in a captured response),

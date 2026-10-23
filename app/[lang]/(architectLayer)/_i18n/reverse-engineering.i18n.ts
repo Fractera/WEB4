@@ -56,6 +56,8 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
       taskContinue: "Continue the study {job} ({target}) for element {item}: capture the screens the agent's decision lists as missing. Skill reverse-engineer.",
       taskContinueAccount: " The internal pages are in the test account of {site}.",
       decisionOf: "{target}: the agent's decision of {date}",
+      parts: "parts 1–{n}",
+      partTitle: "Part {n}",
       signIn: {
         title: "To go deeper into the product, sign in to a test account on {site}",
         steps: [
@@ -140,6 +142,8 @@ const DICT: Record<"en" | "ru", ReverseEngineeringWords> = {
       taskContinue: "Продолжи разбор {job} ({target}) для элемента {item}: сними экраны, которых по решению агента не хватает. Навык reverse-engineer.",
       taskContinueAccount: " Внутренние страницы — в тестовой учётной записи {site}.",
       decisionOf: "{target}: решение агента от {date}",
+      parts: "части 1–{n}",
+      partTitle: "Часть {n}",
       signIn: {
         title: "Чтобы углубиться в продукт, войдите в тестовую учётную запись {site}",
         steps: [
