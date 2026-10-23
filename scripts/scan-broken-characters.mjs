@@ -46,6 +46,10 @@ const SCAN_EXT = /\.(ts|tsx|js|jsx|mjs|cjs|md|json)$/
 const SKIP_DIR = new Set(["node_modules", ".git", ".turbo", "dist", "build", ".vercel", ...FOREIGN_DIRS])
 const SKIP_PREFIX = [".next"]
 const SKIP_FILE = /\.generated\.|package-lock\.json$|\.tsbuildinfo$/
+// 🔒 556-11 (2026-10-23): папки разборов `data/services/reverse/reports` — снятые с ЧУЖИХ сайтов страницы и скрипты (улики REA), тот же
+// машинный вывод, что `.next`: первый живой разбор (tinylaunch) принёс U+FFFD в сжатом чужом JavaScript и уронил prebuild ядра. Наш
+// текст там не живёт; судить его — значит «чинить по букве» чужой сайт. Путь сверяется от корня проекта, а не по имени папки.
+const SKIP_PATH = ["data/services/reverse/reports"]
 
 // The single detection rule (mirrors hasBrokenChar in the content emitters). Returns the codepoint
 // of the first offending char in a string, or -1. Allows tab(09)/LF(0A)/CR(0D).
@@ -77,15 +81,16 @@ function safeContext(line, col) {
   return marked.trim().slice(0, 120)
 }
 
-async function* walk(dir) {
+async function* walk(dir, root = dir) {
   let entries
   try { entries = await readdir(dir, { withFileTypes: true }) } catch { return }
   for (const e of entries) {
     if (e.name.startsWith(".") && e.name !== ".env.local" && SKIP_DIR.has(e.name)) continue
     const full = join(dir, e.name)
     if (e.isDirectory()) {
-      const skipped = SKIP_DIR.has(e.name) || SKIP_PREFIX.some(p => e.name.startsWith(p))
-      if (!skipped) yield* walk(full)
+      const rel = relative(root, full).split(sep).join("/")
+      const skipped = SKIP_DIR.has(e.name) || SKIP_PREFIX.some(p => e.name.startsWith(p)) || SKIP_PATH.some(p => rel === p || rel.startsWith(`${p}/`))
+      if (!skipped) yield* walk(full, root)
     }
     else if (SCAN_EXT.test(e.name) && !SKIP_FILE.test(e.name)) yield full
   }

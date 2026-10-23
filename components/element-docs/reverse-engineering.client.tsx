@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState, type ReactNode } from "react"
-import { CircleHelp, FileText, Globe, ImagePlus, Plus, Trash2, X } from "lucide-react"
+import { CircleHelp, FileText, Globe, ImagePlus, Plus, RefreshCw, Trash2, X } from "lucide-react"
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
@@ -56,7 +56,29 @@ export type ReverseEngineeringWords = {
   /** «{links}» is replaced. */
   taskShots: string
   drawer: TerminalDrawerWords
-  reports: { title: string; loading: string; failed: string; empty: string; open: string; openFailed: string; kinds: Record<string, string> }
+  /** 556-11: the drawer with the element's agent («Send to the product quiz»). */
+  drawerElement: TerminalDrawerWords
+  reports: {
+    title: string
+    loading: string
+    failed: string
+    empty: string
+    open: string
+    openFailed: string
+    kinds: Record<string, string>
+    /** 556-11: the decision under a study and its buttons. */
+    analyze: string
+    analyzeAgain: string
+    verdictTitle: string
+    verdictPages: string
+    continueStudy: string
+    toQuiz: string
+    refresh: string
+    /** The task for the main agent. «{job}», «{target}», «{item}» are replaced. */
+    taskAnalyze: string
+    /** The task for the element's agent. «{job}», «{target}» are replaced. */
+    taskQuiz: string
+  }
   tool: {
     title: string
     install: string
@@ -227,25 +249,70 @@ function PageCard({
 }
 
 // ГОТОВЫЕ РАЗБОРЫ. Элемент `reverse` между задачами выключен, отчёты отдаёт ядро (`/api/node/reverse-report`): список — при открытии
-// страницы; полный отчёт — при раскрытии строки.
-type ReportItem = { job: string; target: string; kind: string; summary: string }
+// страницы, по «Обновить» и когда человек сворачивает ящик с терминалом; полный отчёт — при раскрытии строки.
+// 556-11 (владелец 2026-10-23: «кнопку проанализировать итог … выдаёшь мне рекомендацию … продолжить разбор или кнопка отправить в
+// продуктовый Quiz»): у разбора без решения — «Проанализировать итог» (главный агент, навык analyze-study); с решением — оно и две кнопки,
+// рекомендованная выделена, выбирает человек.
+export type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string }
+export type ReportItem = { job: string; target: string; kind: string; summary: string; verdict: Verdict | null }
 type ReportView = { markdown: string | null } | "loading" | "failed"
+type ReportActions = { onAnalyze: (it: ReportItem) => void; onContinue: (it: ReportItem) => void; onQuiz: (it: ReportItem) => void }
 
-function Reports({ w }: { w: ReverseEngineeringWords["reports"] }) {
+function VerdictBlock({ it, w, onAnalyze, onContinue, onQuiz }: { it: ReportItem; w: ReverseEngineeringWords["reports"] } & ReportActions) {
+  const v = it.verdict
+  if (!v) {
+    return (
+      <div>
+        <Button type="button" onClick={() => onAnalyze(it)} data-rea-analyze={it.job}>{w.analyze}</Button>
+      </div>
+    )
+  }
+  const cont = (
+    <Button key="continue" type="button" variant={v.verdict === "continue" ? "default" : "outline"} onClick={() => onContinue(it)} data-rea-continue={it.job}>
+      {w.continueStudy}
+    </Button>
+  )
+  const quiz = (
+    <Button key="quiz" type="button" variant={v.verdict === "quiz" ? "default" : "outline"} onClick={() => onQuiz(it)} data-rea-to-quiz={it.job}>
+      {w.toQuiz}
+    </Button>
+  )
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-border p-3" data-rea-verdict={v.verdict}>
+      <p className="font-medium">{w.verdictTitle} · {v.at.slice(0, 10)}</p>
+      <p className="max-w-prose">{v.summary}</p>
+      {v.pages.length > 0 && (
+        <div className="flex flex-col gap-1">
+          <p className="text-muted-foreground">{w.verdictPages}</p>
+          <ul className="list-disc space-y-0.5 pl-5">
+            {v.pages.map((p) => <li key={`${p.address}|${p.note}`}>{[p.address, p.note].filter(Boolean).join(" — ")}</li>)}
+          </ul>
+        </div>
+      )}
+      <div className="flex flex-wrap items-center gap-2">
+        {v.verdict === "continue" ? [cont, quiz] : [quiz, cont]}
+        <Button type="button" variant="ghost" size="sm" onClick={() => onAnalyze(it)} data-rea-analyze={it.job}>{w.analyzeAgain}</Button>
+      </div>
+    </div>
+  )
+}
+
+function Reports({ w, refresh, onAnalyze, onContinue, onQuiz }: { w: ReverseEngineeringWords["reports"]; refresh: number } & ReportActions) {
   const [items, setItems] = useState<ReportItem[] | "loading" | "failed">("loading")
   const [views, setViews] = useState<Record<string, ReportView>>({})
+  const [reload, setReload] = useState(0)
 
   useEffect(() => {
     void (async () => {
       try {
         const r = await fetch(`${BASE}/api/node/reverse-report`, { cache: "no-store" })
         const j = (await r.json().catch(() => null)) as { ok?: boolean; items?: ReportItem[] } | null
-        setItems(j?.ok ? (j.items ?? []) : "failed")
+        setItems(j?.ok ? (j.items ?? []).map((it) => ({ ...it, verdict: it.verdict ?? null })) : "failed")
       } catch {
         setItems("failed")
       }
     })()
-  }, [])
+  }, [refresh, reload])
 
   async function open(job: string) {
     if (!job || views[job]) return
@@ -274,11 +341,13 @@ function Reports({ w }: { w: ReverseEngineeringWords["reports"] }) {
               <span className="flex min-w-0 flex-wrap items-center gap-2 text-left">
                 <span className="break-all font-medium text-foreground">{it.target || it.job}</span>
                 <Badge variant="secondary">{w.kinds[it.kind] ?? w.kinds.other}</Badge>
+                {it.verdict && <Badge variant="outline">{it.verdict.verdict === "continue" ? w.continueStudy : w.toQuiz}</Badge>}
                 {date && <span className="text-xs text-muted-foreground">{date}</span>}
               </span>
             </AccordionTrigger>
             <AccordionContent>
               <div className="flex flex-col gap-3 text-sm text-foreground">
+                <VerdictBlock it={it} w={w} onAnalyze={onAnalyze} onContinue={onContinue} onQuiz={onQuiz} />
                 {it.summary && <p className="max-w-prose">{it.summary}</p>}
                 {v === undefined || v === "loading" ? (
                   <p className="inline-flex items-center gap-2 text-muted-foreground"><Spinner /> {w.open}</p>
@@ -297,7 +366,13 @@ function Reports({ w }: { w: ReverseEngineeringWords["reports"] }) {
 
   return (
     <section className="flex flex-col gap-3" data-rea-reports-section>
-      <H2 variant="ui">{w.title}</H2>
+      <div className="flex items-center justify-between gap-2">
+        <H2 variant="ui">{w.title}</H2>
+        <Button type="button" variant="ghost" size="sm" className="gap-1.5" onClick={() => setReload((n) => n + 1)} data-rea-reports-refresh>
+          <RefreshCw className="size-4" aria-hidden />
+          {w.refresh}
+        </Button>
+      </div>
       {body}
     </section>
   )
@@ -373,7 +448,9 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
   const [target, setTarget] = useState("")
   const [pages, setPages] = useState<PageInput[]>([{ key: 1, address: "", note: "", shots: [] }])
   const [open, setOpen] = useState<string[]>(["site"])
-  const [drawer, setDrawer] = useState<{ n: number; text: string } | null>(null)
+  const [drawer, setDrawer] = useState<{ n: number; text: string; service: string } | null>(null)
+  const [refresh, setRefresh] = useState(0)
+  const cardsRef = useRef<HTMLDivElement | null>(null)
   // Ссылка на скриншот для агента — через ядро на этом компьютере (`nodeUrl` двери `/api/domain/state`): хранилище напрямую отвечает
   // 401 без ключа узла (замерено 556-9), а ядро отдаёт файл. Нет ответа — адрес этой страницы.
   const [nodeUrl, setNodeUrl] = useState<string | null>(null)
@@ -394,14 +471,32 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
   function start() {
     const value = target.trim()
     if (!value) return
-    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, text: composeTask(words, item, value, pages) }))
+    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, service: "build", text: composeTask(words, item, value, pages) }))
+  }
+
+  // 556-11: адрес разбора — первое слово цели отчёта («https://www.tinylaunch.com (the apex … )»).
+  const firstUrl = (t: string) => t.trim().split(/\s+/)[0] ?? ""
+  function analyze(it: ReportItem) {
+    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, service: "build", text: fill(words.reports.taskAnalyze, { job: it.job, target: firstUrl(it.target), item }) }))
+  }
+  function toQuiz(it: ReportItem) {
+    setDrawer((d) => ({ n: (d?.n ?? 0) + 1, service: item, text: fill(words.reports.taskQuiz, { job: it.job, target: firstUrl(it.target) }) }))
+  }
+  // «Продолжить разбор»: карточки получают адрес и недостающие страницы из решения агента — человеку остаётся скриншот или вход.
+  function continueStudy(it: ReportItem) {
+    if (!it.verdict) return
+    const next = it.verdict.pages.map((p) => ({ key: nextKey.current++, address: p.address, note: p.note, shots: [] }))
+    setTarget(firstUrl(it.target))
+    setPages(next.length ? next : [{ key: nextKey.current++, address: "", note: "", shots: [] }])
+    setOpen(["site", ...next.map((p) => `page-${p.key}`)])
+    cardsRef.current?.scrollIntoView({ block: "start" })
   }
 
   return (
     <div className="my-4 flex flex-col gap-4 lg:flex-row lg:items-start" data-reverse-engineering>
       <div className="flex min-w-0 max-w-3xl flex-1 flex-col gap-8">
         <ToolNotice t={words.tool} />
-        <div className="flex flex-col gap-4">
+        <div ref={cardsRef} className="flex flex-col gap-4" data-rea-form>
           <Accordion type="multiple" value={open} onValueChange={setOpen} className="rounded-lg border border-border px-4" data-rea-cards>
             <AccordionItem value="site" data-rea-site>
               <AccordionTrigger>
@@ -453,18 +548,18 @@ export function ReverseEngineering({ item, lang, words, kit }: { item: string; l
             {words.start}
           </Button>
         </div>
-        <Reports w={words.reports} />
+        <Reports w={words.reports} refresh={refresh} onAnalyze={analyze} onContinue={continueStudy} onQuiz={toQuiz} />
       </div>
       {drawer && (
         <TerminalDrawer
           key={drawer.n}
-          service="build"
+          service={drawer.service}
           lang={lang}
-          words={words.drawer}
+          words={drawer.service === "build" ? words.drawer : words.drawerElement}
           kit={kit}
           text={drawer.text}
           start
-          onCollapse={() => setDrawer(null)}
+          onCollapse={() => { setDrawer(null); setRefresh((n) => n + 1) }}
         />
       )}
     </div>

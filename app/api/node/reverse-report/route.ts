@@ -1,6 +1,6 @@
-// @api read a finished reverse engineering report by its task id
+// @api read finished study reports and record the agent verdict
 import { timingSafeEqual } from "node:crypto"
-import { existsSync, readdirSync, readFileSync } from "node:fs"
+import { existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"
@@ -25,6 +25,13 @@ function nodeKeyOk(given: string | null): boolean {
 
 const read = (file: string) => (existsSync(file) ? readFileSync(file, "utf8") : null)
 
+// 556-11 (владелец 2026-10-23: «кнопку проанализировать итог … выдаёшь мне рекомендацию … продолжить разбор или … отправить в продуктовый
+// Quiz»): решение главного агента по итогу разбора — `verdict.json` рядом с отчётом. Пишет только агент узла (ключ узла); страница читает.
+type Verdict = { verdict: "continue" | "quiz"; summary: string; pages: { address: string; note: string }[]; at: string }
+const verdictOf = (dir: string): Verdict | null => {
+  try { const v = JSON.parse(read(join(dir, "verdict.json")) ?? "null") as Verdict | null; return v && (v.verdict === "continue" || v.verdict === "quiz") ? v : null } catch { return null }
+}
+
 export async function GET(req: NextRequest) {
   if (!nodeKeyOk(req.headers.get("x-node-key"))) {
     const denied = await requireRoles(req, ["architect", "admin"])
@@ -40,7 +47,7 @@ export async function GET(req: NextRequest) {
     const items = jobs.map((j) => {
       let r: { target?: { source?: string; name?: string; kind?: string }; summary?: string } = {}
       try { r = JSON.parse(read(join(REPORTS, j, "report.json")) ?? "{}") } catch { /* a broken report shows its id only */ }
-      return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400) }
+      return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400), verdict: verdictOf(join(REPORTS, j)) }
     }).reverse()
     return NextResponse.json({ ok: true, jobs, items }, { headers: HEADERS })
   }
@@ -55,4 +62,22 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "report.json is not JSON" }, { status: 502, headers: HEADERS })
   }
   return NextResponse.json({ ok: true, job, report, markdown: read(join(dir, "report.md")) }, { headers: HEADERS })
+}
+
+const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "")
+
+export async function POST(req: NextRequest) {
+  if (!nodeKeyOk(req.headers.get("x-node-key"))) return NextResponse.json({ ok: false, error: "node key required" }, { status: 401, headers: HEADERS })
+  const b = (await req.json().catch(() => null)) as { job?: unknown; verdict?: unknown; summary?: unknown; pages?: unknown } | null
+  const job = text(b?.job, 90)
+  if (!JOB.test(job)) return NextResponse.json({ ok: false, error: "bad-job" }, { status: 400, headers: HEADERS })
+  const dir = join(REPORTS, job)
+  if (!existsSync(join(dir, "report.json"))) return NextResponse.json({ ok: false, error: "not-found" }, { status: 404, headers: HEADERS })
+  if (b?.verdict !== "continue" && b?.verdict !== "quiz") return NextResponse.json({ ok: false, error: "verdict must be continue or quiz" }, { status: 400, headers: HEADERS })
+  const summary = text(b.summary, 2000)
+  if (!summary) return NextResponse.json({ ok: false, error: "summary required" }, { status: 400, headers: HEADERS })
+  const pages = (Array.isArray(b.pages) ? b.pages : []).slice(0, 12).map((p) => ({ address: text((p as { address?: unknown })?.address, 300), note: text((p as { note?: unknown })?.note, 500) })).filter((p) => p.address || p.note)
+  const verdict: Verdict = { verdict: b.verdict, summary, pages, at: new Date().toISOString() }
+  writeFileSync(join(dir, "verdict.json"), JSON.stringify(verdict, null, 2) + "\n", "utf8")
+  return NextResponse.json({ ok: true, job, verdict }, { headers: HEADERS })
 }

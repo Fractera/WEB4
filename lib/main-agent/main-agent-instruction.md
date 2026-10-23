@@ -37,6 +37,7 @@ An element without a role for this request — `npm run role -- <id> "<one sente
 - A check the architect wants from an element; starting or closing an element's agent yourself — `ask-element`.
 - The node type (single project or app factory) — `node-type`. Turning an element itself on or off — `element-power`.
 - How a finished product, site or SDK works — `reverse-engineer`: turn `reverse` on for the task, bring the report, turn it off.
+- Whether a finished study is enough, «Проанализируй итог разбора …» — `analyze-study`: decide continue or quiz, `npm run verdict`.
 - Automating something on a clock — `core-schedule`.
 Change the type, an element's power or a schedule only after the person's «yes». No subagents, unless a skill explicitly allows one
 («Subagent: allowed» in it).
