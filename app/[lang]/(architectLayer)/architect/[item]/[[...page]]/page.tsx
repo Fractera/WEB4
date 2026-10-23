@@ -257,6 +257,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const node = r.trail[r.trail.length - 1]
   const key = r.trail.map((t) => t.slug).join('/')
   const words = node.words[l]
+  // 577-11: «Блоки» — только переадресация на страницу блоков самого элемента (владелец: «мы не строим внутри страницы архитектора блоки»).
+  if (key === 'build/blocks') redirect(`${domainRecord(item)?.url ?? `https://${address}`}/${lang}/admin/blocks`)
   const nodePath = `${dir}/${key}`
   const path = r.service ? `${nodePath}/${r.service}` : nodePath
 
