@@ -52,6 +52,8 @@ export type WorkspaceShellItem = {
    * у рождённого элемента тот же клик переходит). Полная загрузка той же страницы работает.
    */
   reload?: boolean
+  /** 578-5: пункт открывается в новой вкладке (страница блоков элемента живёт на его собственном сайте). */
+  newTab?: boolean
 }
 export type WorkspaceShellNote = {
   tone: 'recommended' | 'advice' | 'warning'
@@ -90,7 +92,12 @@ const NOTE_TONE: Record<WorkspaceShellNote['tone'], { box: string; title: string
  * в двух местах сразу.
  */
 /** 557: ссылка меню — клиентский переход, а у пунктов с `reload` — обычный `<a>` (полная загрузка). */
-function NavLink({ reload, ...props }: { reload?: boolean } & Parameters<typeof Link>[0]) {
+function NavLink({ reload, newTab, ...props }: { reload?: boolean; newTab?: boolean } & Parameters<typeof Link>[0]) {
+  // 578-5: пункт, открывающий страницу в новой вкладке (страница блоков элемента — на его собственном сайте).
+  if (newTab) {
+    const { href, prefetch: _p, replace: _r, scroll: _s, ...rest } = props as Parameters<typeof Link>[0] & Record<string, unknown>
+    return <a href={String(href)} target="_blank" rel="noopener noreferrer" {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)} />
+  }
   if (reload) {
     const { href, prefetch: _p, ...rest } = props as typeof props & { prefetch?: unknown }
     return <a href={String(href)} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)} />
@@ -138,7 +145,7 @@ function Item({
       )
     }
     return (
-      <NavLink reload={item.reload} href={item.href} aria-current={item.active ? 'page' : undefined} className={cls}>
+      <NavLink reload={item.reload} newTab={item.newTab} href={item.href} aria-current={item.active ? 'page' : undefined} className={cls}>
         {body}
       </NavLink>
     )
@@ -291,6 +298,7 @@ export function WorkspaceShell({
                     {item.href ? (
                       <NavLink
                         reload={item.reload}
+                        newTab={item.newTab}
                         href={item.href}
                         aria-current={item.active ? 'page' : undefined}
                         className={
@@ -324,6 +332,7 @@ export function WorkspaceShell({
                               {sub.href ? (
                                 <NavLink
                                   reload={sub.reload}
+                                  newTab={sub.newTab}
                                   href={sub.href}
                                   aria-current={sub.active ? 'page' : undefined}
                                   className={

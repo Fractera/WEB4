@@ -43,9 +43,9 @@ export type TreePage = {
   /** 559 (владелец 2026-10-21: «добавления к стандартной вкладки авторизации на одном из верхних уровней вкладки пользователей»):
    *  раздел только элемента входа (`auth`). */
   auth?: true
-  /** 577-11 (владелец 2026-10-23: «вкладку блоки мы должны поставить на вкладку строительства внутри каждого элемента, который не
-   *  использует синхронизацию с общими блоками»): пункт только у элемента с выключенной связью «Блоки» (`links.json`). */
-  ownBlocks?: true
+  /** 578-5 (владелец 2026-10-23: «разместить вкладку блоки внутри всех нативных и кастомных элементов, обеспечивая её как кнопку
+   *  которая просто напросто открывает новую вкладку»): пункт меню открывается в новой вкладке. */
+  newTab?: true
   // 553-6: на едином проекте (nodeType project) страницы нет — в меню и по адресу
   project?: false
   doc?: { file: string; folder?: boolean; deep?: boolean }
@@ -98,7 +98,7 @@ export function movedPage(path: string[]): string | null {
 }
 
 // 472: что у элемента есть — для условий `needs`/`unless`. Один ответ для меню, маршрута и списка страниц раздела.
-export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean; web4?: boolean; payment?: boolean; ownBlocks?: boolean }
+export type TreeContext = { catalog: boolean; messengers: Record<Messenger, boolean>; native?: boolean; nodeType?: "project" | "factory"; memory?: boolean; auth?: boolean; web4?: boolean; payment?: boolean }
 export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.project === false && c.nodeType === "project") return false
   if (p.needs === "catalog" && !c.catalog) return false
@@ -109,7 +109,6 @@ export function treeVisible(p: TreePage, c: TreeContext): boolean {
   if (p.custom && c.native && !(p.orPayment && c.payment)) return false
   if (p.memory && !c.memory) return false
   if (p.auth && !c.auth) return false
-  if (p.ownBlocks && !c.ownBlocks) return false
   return true
 }
 // 472: у элемента с H2A бот живёт в H2A — старый адрес ведёт туда (у элемента без H2A бот остаётся в «Строительстве»).
@@ -341,7 +340,7 @@ export const ITEM_TREE: TreePage[] = [
       { slug: "deployments", words: w("Preview & Deploy", "See a new version before visitors do, deploy it, or go back to a working one.", "Предпросмотр и развёртывание", "Посмотреть новую версию до посетителей, развернуть её или вернуться к работающей.") },
       // 577-11 (владелец 2026-10-23: «мы не строим внутри страницы архитектора блоки это кнопка просто работает как переадресация на
       // страницу блоке которая находится в элементах»): пункт ведёт на `/<язык>/admin/blocks` самого элемента.
-      { slug: "blocks", ownBlocks: true, words: w("Blocks", "The blocks of this element, on the element itself.", "Блоки", "Блоки этого элемента — на самом элементе.") },
+      { slug: "blocks", newTab: true, words: w("Blocks", "The blocks of this element, on the element itself.", "Блоки", "Блоки этого элемента — на самом элементе.") },
       // 472: у элемента с H2A бот переехал в H2A (`MOVED_WITH`); здесь он остаётся для элементов без H2A.
       { slug: "telegram", unless: "h2a", words: w("Telegram bot", "A bot that talks to the same agent session.", "Telegram-бот", "Бот, который говорит с той же сессией агента.") },
       { slug: "environment", words: w("Environment variables", "Keys and settings the element reads at start.", "Переменные окружения", "Ключи и настройки, которые элемент читает при старте.") },

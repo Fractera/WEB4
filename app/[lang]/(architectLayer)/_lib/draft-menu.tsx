@@ -79,7 +79,7 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
       const href = hrefPath(path)
       return kids.length > 0
         ? { label: p.words[l].title, href: at(href), active: href === currentPath, open: href === currentPath || inside, children: kids, reload: builtIn && href === path }
-        : { label: p.words[l].title, href: at(href), active: href === currentPath || inside, reload: builtIn && href === path }
+        : { label: p.words[l].title, href: at(href), active: href === currentPath || inside, reload: builtIn && href === path, ...(p.newTab ? { newTab: true } : {}) }
     }
     const children = shownOf(ITEM_TREE).map((s) => node(s, dir))
     return {
