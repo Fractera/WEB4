@@ -302,7 +302,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const preview = key === 'preview' && serviceUrl(item)
     // Терминал рождённого элемента — под `build/` (как у «Описания» ниже); путь служб ядра вёл на ошибку (замерено 356-3).
     // 576-2: выключенный элемент показывает копию из Cloudflare, строка ведёт в его «Опасную зону» (адрес — как у плашки 567 ниже).
-    ? <ElementPreview serviceId={item} terminalService={`${slug}/build`} devHref={`/${lang}/${slug}/build/deployments`} offHref={`/${lang}/architect/${address}/settings/danger-zone`} lang={lang} words={elementPreviewWords(lang)} task={previewTaskKit(item, lang)} />
+    ? <ElementPreview serviceId={item} terminalService={`${slug}/build`} devHref={`/${lang}/${slug}/build/deployments`} offHref={`/${lang}${dir}/settings/danger-zone`} lang={lang} words={elementPreviewWords(lang)} task={previewTaskKit(item, lang)} />
     : null
 
   // 326-3: «Подписка Claude Code», «Терминал», «Telegram бот» — острова ОБЩЕЙ копии комплекта агента (`../_agent-kit`, 326-1);
@@ -539,7 +539,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   const offNow = entry ? power.offOf(entry) : null
   const offNote = offNow ? (
     <div role="status" className="my-4 rounded-lg bg-warning/10 px-4 py-3 text-sm text-foreground ring-1 ring-warning/50" data-element-off>
-      <span className="font-semibold">{sui.powerDialog.stateOff}</span> {power.reasonIn(offNow, lang)} · {sui.power.title}: <a className="underline" href={`/${lang}/architect/${address}/settings/danger-zone`}>{sui.badge}</a>
+      <span className="font-semibold">{sui.powerDialog.stateOff}</span> {power.reasonIn(offNow, lang)} · {sui.power.title}: <a className="underline" href={`/${lang}${dir}/settings/danger-zone`}>{sui.badge}</a>
     </div>
   ) : null
   return (
