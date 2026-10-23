@@ -478,13 +478,13 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 536-1 (владелец 2026-10-18): «Продуктовый квиз» — живое описание продукта из `development-docs/product/` элемента; страница
   // только читает, меняет квиз агент элемента в разговоре. 556-10: «Начать квиз», «Продолжить квиз» и 💬 открывают справа терминал
   // агента элемента (`_tools/terminal-drawer`); Telegram со страницы снят.
-  const productQuiz = key === 'build/product-design/quiz'
+  const productQuiz = key === 'product-design/quiz'
     ? <ProductQuizIsland item={item} lang={lang} words={productQuizUi(lang)}
         task={{ ui: quizTaskUi(lang), terminalWords: agentTerminalWords(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref(item, lang) }} />
     : null
   // 539-3, переделано 556-9 (владелец 2026-10-23: «Представь все просто в формате карточек аккордеон»): карточки адреса и страниц,
   // «Начать реверс-инжиниринг» — справа терминал главного агента узла (`build`); одна страница ядра для каждого элемента.
-  const reverseEngineering = key === 'build/product-design/reverse-engineering'
+  const reverseEngineering = key === 'product-design/reverse-engineering'
     ? <ReverseEngineering item={item} lang={lang} words={reverseEngineeringUi(lang)}
         kit={{ terminalWords: agentTerminalWords(lang), dialogUi: appDialogUi(lang), keyHref: openAiKeyHref('build', lang) }} />
     : null

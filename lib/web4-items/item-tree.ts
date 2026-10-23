@@ -52,7 +52,7 @@ const w = (enTitle: string, enLead: string, ruTitle: string, ruLead: string): Re
 // Прежний адрес → новый: ссылки и закладки не ломаются. Сначала точное совпадение, затем начало пути (`movedPage`).
 // 451-2: вкладки i2i и f2f переехали в «Строительство»; 528-1: они — подразделы `build/i2i`, `build/f2f`; H2H и H2A — в Messenger;
 // A2A — в «Рабочий процесс» («A2A ваша работа», витрина — «Карточки возможностей»); «Процесс» — в «Рабочий процесс»;
-// «Документы» и «Проектирование продукта» — в «Строительство».
+// «Документы» — в «Строительство»; 556-12: «Проектирование продукта» — снова свой раздел между «Рабочим процессом» и «Строительством».
 export const MOVED_PAGES: Record<string, string> = {
   "connectors/catalog": "build/i2i/catalog",
   "connectors/api": "build/i2i/api",
@@ -68,8 +68,10 @@ export const MOVED_PAGES: Record<string, string> = {
   "build/publish": "build/f2f/publish",
   "h2a/native-chat": "messenger/h2a/native",
   // 538: два пункта переезда свёрнуты в «Реверс-инжиниринг».
-  "build/product-design/from-nextjs": "build/product-design/reverse-engineering",
-  "build/product-design/from-framework": "build/product-design/reverse-engineering",
+  "build/product-design/from-nextjs": "product-design/reverse-engineering",
+  "build/product-design/from-framework": "product-design/reverse-engineering",
+  "product-design/from-nextjs": "product-design/reverse-engineering",
+  "product-design/from-framework": "product-design/reverse-engineering",
 }
 const MOVED_PREFIXES: [string, string][] = [
   ["h2a", "messenger/h2a"],
@@ -77,7 +79,7 @@ const MOVED_PREFIXES: [string, string][] = [
   ["connectors", "workflow/a2a-work"],
   ["process", "workflow/process"],
   ["documents", "build/documents"],
-  ["product-design", "build/product-design"],
+  ["build/product-design", "product-design"],
 ]
 /** Куда переехал прежний адрес (путь под элементом, без языка); не переезжал — `null`. */
 export function movedPage(path: string[]): string | null {
@@ -305,6 +307,18 @@ export const ITEM_TREE: TreePage[] = [
       },
     ],
   },
+  // 556-12 (владелец 2026-10-23): «Вынеси проектирование продукта на внешний слой каждого элемента чтобы он был в 1 линии … живой
+  // сайт – рабочий процесс – проектирование продукта – строительство». С 528-1 до этого раздел жил внутри «Строительства».
+  {
+    slug: "product-design",
+    words: w("Product design", "What the element should become, before its code.", "Проектирование продукта", "Каким должен стать элемент — до его кода."),
+    pages: [
+      { slug: "quiz", words: w("Product quiz", "Questions that shape the element.", "Продуктовый квиз", "Вопросы, из которых складывается элемент.") },
+      // 538 (владелец 2026-10-19): «замену двух этих записей на надпись Реверс инжиниринг» — «Переезд из другого Next.js» и
+      // «Переезд из другого фреймворка» свёрнуты в один пункт; прежние адреса переадресуются (`MOVED_PAGES`).
+      { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or SDK works, then build your own in this element.", "Реверс-инжиниринг", "Разберите, как устроен готовый сайт или SDK, чтобы построить своё в этом элементе.") },
+    ],
+  },
   {
     slug: "build",
     words: w("Build", "Everything the element's agent needs to build it.", "Строительство", "Всё, что нужно агенту элемента, чтобы его строить."),
@@ -412,17 +426,6 @@ export const ITEM_TREE: TreePage[] = [
           { slug: "translation-debt", doc: { file: "development-docs/translation-debt.md" }, words: w("Translation debt", "Texts still in one language, and why.", "Долги по переводам", "Тексты, которые пока на одном языке, и почему.") },
           { slug: "skill-decisions", doc: { file: "development-docs/owner-decisions-on-skill-changes.md" }, words: w("Decisions on skills", "What a self-review proposed and what the person answered.", "Решения о навыках", "Что предложил разбор и что ответил человек.") },
           { slug: "task-add", words: w("Add a task", "A task for the element's agent.", "Добавить задание", "Задание агенту элемента.") },
-        ],
-      },
-      // 528-1 (владелец 2026-10-18): «В Строительство переносим … проектирование продукта».
-      {
-        slug: "product-design",
-        words: w("Product design", "What the element should become, before its code.", "Проектирование продукта", "Каким должен стать элемент — до его кода."),
-        pages: [
-          { slug: "quiz", words: w("Product quiz", "Questions that shape the element.", "Продуктовый квиз", "Вопросы, из которых складывается элемент.") },
-          // 538 (владелец 2026-10-19): «замену двух этих записей на надпись Реверс инжиниринг» — «Переезд из другого Next.js» и
-          // «Переезд из другого фреймворка» свёрнуты в один пункт; прежние адреса переадресуются (`MOVED_PAGES`).
-          { slug: "reverse-engineering", words: w("Reverse engineering", "Study how a finished site or SDK works, then build your own in this element.", "Реверс-инжиниринг", "Разберите, как устроен готовый сайт или SDK, чтобы построить своё в этом элементе.") },
         ],
       },
     ],

@@ -3040,10 +3040,10 @@ Owner, verbatim — `/code` `current-steps.md`, records «531 — ЗАМЕЧАН
 
 The owner, verbatim: «я считаю что проект должен быть описан на продуктовом языке» and «по мере того как пользователь говорит: – а ещё
 мне нужно … это должно вызывать процедуру … чтобы понять какие существуют зависимости и на что повлияет это новая Fitch». The page:
-«Building → Product design → Product quiz» (`build/product-design/quiz`).
+«Product design → Product quiz» (`product-design/quiz`; under «Building» until 556-12).
 
 - **Reverse engineering (step 538, 2026-10-19):** the owner, verbatim: «замену двух этих записей на надпись Реверс инжиниринг». The two
-  pages «Move from another Next.js» and «Move from another framework» became one page `build/product-design/reverse-engineering` —
+  pages «Move from another Next.js» and «Move from another framework» became one page `product-design/reverse-engineering` (under «Building» until 556-12) —
   «Study how a finished site or app works, then build your own in the element»; title and lead only, nothing is built behind it yet.
   The old addresses redirect (`MOVED_PAGES` in `lib/web4-items/item-tree.ts`). The tool REA (`morluto/rea`) was studied, **not
   installed**: it needs Node ≥ 22.19 (this machine: 22.11), its default setup registers itself for every agent on the machine, and a
