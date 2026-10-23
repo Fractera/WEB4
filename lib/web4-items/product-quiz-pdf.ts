@@ -34,15 +34,24 @@ async function git(dir: string, args: string[]): Promise<string> {
   }
 }
 
-/** The commit where the quiz changed last, whether it is on GitHub (the remote-tracking branches as git last saw them), uncommitted edits. */
-export async function quizGit(dir: string): Promise<QuizGit> {
+/** The commit where the quiz changed last, whether it is on GitHub, uncommitted edits. GitHub: the node's own upload of the element
+ *  (`data/services/<id>/github/state.json`: `repo`, `lastCommit` — the button «Building → GitHub», 374) — the quiz commit is there when
+ *  it is an ancestor of the last upload; an element cloned from a remote (built-in) — its remote-tracking branches as git last saw them. */
+export async function quizGit(dir: string, id: string): Promise<QuizGit> {
   const last = await git(dir, ["log", "-1", "--format=%H|%cI", "--", "development-docs/product"])
   const [commit, date] = last ? last.split("|") : [null, null]
   const dirty = (await git(dir, ["status", "--porcelain", "--", "development-docs/product"])) !== ""
+  let stored: { repo?: string; lastCommit?: string } = {}
+  try { stored = JSON.parse(readFileSync(join(process.cwd(), "data", "services", id, "github", "state.json"), "utf8")) } catch { /* not uploaded by the node */ }
   const url = await git(dir, ["remote", "get-url", "origin"])
   const m = url.match(/github\.com[/:]([^/]+)\/([^/.]+?)(?:\.git)?$/)
-  const remote = m ? `https://github.com/${m[1]}/${m[2]}` : null
-  const pushed = commit ? (await git(dir, ["branch", "-r", "--contains", commit])) !== "" : false
+  const repo = stored.repo && /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(stored.repo) ? stored.repo : m ? `${m[1]}/${m[2]}` : null
+  const remote = repo ? `https://github.com/${repo}` : null
+  let pushed = false
+  if (commit && stored.lastCommit && /^[0-9a-f]{7,40}$/.test(stored.lastCommit)) {
+    try { await run("git", ["-C", dir, "merge-base", "--is-ancestor", commit, stored.lastCommit], { windowsHide: true, timeout: 15_000 }); pushed = true } catch { /* not an ancestor */ }
+  }
+  if (commit && !pushed) pushed = (await git(dir, ["branch", "-r", "--contains", commit])) !== ""
   return { commit: commit || null, date: date || null, dirty, remote, pushed }
 }
 

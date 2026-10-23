@@ -83,7 +83,18 @@ function summaryOf(j: string) {
     .map((s: { name?: unknown; id?: unknown; shot?: { id?: unknown } }) => ({ name: String(s?.name ?? s?.id ?? "").slice(0, 120), id: String(s?.shot?.id ?? "") }))
     .filter((s) => UUID.test(s.id))
     .slice(0, 60)
-  return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: String(r.summary ?? "").slice(0, 400), verdict: verdictOf(join(REPORTS, j)), series, part, screens }
+  return { job: j, target: r.target?.source || r.target?.name || "", kind: r.target?.kind || "other", summary: brief(String(r.summary ?? ""), 400), verdict: verdictOf(join(REPORTS, j)), series, part, screens }
+}
+
+/** The first sentences that fit; a cut never falls inside a word (✗ 556-14: «… The stu» under a part on the page). */
+function brief(text: string, max: number): string {
+  const t = text.trim()
+  if (t.length <= max) return t
+  const cut = t.slice(0, max)
+  const end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "))
+  if (end > max / 3) return cut.slice(0, end + 1)
+  const space = cut.lastIndexOf(" ")
+  return `${cut.slice(0, space > 0 ? space : max)}…`
 }
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "")

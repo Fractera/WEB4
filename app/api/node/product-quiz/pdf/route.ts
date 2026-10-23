@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
   const asked = req.nextUrl.searchParams.get("lang")
   const lang = asked === "ru" || asked === "en" ? asked : quiz.language === "ru" ? "ru" : "en"
   const at = new Date()
-  const [git, shots] = await Promise.all([quizGit(dir), quizShots(quiz)])
+  const [git, shots] = await Promise.all([quizGit(dir, id), quizShots(quiz)])
   const name = address || id
   const html = quizPdfHtml({ item: id, name, lang, quiz, git, shots, at })
 
