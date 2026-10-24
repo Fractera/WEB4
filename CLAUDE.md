@@ -3634,3 +3634,24 @@ Owner, 2026-10-24: «архитектор это супер пользовате
   «Войти» on the element's site once — the node cookie is still valid, no password is asked.
 - Proven by: a stand on a copy of the live auth database (`completed-steps/580-*.md`, 25 checks) and the owner's browser on lagrix.dev
   and throughsongs.com. Not proven live: an administrator of a factory application (this node is a single project).
+
+## The architect entrance asks nothing on open; the menu by zones; Create a native element (step 582, 2026-10-24)
+
+Owner's words, verbatim in `/code/development-docs/development-steps/completed-steps/582-main.md`; plan — «Подтвердить, до конца (Рекомендую)»,
+the shell requests — «Только вход, как просил», the integrator — «Как идею, ссылкой на Lagrix (Рекомендую)».
+- 🔒 **`/<lang>/architect` makes no request of its own:** the node state island (`components/node-state/node-state.client.tsx`) starts
+  in `idle` with one button «Get the current state»; `GET /api/node/state` and the cards come only after the press. ✗ Measured before:
+  on open the entrance fired state (2.6 s) together with the shell's requests, and the page did not answer clicks.
+- **The entrance text** (`_i18n/architect-home.i18n.ts`): three actions to start (Claude Code subscription → `/build/subscription`,
+  Telegram → `/build/telegram`, reverse engineering → `/reverse`) and the basics — node, element, native, custom, one owner («Single
+  project»), site factory («App factory»), integrator (an idea, linked to Lagrix document 19), Web4 ready. The old eight topics are in git.
+- 🛑 **Not changed (owner's choice):** the shell still asks `/api/node/online` (4–4.6 s), `/api/node/github-backup` (2 s) and
+  `/api/node/attention` (1.7–2 s) on every architect page.
+- **Left menu** (`_lib/draft-menu.tsx`): Passport · the zone «Main» (everything from Passport to «Main agent» — not a hand list) ·
+  «Native elements» · «Custom elements». Zones are closed except the one holding the current page (553). Zone headings — `--fs-lead`
+  semibold; the create buttons — `--fs-small` (`components/workspace/workspace-shell.tsx`, `_components/create-draft-button.client.tsx`).
+- **«Create a native element»** — first line of the native zone: `POST /api/architect/drafts {native:true}` writes `native: true` into
+  `data/web4-drafts.json`; the draft stands in the native zone, its page shows the owner's note on what native elements are for, the
+  birth window asks nothing about the look, and the birth door starts `scripts/item-birth.mjs <id> --native` (`birthArgs` in
+  `lib/web4-items/birth.ts`). A live birth of a native element from the button has not been run (owner's word needed: ~3 min and new
+  resident processes).
