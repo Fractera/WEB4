@@ -102,11 +102,34 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
           },
         ],
       },
+      // 583 (владелец 2026-10-24): «reverse engeninring REA with product QUIZ it is killer features , add describe» — раздел встаёт
+      // третьим: карточки Lagrix и ИИ привязаны к разделам 1 и 2 по индексу (`_components/index.ts`).
       {
-        title: '3. At home or on a dedicated server',
+        title: '3. Killer features: reverse engineering and the product quiz',
         parts: [
           {
-            title: '3.1 A home server',
+            title: '3.1 Learn from products that already work',
+            items: [
+              'Name a popular site or SDK, and the node studies how it works: its pages, user flows, API and data. It handles sites, npm and Python packages, .NET and native libraries, Android apps and WASM.',
+              'The study is done by the REA tool inside the reverse engineering element, which switches on for one task and off after it.',
+              'The node takes ideas and structure and never copies foreign code, texts, pictures or design. If a site\'s rules forbid a study, you show it with screenshots, and the node studies similar sites whose rules allow it.',
+            ],
+          },
+          {
+            title: '3.2 The product quiz: your product in plain words before any code',
+            items: [
+              'The element\'s agent asks one question at a time and writes down who the product is for, what it does and what it needs.',
+              'It checks what the node already has and suggests studying a reference product where that helps, with the price of the study.',
+              'The quiz turns into stages. Stage 0 is static pages with first data; each next stage adds one capability that works on its own.',
+            ],
+          },
+        ],
+      },
+      {
+        title: '4. At home or on a dedicated server',
+        parts: [
+          {
+            title: '4.1 A home server',
             items: [
               'The node is made to live at home: it is installed on your computer with one sentence to an agent and runs without an administrator.',
               'You pay nothing for hosting, and the data stays with you.',
@@ -114,7 +137,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
             ],
           },
           {
-            title: '3.2 Medium and large business',
+            title: '4.2 Medium and large business',
             items: [
               'When the load grows, the same project moves to a dedicated server.',
               'The same code moves: the elements live in your GitHub repositories and are set up on the server the same way as at home.',
@@ -214,10 +237,31 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
         ],
       },
       {
-        title: '3. Дома или на выделенном сервере',
+        title: '3. Киллер-фичи: реверс-инжиниринг и продуктовый квиз',
         parts: [
           {
-            title: '3.1 Домашний сервер',
+            title: '3.1 Учитесь у продуктов, которые уже работают',
+            items: [
+              'Назовите популярный сайт или SDK, и узел разберёт, как он устроен: страницы, пути пользователя, API и данные. Он разбирает сайты, пакеты npm и Python, библиотеки .NET и нативные, приложения Android и WASM.',
+              'Разбор делает инструмент REA внутри элемента «Реверс-инжиниринг»: элемент включается на одну задачу и выключается после неё.',
+              'Узел берёт идеи и устройство и никогда не копирует чужой код, тексты, картинки и оформление. Если правила сайта запрещают разбор, вы показываете его скриншотами, а узел разбирает похожие сайты, чьи правила это разрешают.',
+            ],
+          },
+          {
+            title: '3.2 Продуктовый квиз: ваш продукт простыми словами до первой строки кода',
+            items: [
+              'Агент элемента задаёт по одному вопросу и записывает, для кого продукт, что он делает и что ему нужно.',
+              'Он смотрит, что уже есть в узле, и там, где это поможет, предлагает разобрать образец и называет цену разбора.',
+              'Квиз превращается в этапы. Этап 0 — статические страницы с первыми данными; каждый следующий добавляет одну способность, которая работает сама.',
+            ],
+          },
+        ],
+      },
+      {
+        title: '4. Дома или на выделенном сервере',
+        parts: [
+          {
+            title: '4.1 Домашний сервер',
             items: [
               'Узел задуман домашним: он ставится на ваш компьютер одной фразой агенту и работает без администратора.',
               'За хостинг вы не платите, а данные остаются у вас.',
@@ -225,7 +269,7 @@ const UI: Record<'en' | 'ru', PresentationWords> = {
             ],
           },
           {
-            title: '3.2 Средний и крупный бизнес',
+            title: '4.2 Средний и крупный бизнес',
             items: [
               'Когда нагрузка растёт, тот же проект переносится на выделенный сервер.',
               'Переезжает тот же код: элементы лежат в ваших репозиториях GitHub и разворачиваются на сервере так же, как дома.',

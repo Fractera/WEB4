@@ -13,7 +13,7 @@ about it is written anywhere else.
 | `_data/ru.ts` | an override |
 | `_data/index.ts` | ties them together; **this file is what makes the folder a page** |
 | `_components/` | the working part: the presentation of the node and its link with Lagrix, built from blocks (step 535) |
-| `_data/presentation.ts` | the words of the presentation, `en` base and `ru`: intro, the card «you do not have to open this panel», three numbered sections (Web4-ready and Lagrix · the ordinary web · home or a dedicated server); money figures by the Lagrix changelog, one reading (entry 51) |
+| `_data/presentation.ts` | the words of the presentation, `en` base and `ru`: intro, the card «you do not have to open this panel», four numbered sections (Web4-ready and Lagrix · the ordinary web · the killer features: reverse engineering and the product quiz, step 583 · home or a dedicated server); money figures by the Lagrix changelog, one reading (entry 51) |
 
 ## The three states of this page
 
