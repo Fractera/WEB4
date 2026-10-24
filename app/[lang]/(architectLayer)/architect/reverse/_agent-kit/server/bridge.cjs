@@ -11,7 +11,7 @@
 // печатается в журнал и в сам терминал: молча пропавший терминал читается как «сломали вход в подписку».
 // Измерено 2026-09-22: у `node-pty@1.1.0` готовые сборки есть под Windows и macOS, под Linux — нет.
 
-const { existsSync } = require('node:fs')
+const { existsSync, readFileSync, unlinkSync } = require('node:fs')
 const path = require('node:path')
 const { redeemTicket } = require('./ticket.cjs')
 const session = require('./session.cjs')
@@ -96,6 +96,30 @@ function shellEnv(shell) {
  * владелец: «агент должен уметь запускать собственный терминал»). `notice` — строки человеку (в окно терминала или никуда),
  * `wanted` — нужен ли ещё запуск после установки плагина канала (окно закрыли — не рождать).
  */
+// ── 587-5: ПЕРВОЕ ЗАДАНИЕ УЗЛА ДЛЯ ГЛАВНОГО АГЕНТА ─────────────────────────────────────────────────────────────────────────────
+// Пишет его ядро (`lib/web4-items/first-task.ts`, дверь `/api/node/first-task`); здесь — только «забрать». Служба главного агента — `build`.
+const MAIN_AGENT = 'build'
+const FIRST_TASK = () => path.join(process.cwd(), 'data', 'node', 'first-task.json')
+
+function takeFirstTask() {
+  try {
+    const raw = JSON.parse(readFileSync(FIRST_TASK(), 'utf8'))
+    const text = typeof raw.text === 'string' ? raw.text.replace(/[\u0000-\u0008\u000b-\u001f\u007f]/g, '').trim() : ''
+    try { unlinkSync(FIRST_TASK()) } catch { /* уже забрано */ }
+    return text || null
+  } catch {
+    return null
+  }
+}
+
+/** Первое поручение: в терминале — само задание; в сессии с ботом Telegram — сначала вопрос человеку в Telegram. */
+function firstTaskPrompt(task, viaChannel) {
+  if (!viaChannel) return `The person wrote this task on the home page of the node's site. Do it:\n\n${task}`
+  return `The person wrote this task on the home page of the node's site before connecting Telegram:\n\n${task}\n\n` +
+    `First write to the person in Telegram, in their language: «Вы просили: «<the task in short>». Запускаем его в работу?» ` +
+    `Start the work only after they answer yes.`
+}
+
 async function spawnAgent(service, notice = () => {}, wanted = () => true, firstPrompt = '', { answerTrust = false } = {}) {
   if (!pty) {
     notice(`[терминал недоступен: node-pty не загружен — ${ptyLoadError}]`)
@@ -170,6 +194,15 @@ async function spawnAgent(service, notice = () => {}, wanted = () => true, first
   // 570: модель по роду работы (`lib/agent-kit/modes.cjs` `launchModel`) — один флаг с одним значением, до поручения.
   const model = typeof modes.launchModel === 'function' ? modes.launchModel(cwd, mode) : null
   if (model) args = [...args, '--model', model]
+  // 587-5 (владелец 2026-10-24): «если пользователь авторизуется в Claude Code Agent а затем придёт терминал … если есть такая запись то
+  // подставить её как в техническое задание в терминал, сразу после подтверждения папки. Если же пользователь активировать Telegram …
+  // сразу же отправляются это задание с текстом … запускаем его в работу?». Первое задание узла (главная root → `data/node/first-task.json`)
+  // забирает первая сессия главного агента, начатая без своего поручения: запись стирается, второй путь её уже не видит. Вопрос доверия
+  // папке остаётся человеку — поручение `claude` берёт после него.
+  if (!firstPrompt && element === MAIN_AGENT) {
+    const task = takeFirstTask()
+    if (task) firstPrompt = firstTaskPrompt(task, viaChannel)
+  }
   if (firstPrompt) args = [...args, firstPrompt.startsWith('-') ? ` ${firstPrompt}` : firstPrompt]
   let child
   try {
