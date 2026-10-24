@@ -17,7 +17,8 @@ import { addressOf } from "@/lib/web4-items/address-file.mjs"
 // 🔒 «НЕТ ФАЙЛА» — законный пустой список; файл есть, но не читается — тоже пусто для меню, но запись в такой файл
 // отказывает, а не затирает его пустотой.
 
-export type Web4Draft = { id: string; createdAt: string }
+/** 582: `native` — черновик нативного элемента (кнопка «Создать нативный элемент»): стоит в зоне нативных и рождается с `--native`. */
+export type Web4Draft = { id: string; createdAt: string; native?: boolean }
 
 const FILE = join(process.cwd(), "data", "web4-drafts.json")
 
@@ -103,12 +104,12 @@ export function getDraft(id: string): Web4Draft | null {
   return DRAFT_ID.test(id) ? listDrafts().find((d) => d.id === id) ?? null : null
 }
 
-export function createDraft(): Web4Draft | null {
+export function createDraft(native = false): Web4Draft | null {
   const r = read()
   if (!r.ok) return null
   let id: string
   try { id = newDraftId(r.drafts.map((d) => d.id)) } catch { return null }
-  const draft = { id, createdAt: new Date().toISOString() }
+  const draft: Web4Draft = { id, createdAt: new Date().toISOString(), ...(native ? { native: true } : {}) }
   return write([...r.drafts, draft]) ? draft : null
 }
 

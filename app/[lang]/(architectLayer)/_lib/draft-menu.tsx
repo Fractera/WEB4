@@ -45,9 +45,15 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     label: ui.create,
     node: <CreateDraftButton lang={lang} label={ui.create} busyLabel={ui.creating} failed={ui.createFailed} />,
   }
+  // 582 (владелец 2026-10-24): «для нативных элементов … кнопку какую же как и для кастомных элементов – [+ создать нативный элемент]».
+  const nativeButton: WorkspaceItem = {
+    label: ui.createNative,
+    zone: 'native',
+    node: <CreateDraftButton lang={lang} label={ui.createNative} busyLabel={ui.creating} failed={ui.createFailed} native />,
+  }
 
   // 557: пункт элемента — дерево. У встроенного элемента (`builtIn`) страницы, которые уже есть в папке службы, ведут на прежний адрес.
-  const treeItem = (d: { id: string }, builtIn: boolean): WorkspaceItem & { native: boolean } => {
+  const treeItem = (d: { id: string; native?: boolean }, builtIn: boolean): WorkspaceItem & { native: boolean } => {
     // 325-3: пункт и пути — по адресу элемента в ядре (нет своего — id).
     const slug = addressOf(d.id)
     const dir = `${ARCHITECT_HOME}/${slug}`
@@ -64,7 +70,8 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     // «Рабочий процесс → Процесс»).
     const services = elementPassport(d.id)?.subscriptions?.services ?? []
     // 472: разделы H2A/H2H и страницы по флагам паспорта элемента (`messengers`); одна функция и для маршрута.
-    const native = builtIn || isNativeElement(d.id)
+    // 582: черновик кнопки «Создать нативный элемент» — нативный ещё до рождения (паспорта у него пока нет).
+    const native = builtIn || d.native === true || isNativeElement(d.id)
     const ctx = { ...treeContextOf(d.id), catalog, native }
     // 412-2: пункт документа — только пока его файл есть в папке элемента.
     const shownOf = (pages?: TreePage[]) => (pages ?? []).filter((p) => treeVisible(p, ctx) && (!p.doc || hasDoc(d.id, p.doc)))
@@ -124,5 +131,12 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
     ...inZone(memory, 'native memory'),
     ...inZone(rest.slice(first), 'native'),
   ]
-  return [...withCustom.slice(0, c + 1), zone(ui.zoneNative, 'native', holds(nativeZone, page)), ...grouped, ...withCustom.slice(end)]
+  // 582 (владелец 2026-10-24): «Паспорт отдельная вкладка – раскрывающиеся список основное – перенести туда все кроме паспорта,
+  // нативных и кастомных разделов … меню по умолчанию будет закрыты». Зона «Основное» — всё от Паспорта до «Ядра» включительно;
+  // список не рукописный: новый пункт верхнего уровня сам уходит в неё. Нет Паспорта — меню как было.
+  const top = withCustom.slice(0, c + 1)
+  const p = top.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/passport`))
+  const main = p < 0 ? [] : top.filter((_, k) => k !== p)
+  const head = p < 0 ? top : [top[p], zone(ui.zoneMain, 'main', holds(main, page)), ...inZone(main, 'main')]
+  return [...head, zone(ui.zoneNative, 'native', holds(nativeZone, page)), nativeButton, ...grouped, ...withCustom.slice(end)]
 }

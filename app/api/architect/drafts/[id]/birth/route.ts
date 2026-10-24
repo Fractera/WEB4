@@ -20,8 +20,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
   const denied = await requireRoles(req, ROLES)
   if (denied) return denied
   const { id } = await params
-  if (!getDraft(id)) return NextResponse.json({ ok: false, reason: "not-found" }, { status: 404 })
+  const draft = getDraft(id)
+  if (!draft) return NextResponse.json({ ok: false, reason: "not-found" }, { status: 404 })
   if (getService(id)) return NextResponse.json({ ok: false, reason: "born" }, { status: 409 })
+  // 582: черновик нативного элемента рождается из нативного шаблона; облик и репозиторий у него не спрашиваются.
+  if (draft.native) {
+    const n = startBirth(id, { native: true })
+    if (!n.ok) return NextResponse.json({ ok: false, reason: n.reason }, { status: n.reason === "running" ? 409 : 500 })
+    return NextResponse.json({ ok: true, state: "running" }, { status: 202 })
+  }
   // 367: облик элемента — ответ человека в окне рождения; закрытый список, иначе 400 (рождение не стартует).
   const body = (await req.json().catch(() => null)) as { look?: unknown; source?: unknown; repo?: unknown } | null
   const look = BIRTH_LOOKS.find((l) => l === body?.look)
@@ -35,7 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     const own = checkRepoOwner(repo)
     if (!own.ok) return NextResponse.json({ ok: false, reason: own.reason, message: own.message }, { status: 400 })
   }
-  const r = startBirth(id, look, source === "repo" ? repo : null)
+  const r = startBirth(id, { look, repo: source === "repo" ? repo : null })
   if (!r.ok) return NextResponse.json({ ok: false, reason: r.reason }, { status: r.reason === "running" ? 409 : 500 })
   return NextResponse.json({ ok: true, state: "running" }, { status: 202 })
 }

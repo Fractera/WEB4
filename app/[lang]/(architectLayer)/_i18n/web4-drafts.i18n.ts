@@ -64,6 +64,11 @@ export type Web4DraftsUi = {
   birthRetry: string
   /** 338: вводный текст под заголовком черновика — виден только до нажатия «Родить WEB4 элемент»; абзацы через \n\n. */
   draftIntro: string
+  /** 582: кнопка в зоне нативных, вводный текст черновика нативного элемента, текст окна его рождения, зона «Основное». */
+  createNative: string
+  nativeDraftIntro: string
+  nativeBirthText: string
+  zoneMain: string
 }
 
 const DICT: Record<string, Web4DraftsUi> = {
@@ -71,8 +76,12 @@ const DICT: Record<string, Web4DraftsUi> = {
     create: "Create a WEB4 ITEM",
     creating: "Creating…",
     createFailed: "The WEB4 ITEM was not created: the node could not write the draft.",
-    zoneNative: "Native items",
-    zoneCustom: "Custom items",
+    zoneNative: "Native elements",
+    zoneCustom: "Custom elements",
+    zoneMain: "Main",
+    createNative: "Create a native element",
+    nativeDraftIntro: "A native element is a service that any custom element of this node can use. Sign-in, memory, data, design and blocks are already installed. Here you can create a shared service of your own, such as a content factory or email marketing, and every element will be able to use it.\n\nA native element is born from the Fractera native template. It is not sold and is not shown to the network: it works only inside this node.",
+    nativeBirthText: "The node downloads the native element template, gives this draft its own copy, a port, a build and a process. It takes about three minutes and a lot of memory; the page may be closed — the birth goes on.",
     memoryGroup: "Memory",
     draftBadge: "Draft",
     sectionPages: "Pages of this section",
@@ -127,8 +136,12 @@ const DICT: Record<string, Web4DraftsUi> = {
     create: "Создать WEB4 ITEM",
     creating: "Создаю…",
     createFailed: "WEB4 ITEM не создан: узел не смог записать черновик.",
-    zoneNative: "Встроенные элементы",
-    zoneCustom: "Свои элементы",
+    zoneNative: "Нативные элементы",
+    zoneCustom: "Кастомные элементы",
+    zoneMain: "Основное",
+    createNative: "Создать нативный элемент",
+    nativeDraftIntro: "Нативный элемент — служба, которой пользуется любой кастомный элемент узла. Авторизация, память, данные, дизайн и блоки уже установлены. Здесь вы можете создать свою общую службу, например контент-завод или email-маркетинг, и её смогут использовать все элементы.\n\nНативный элемент рождается из нативного шаблона Fractera. Его не продают и не показывают сети: он работает только внутри этого узла.",
+    nativeBirthText: "Узел скачает шаблон нативного элемента и даст черновику свою копию, порт, сборку и процесс. Это около трёх минут и много памяти; страницу можно закрыть — рождение продолжится.",
     memoryGroup: "Память",
     draftBadge: "Черновик",
     sectionPages: "Страницы раздела",

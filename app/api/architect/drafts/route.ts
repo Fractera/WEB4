@@ -21,8 +21,10 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const denied = await requireRoles(req, ROLES)
   if (denied) return denied
-  const draft = createDraft()
+  // 582: `{ native: true }` — черновик нативного элемента (кнопка в зоне нативных); тело пустое или без флага — кастомный, как прежде.
+  const body = (await req.json().catch(() => null)) as { native?: unknown } | null
+  const draft = createDraft(body?.native === true)
   if (!draft) return NextResponse.json({ ok: false, reason: "write-failed" }, { status: 500 })
   revalidatePath("/[lang]", "layout")
-  return NextResponse.json({ ok: true, id: draft.id, createdAt: draft.createdAt })
+  return NextResponse.json({ ok: true, id: draft.id, createdAt: draft.createdAt, native: draft.native === true })
 }

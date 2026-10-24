@@ -11,7 +11,7 @@
       "paramsHeaders": ["Parameter", "What it is"],
       "params": [
         ["lang", "the page language; the island receives one set of words, not the whole dictionary"],
-        ["GET /api/node/state", "the endpoint the island calls: measured over the network, available only to the architect and admin roles"],
+        ["GET /api/node/state", "the endpoint the island calls only after the person presses «Get the current state» (nothing is asked on page open, step 582): measured over the network, available only to the architect and admin roles"],
         ["POST /api/node/place", "a temporary way to state where the project is hosted (local computer or dedicated server) until this is detected automatically"]
       ],
       "sample": "Live sample: [Architect layer — home page](/en/architect). State where the project is hosted: [Domain and hosting → Dedicated server](/en/architect/hosting/hosting).",
@@ -56,7 +56,7 @@
       "paramsHeaders": ["Параметр", "Что это"],
       "params": [
         ["lang", "язык страницы; в островок уходит один набор слов, а не весь словарь"],
-        ["GET /api/node/state", "адрес, который вызывает островок: измеряет по сети, доступен только ролям архитектора и администратора"],
+        ["GET /api/node/state", "адрес, который островок вызывает только после нажатия «Получить текущее состояние» (при открытии страницы не спрашивает ничего, шаг 582): измеряет по сети, доступен только ролям архитектора и администратора"],
         ["POST /api/node/place", "временный способ указать, где размещён проект (локальный компьютер или выделенный сервер), пока это не определяется автоматически"]
       ],
       "sample": "Живой образец: [главная страница слоя архитектора](/ru/architect). Указать, где размещён проект: [Домен и хостинг → Выделенный сервер](/ru/architect/hosting/hosting).",

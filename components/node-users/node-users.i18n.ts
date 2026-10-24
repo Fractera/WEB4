@@ -62,7 +62,7 @@ export type NodeUsersUi = {
 const EN: NodeUsersUi = {
   loading: "Loading the users of the node…",
   forbidden: "This table is open to the architect and the administrator.",
-  unreachable: "The sign-in element does not answer. Check that it runs (Native items → Authorization).",
+  unreachable: "The sign-in element does not answer. Check that it runs (Native elements → Authorization).",
   failed: "The table could not be loaded.",
   cols: { user: "User", email: "Email", roles: "Roles", orgs: "Organizations", methods: "Sign-in", status: "Status", created: "Registered", edit: "Edit", select: "Select", selectPage: "Select the page" },
   filterOrg: "Organization",
@@ -116,7 +116,7 @@ const EN: NodeUsersUi = {
 const RU: NodeUsersUi = {
   loading: "Загружаю пользователей узла…",
   forbidden: "Эта таблица открыта архитектору и администратору.",
-  unreachable: "Элемент входа не отвечает. Проверьте, что он запущен (Встроенные элементы → Авторизация).",
+  unreachable: "Элемент входа не отвечает. Проверьте, что он запущен (Нативные элементы → Авторизация).",
   failed: "Таблицу загрузить не удалось.",
   cols: { user: "Пользователь", email: "Email", roles: "Роли", orgs: "Организации", methods: "Способ входа", status: "Статус", created: "Регистрация", edit: "Править", select: "Выбрать", selectPage: "Выбрать страницу" },
   filterOrg: "Организация",

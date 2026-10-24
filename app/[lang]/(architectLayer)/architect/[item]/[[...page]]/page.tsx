@@ -198,6 +198,8 @@ export default async function Page({ params }: { params: Promise<Params> }) {
   // 319-3: РОДИВШИЙСЯ ЭЛЕМЕНТ — тот, что уже в реестре узла. У него значок «Элемент», настоящий порт в карточке и нет кнопки
   // «Удалить»: она сняла бы только запись черновика, а работающий элемент остался бы без страницы (дверь тоже отвечает 409).
   const entry = getService(item)
+  // 582: черновик кнопки «Создать нативный элемент» (`native: true` в файле черновиков).
+  const nativeDraft = getDraft(item)?.native === true
   // Рождение дошло до реестра и упало позже (сборка, память): элемент записан, но его процесса нет — карточка порта не
   // утверждает, что он отвечает, а под карточками стоит отказ с подсказкой повторить установку.
   const birth = birthState(item).state
@@ -222,9 +224,11 @@ export default async function Page({ params }: { params: Promise<Params> }) {
         pageTitle={address}
         widget={<>
           {/* 338: вводный текст под заголовком — только пока черновик не рождается и не родился (слово владельца 2026-09-29). */}
+          {/* 582: у черновика нативного элемента — пометка владельца о назначении нативных («могут быть использованы любым
+              кастомными элементом … вы можете создать контент завод, email маркетинг и другие»). */}
           {!entry && birth !== 'running' && (
-            <div className="mb-6 max-w-3xl space-y-3 text-muted-foreground" data-draft-intro>
-              {ui.draftIntro.split('\n\n').map((t) => <p key={t}>{t}</p>)}
+            <div className="mb-6 max-w-3xl space-y-3 text-muted-foreground" data-draft-intro={nativeDraft ? 'native' : 'custom'}>
+              {(nativeDraft ? ui.nativeDraftIntro : ui.draftIntro).split('\n\n').map((t) => <p key={t}>{t}</p>)}
             </div>
           )}
           {bar}
@@ -247,7 +251,7 @@ export default async function Page({ params }: { params: Promise<Params> }) {
               : <ElementDiscoveryAlarm ui={hu} described={described} card={card} orderHref={terminalLink({ lang, service: `${slug}/build`, text: DESCRIBE_TASK })} />
             return <ElementHome id={item} rating={lagrixRatingUi(lang)} wallet={nodeWalletUi(lang)} alarm={alarm} alarmMark={hu.alarmMark} />
           })()}
-          {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} suggested={nodeType.birthLook({ native: false }, process.cwd()) as "project" | "own"} nodeType={nodeType.readNodeType(process.cwd()) as "project" | "factory"} />}
+          {(!entry || brokenBirth) && <BirthButton id={item} ui={ui} dialogUi={appDialogUi(lang)} born={!!entry} suggested={nodeType.birthLook({ native: false }, process.cwd()) as "project" | "own"} nodeType={nodeType.readNodeType(process.cwd()) as "project" | "factory"} native={nativeDraft} />}
         </>}
       />
     )

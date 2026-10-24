@@ -29,7 +29,8 @@ type State = { state: "idle" | "running" | "done" | "failed"; lines: string[]; r
 // `born` — элемент уже в реестре узла (рождение дошло до записи и упало позже): кнопки нет, подсказка — повтор установки.
 // Иначе упавшее рождение ничего не записало, и подсказка — нажать кнопку снова.
 // 553: `suggested` — облик по типу узла (единый проект → как проект, завод → самостоятельный); человек может выбрать другой.
-export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeType }: { id: string; ui: Web4DraftsUi; dialogUi: AppDialogUi; born?: boolean; suggested?: "project" | "own"; nodeType?: "project" | "factory" }) {
+// 582: `native` — черновик нативного элемента: облика и источника кода у него нет (нативный шаблон один), окно только подтверждает.
+export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeType, native = false }: { id: string; ui: Web4DraftsUi; dialogUi: AppDialogUi; born?: boolean; suggested?: "project" | "own"; nodeType?: "project" | "factory"; native?: boolean }) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [starting, setStarting] = useState(false)
@@ -41,7 +42,7 @@ export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeTyp
   const [source, setSource] = useState<"starter" | "repo" | "">("")
   const [repo, setRepo] = useState("")
   const repoOk = REPO_URL.test(repo.trim())
-  const ready = look === "project" || (look === "own" && (source === "starter" || (source === "repo" && repoOk)))
+  const ready = native || look === "project" || (look === "own" && (source === "starter" || (source === "repo" && repoOk)))
 
   /** Карточка-вариант: shadcn Button с role=radio; выбранная — с рамкой основного цвета. */
   const option = (value: string, title: string, text: string, checked: boolean, pick: () => void, mark: string) => (
@@ -88,7 +89,7 @@ export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeTyp
       const r = await fetch(`${BASE}/api/architect/drafts/${id}/birth`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(look === "own" ? { look, source, ...(source === "repo" ? { repo: repo.trim() } : {}) } : { look }),
+        body: JSON.stringify(native ? {} : look === "own" ? { look, source, ...(source === "repo" ? { repo: repo.trim() } : {}) } : { look }),
       })
       if (r.status === 400) {
         const j = (await r.json().catch(() => null)) as { message?: string } | null
@@ -133,7 +134,7 @@ export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeTyp
         open={open}
         onOpenChange={(v) => !starting && setOpen(v)}
         title={ui.birthTitle}
-        description={ui.birthText}
+        description={native ? ui.nativeBirthText : ui.birthText}
         ui={dialogUi}
         size="sm"
         footer={
@@ -143,7 +144,7 @@ export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeTyp
           </>
         }
       >
-        <div className="flex flex-col gap-2" role="radiogroup" aria-label={ui.lookQuestion} data-birth-look>
+        {!native && <div className="flex flex-col gap-2" role="radiogroup" aria-label={ui.lookQuestion} data-birth-look>
           <p className="text-sm font-medium text-foreground">{ui.lookQuestion}</p>
           {nodeType === "factory" && <p className="text-xs text-muted-foreground" data-birth-factory-hint>{ui.lookFactoryHint}</p>}
           {option("project", ui.lookProject, ui.lookProjectText, look === "project", () => setLook("project"), "data-birth-look-option")}
@@ -175,7 +176,7 @@ export function BirthButton({ id, ui, dialogUi, born = false, suggested, nodeTyp
           )}
           {!look && <p className="text-xs text-muted-foreground">{ui.lookPick}</p>}
           {refusal && <p className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-foreground" role="alert" data-birth-refusal>{refusal}</p>}
-        </div>
+        </div>}
       </AppDialog>
     </div>
   )

@@ -9,6 +9,8 @@
 // владелец назвал бредом — это внутренний жаргон, а не слова, которыми с людьми говорят.
 
 export type NodeStateWords = {
+  /** 582: единственная кнопка до первого запроса — до неё островок ничего не спрашивает */
+  getState: string
   loading: string
   checking: string
   /** дверь не ответила: честное «не знаю», а не «ничего нет» */
@@ -51,6 +53,7 @@ export type NodeStateWords = {
 
 const DICT: Record<string, NodeStateWords> = {
   en: {
+    getState: "Get the current state",
     loading: "Checking the project…",
     checking: "Checking the project again…",
     unknown: "The project did not answer. This means «unknown», not «nothing is set up».",
@@ -87,6 +90,7 @@ const DICT: Record<string, NodeStateWords> = {
     note: "Only one card per row is active. Address and isolation are measured on every check; hosting is what you stated.",
   },
   ru: {
+    getState: "Получить текущее состояние",
     loading: "Проверяю проект…",
     checking: "Проверяю проект заново…",
     unknown: "Проект не ответил. Это значит «неизвестно», а не «ничего не настроено».",

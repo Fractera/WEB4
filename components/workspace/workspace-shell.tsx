@@ -275,10 +275,12 @@ export function WorkspaceShell({
                   <ChevronDown size={14} aria-hidden className="chevron shrink-0 transition-transform duration-200" />
                 </label>
               ) : item.zoneHead ? (
-                <label className="mt-2 flex cursor-pointer items-center justify-between gap-2 border-t border-border px-[9px] pt-2 text-[length:var(--fs-small)] text-muted-foreground transition-colors hover:text-foreground [&:has(input:checked)_svg]:rotate-180" data-menu-zone={item.zoneHead.id}>
+                // 582 (владелец 2026-10-24): подпись зоны — «самое главное поэтому их шрифт должен быть даже больше чем шрифт верхних
+                // вкладок»: 18 px полужирным против 16 px пунктов; кнопка «Создать…» внутри зоны — 14 px.
+                <label className="mt-2 flex cursor-pointer items-center justify-between gap-2 border-t border-border px-[9px] pt-2 text-[length:var(--fs-lead)] font-semibold text-foreground transition-colors hover:text-primary [&:has(input:checked)_svg]:rotate-180" data-menu-zone={item.zoneHead.id}>
                   <span>{item.label}</span>
                   <input type="checkbox" className="peer sr-only" data-zone-toggle={item.zoneHead.id} defaultChecked={item.zoneHead.open} aria-label={item.label} />
-                  <ChevronDown size={14} aria-hidden className="shrink-0 transition-transform duration-200" />
+                  <ChevronDown size={16} aria-hidden className="shrink-0 transition-transform duration-200" />
                 </label>
               ) : item.node ? (
                 item.node

@@ -4,217 +4,118 @@
 // повторяется на ОДИННАДЦАТИ страницах — имена групп, разделов, предупреждение.
 // Здесь текст ОДНОЙ страницы, и его объём немедленно утопил бы общий словарь.
 //
-// 🪦 БЛОК «БЛОКЧЕЙН-ВИДИМОСТЬ» УДАЛЁН ОТСЮДА 2026-09-19 ПО СЛОВУ ВЛАДЕЛЬЦА
-// («all trash to remove»). Он описывал путь микросервиса к продаже четырьмя
-// шагами и повторял то, что уже рассказано на ГЛАВНОЙ, — а страница архитектора
-// не витрина: сюда приходят строить, а не читать о замысле. Живой текст о
-// блокчейн-видимости остался на главной, в `(publicLayer)/_data/ru.ts`.
-//
-// 🪦 АККОРДЕОН ОТМЕНЁН ТЕМ ЖЕ РЕШЕНИЕМ: «уберём с этой страницы аккордеоны и
-// представим страницу в виде раскрытых блоков с заголовками своего уровня и
-// описанием». Свёрнутое здесь мешало: человек пришёл разбираться в своём узле, а
-// не открывать по одной полосе.
+// 🪦 ВОСЕМЬ ТЕМ-ПОДСКАЗОК (агент, языки, нагрузка, авторизация, данные, вид, домен, продажа), ВВОДНЫЙ АБЗАЦ И
+// ПРЕДУПРЕЖДЕНИЕ О ПРОДАКШНЕ СНЯТЫ 2026-10-24 (шаг 582) ПО СЛОВУ ВЛАДЕЛЬЦА: «Текст подсказками он бессмысленный а
+// места этого три популярных действия чтобы начать … И внизу сразу дай главный ликбез». Прежний текст — в git
+// (`git show 275a565:"app/[lang]/(architectLayer)/_i18n/architect-home.i18n.ts"`).
 //
 // 🔒 ВЕРХНИЙ РЯД — НАВИГАЦИЯ ПО ЭТОЙ СТРАНИЦЕ, А НЕ КОПИЯ ЛЕВОГО МЕНЮ. Его слова:
 // «ошибка, которую ты совершил, — ты продублировал это меню и слева, и сверху;
 // это неправильно, это меню предназначено только для навигации по странице с
-// плавной прокруткой». Поэтому у каждой темы есть `anchor`, и ряд собирается из
-// тех же тем — второго списка не существует.
+// плавной прокруткой». Поэтому у каждого раздела есть `anchor`, и ряд собирается из
+// тех же разделов — второго списка не существует.
+//
+// 🔒 АДРЕС ДЕЙСТВИЯ — ПУТЬ ОТ КОРНЯ ЯДРА БЕЗ ЯЗЫКА И БЕЗ `/architect` (285-6): язык подставляет страница.
 
-export type ArchitectTopic = {
-  /** Якорь раздела. Задаётся явно: русский заголовок дал бы нечитаемый хеш. */
-  anchor: string
-  /** Короткая подпись для верхнего ряда — она же пункт навигации по странице. */
-  tab: string
+export type ArchitectAction = {
   title: string
   text: string
-  points?: string[]
+  /** `/build/subscription` — страница ядра; язык подставляет страница. */
+  path: string
+  label: string
 }
 
 export type ArchitectHomeUi = {
-  /** Вводный абзац: что это за группа страниц. */
-  intro: string
-  /** Условие выхода в продакшн — видно всегда, стоит до тем. */
-  production: { title: string; text: string }
-  /** Разделы страницы. Порядок здесь — порядок на экране и в верхнем ряду. */
-  topics: ArchitectTopic[]
-  /** Закрывающая строка: остальное — на своих вкладках. */
-  outro: string
+  /** Три действия, чтобы начать (582). */
+  start: { anchor: string; tab: string; title: string; actions: ArchitectAction[] }
+  /** Главный ликбез: строки «**слово** — что это» (582). */
+  basics: { anchor: string; tab: string; title: string; items: string[] }
 }
 
 const DICT: Record<string, ArchitectHomeUi> = {
   en: {
-    intro:
-      'This group of pages is where you run the development of your project. Here you switch the programmer agent on, shape its instructions, connect external tools, and decide how this microservice meets the others.',
-    production: {
-      title: 'Before you hand the project to production',
-      text: 'These pages control the server itself, so they must never stay open to everyone. Either protect the project with authentication, or delete this block of pages once development is over. There is no third option: a node that went to production with the architect layer open is a node anyone can rebuild.',
+    start: {
+      anchor: 'start',
+      tab: 'Start',
+      title: 'Three things to do first',
+      actions: [
+        {
+          title: 'Activate your Claude Code subscription',
+          text: 'The agents of this node work on your Claude subscription. Sign in once, and the main agent can create and change elements for you.',
+          path: '/build/subscription',
+          label: 'Activate',
+        },
+        {
+          title: 'Connect Telegram',
+          text: 'Run the project from your phone: ask the main agent by voice or in a chat message to build anything you need.',
+          path: '/build/telegram',
+          label: 'Connect',
+        },
+        {
+          title: 'Use reverse engineering',
+          text: 'Take apart how popular products work, then build your own on their business ideas and technical solutions.',
+          path: '/reverse',
+          label: 'Open',
+        },
+      ],
     },
-    topics: [
-      {
-        anchor: 'agent',
-        tab: 'Agent',
-        title: 'The programmer agent and your development flow',
-        text: 'Out of the box the project ships with Claude Code. Prefer another agent — Codex, or a different model altogether? Ask Claude Code once to add support for it, and the node learns that path for good.',
-        points: [
-          'Fractera assumes a documentation-first flow: development is a sequence of steps, each with a written plan and a written outcome.',
-          'That flow is a suggestion, not a cage. Ask the agent to delete the files you do not want, and the architecture becomes the one you like.',
-        ],
-      },
-      {
-        anchor: 'languages',
-        tab: 'Languages',
-        title: 'Languages: start with one, finish with as many as you need',
-        text: 'The architecture is built for multilingual work, but a single language costs you nothing extra: leave one in the environment variables and the node uses one. Add up to 82 when the project is ready for them.',
-        points: [
-          'While building, write each feature in ONE language — switching between eighty-two of them mid-feature is how translations rot.',
-          'Everything left untranslated is collected into the translation-debt registry, so nothing is forgotten when you come back to it.',
-        ],
-      },
-      {
-        anchor: 'load',
-        tab: 'Load',
-        title: 'Built for load — and why not to break that',
-        text: 'This project is already optimised for heavy traffic: pages are generated statically and refreshed afterwards, so a hundred visits and a hundred thousand cost the same work. Asking the agent to move to dynamic rendering undoes exactly that, and the bill arrives as server load.',
-      },
-      {
-        anchor: 'auth',
-        tab: 'Authentication',
-        title: 'Authentication — recommended in every case',
-        text: 'Even when this microservice needs no sign-in on its public layer, you still have to protect the private layer and the architect layer, or anyone at all can edit your server. Hide the sign-in button through PLATFORM CONFIG if it does not belong on your public pages — and activate the Fractera authentication microservice anyway.',
-      },
-      {
-        anchor: 'data',
-        tab: 'Data',
-        title: 'Data and storage — when files are enough, and when they are not',
-        text: 'Plenty of sites need no database at all: text lives in the project, images live in the file system, and the architecture already has the patterns to do that efficiently. But once you need dynamic parameters, personal accounts or protected applications, activate the Fractera Data microservice — a full database and object storage inside your own server, with queries, sorting and search, and no cloud provider in the middle.',
-      },
-      {
-        anchor: 'design',
-        tab: 'Look and blocks',
-        title: 'Look, settings and reusable blocks',
-        text: 'Four configuration files decide how the node looks and behaves, and every one of them has a microservice that turns it into a visual interface.',
-        points: [
-          'DESIGN CONFIG — colour, type, spacing and corners for every page at once. Visual editor: Fractera Design.',
-          'PLATFORM CONFIG — header, footer pages, cookie banner, breadcrumbs, theme switch, the sign-in button. Visual editor: Fractera Platform Settings.',
-          'Reusable sections and blocks — build your own branded set once and use it across every page. Catalogue: Fractera Blocks.',
-          'APP CONFIG — company name, languages, logo, favicon, snippets, 404 artwork and the rest of the metadata. Your node is search- and agent-ready because this is wired in. Visual editor: Fractera App Config.',
-        ],
-      },
-      {
-        anchor: 'network',
-        tab: 'Domain and API',
-        title: 'Domain, server, API — and selling this node to other agents',
-        text: 'A microservice rarely lives alone. Its API is written automatically as development goes; you never have to build it by hand, but you can read it here and ask the agent to add or sharpen a method you need. You also decide whether it answers only inside your server or on the internet — the access key is set here.',
-        points: [
-          'Connect the real domain you bought, so your site becomes visible on the internet.',
-          'Move to a VPS of any provider, when the economics of the project call for it.',
-          'Register the node in the global network, so other agents can find and buy it.',
-        ],
-      },
-      // 🔒 The last topic is about earning, and it stands last on purpose (owner,
-      // 2026-09-19): this page is read while building, and talk of selling belongs
-      // where the building ends — not in the middle of the settings.
-      {
-        anchor: 'sell',
-        tab: 'Selling',
-        title: 'Development finished — switch visibility on and start earning',
-        text: 'Once your microservice is built, this is where you switch its visibility on across the shared network: from that moment it is available for sale, and you earn from every project that installs it.',
-        points: [
-          'The catalogue description is composed by the architecture itself — from your documentation and source code.',
-          'You set the rights and the price, zero included: a free node still accumulates a history of installations.',
-          'Telemetry shows the buyer how many projects already run your microservice and how many users they have.',
-        ],
-      },
-    ],
-    outro: 'Everything else is described on the page that owns it — open a section on the left.',
+    basics: {
+      anchor: 'basics',
+      tab: 'Basics',
+      title: 'The basics',
+      items: [
+        '**Node** — your computer or a VPS server where the core and all the elements run. The panel you are looking at is the node.',
+        '**Element** — a self-contained part of the node with its own folder, port, address, repository and agent. A site, an app and a bot are all elements.',
+        '**Native element** — a built-in service any custom element can use: sign-in, data, memory, design, blocks. It is not sold and is not shown to the network.',
+        '**Custom element** — your own project: a site, an app or an agent. It can follow the node’s shared settings or live on its own, and it can be sold and put on the Web4 network.',
+        '**One owner** (node type “Single project”) — every element belongs to one person and shares the same settings, design and wallet.',
+        '**Site factory** (node type “App factory”) — the node hosts projects of different owners; each app gets its own settings, its own sign-in and its own people.',
+        '**Integrator** — what Lagrix calls a node that gives many people ready elements on its own computer. To the network it is an ordinary node, and each element keeps its own reputation on it. [More in Lagrix](https://lagrix.dev/en/docs/19-node-requirements)',
+        '**Web4 ready** — an element on the Web4 network: agents of other nodes find it and give it orders through Lagrix. In the Passport such an element carries a big star.',
+      ],
+    },
   },
   ru: {
-    intro:
-      'Эта группа страниц предназначена для управления разработкой вашего проекта. Здесь вы активируете агента-программиста, настраиваете его инструкции, подключаете внешние инструменты и решаете, как этот микросервис встречается с остальными.',
-    production: {
-      title: 'Прежде чем передать проект в продакшн',
-      text: 'Эти страницы управляют самим сервером, поэтому они не имеют права остаться открытыми для всех. Либо защитите проект при помощи авторизации, либо удалите блок этих страниц после завершения разработки. Третьего не дано: узел, ушедший в продакшн с открытым слоем архитектора, — это узел, который может перестроить кто угодно.',
+    start: {
+      anchor: 'start',
+      tab: 'Начать',
+      title: 'Три действия, чтобы начать',
+      actions: [
+        {
+          title: 'Активируйте подписку Claude Code',
+          text: 'Агенты узла работают по вашей подписке Claude. Войдите один раз, и главный агент сможет создавать и менять элементы.',
+          path: '/build/subscription',
+          label: 'Активировать',
+        },
+        {
+          title: 'Подключите Telegram',
+          text: 'Управляйте проектом с телефона: голосом или сообщением в чате попросите главного агента создать что угодно.',
+          path: '/build/telegram',
+          label: 'Подключить',
+        },
+        {
+          title: 'Используйте реверс-инжиниринг',
+          text: 'Разберите, как устроены популярные продукты, и постройте своё на их бизнес-идеях и технических решениях.',
+          path: '/reverse',
+          label: 'Открыть',
+        },
+      ],
     },
-    topics: [
-      {
-        anchor: 'agent',
-        tab: 'Агент',
-        title: 'Агент-программист и ваш поток разработки',
-        text: 'Из коробки проект поставляется с Claude Code. Предпочитаете другого агента — Codex или вовсе другую модель? Достаточно один раз попросить Claude Code добавить такую возможность, и узел запомнит этот путь навсегда.',
-        points: [
-          'Fractera предполагает поток разработки, ориентированный на документацию: работа идёт последовательностью шагов, у каждого письменный план и письменный итог.',
-          'Этот поток — предложение, а не клетка. Попросите агента удалить ненужные файлы, и архитектура станет такой, какая нравится вам.',
-        ],
-      },
-      {
-        anchor: 'languages',
-        tab: 'Языки',
-        title: 'Языки: начните с одного, закончите сколькими нужно',
-        text: 'Архитектура оптимизирована для мультиязычной разработки, но один язык не стоит вам ничего лишнего: оставьте в переменных окружения один — узел будет работать с одним. Добавьте до 82, когда проект к ним готов.',
-        points: [
-          'В разработке пишите каждую функцию на ОДНОМ языке — переключение между восьмьюдесятью двумя посреди работы и есть то, от чего переводы гниют.',
-          'Всё непереведённое собирается в реестр долгов по переводу, поэтому к нему можно спокойно вернуться и ничего не потерять.',
-        ],
-      },
-      {
-        anchor: 'load',
-        tab: 'Нагрузка',
-        title: 'Рассчитан на нагрузку — и почему это не стоит ломать',
-        text: 'Проект уже оптимизирован под высокую нагрузку: страницы генерируются статически и обновляются после, поэтому сто визитов и сто тысяч стоят одинаковой работы. Просьба к агенту перейти на динамическую генерацию отменяет ровно это, и счёт приходит нагрузкой на сервер.',
-      },
-      {
-        anchor: 'auth',
-        tab: 'Авторизация',
-        title: 'Авторизация — рекомендуется во всех случаях',
-        text: 'Даже когда этому микросервису не нужен вход на публичном слое, приватный слой и слой архитектора защитить всё равно необходимо, иначе редактировать ваш сервер сможет кто угодно. Кнопку входа можно скрыть через PLATFORM CONFIG, если ей не место на ваших публичных страницах, — а микросервис авторизации Fractera активировать всё равно.',
-      },
-      {
-        anchor: 'data',
-        tab: 'Данные',
-        title: 'Данные и хранилище — когда хватает файлов, а когда нет',
-        text: 'Множеству сайтов база данных не нужна вовсе: тексты живут в проекте, изображения — в файловой системе, и архитектура уже содержит нужные паттерны, чтобы делать это эффективно. Но как только понадобятся динамические параметры, личный кабинет или защищённые приложения, активируйте микросервис Fractera Data — полноценная база и объектное хранилище внутри вашего сервера, с выборками, сортировкой и удобным поиском, без зависимости от облачных поставщиков.',
-      },
-      {
-        anchor: 'design',
-        tab: 'Оформление',
-        title: 'Оформление, настройки и переиспользуемые блоки',
-        text: 'Четыре конфигурационных файла решают, как узел выглядит и ведёт себя, и у каждого есть микросервис, превращающий его в визуальный интерфейс.',
-        points: [
-          'DESIGN CONFIG — цвет, шрифты, отступы и скругления сразу для всех страниц. Визуальный интерфейс: Fractera Design.',
-          'PLATFORM CONFIG — верхнее меню, страницы подвала, cookie-баннер, хлебные крошки, переключатель темы, кнопка входа. Визуальный интерфейс: Fractera Platform Settings.',
-          'Секции и блоки — соберите собственный фирменный набор один раз и переиспользуйте на всех страницах. Каталог: Fractera Blocks.',
-          'APP CONFIG — название компании, языки, логотип, favicon, сниппеты, картинки-заглушки 404 и остальная мета-разметка. Узел готов к поисковой и агентной оптимизации именно потому, что это уже собрано. Визуальный интерфейс: Fractera App Config.',
-        ],
-      },
-      {
-        anchor: 'network',
-        tab: 'Домен и API',
-        title: 'Домен, сервер, API — и продажа этого узла чужим агентам',
-        text: 'Микросервис редко живёт один. Его API пишется автоматически по ходу разработки: вручную участвовать в этом не нужно, но здесь его можно увидеть и попросить агента добавить или усилить нужный вам метод. Здесь же вы решаете, отвечает ли он только внутри вашего сервера или в интернете, — ключ доступа устанавливается на этой вкладке.',
-        points: [
-          'Подключите реальный домен, который вы приобрели, чтобы сайт получил видимость в интернете.',
-          'Перейдите на VPS любого поставщика, когда этого потребует экономика проекта.',
-          'Зарегистрируйте узел в общей сети, чтобы чужие агенты могли найти и купить его.',
-        ],
-      },
-      // 🔒 ПОСЛЕДНЯЯ ТЕМА — О ЗАРАБОТКЕ, И ОНА СТОИТ ПОСЛЕДНЕЙ НАМЕРЕННО
-      // (решение владельца 2026-09-19). Человек читает эту страницу, пока
-      // строит; разговор о продаже уместен тогда, когда постройка закончена, —
-      // то есть в самом конце, а не посреди настроек.
-      {
-        anchor: 'sell',
-        tab: 'Продажа',
-        title: 'Закончили разработку — включите видимость и начните зарабатывать',
-        text: 'Если разработка вашего микросервиса завершена, именно здесь вы активируете его видимость в общей сети: с этой минуты он становится доступен для продажи, а вы — получаете заработок с каждого проекта, который его установит.',
-        points: [
-          'Описание для каталога архитектура составит сама — по вашей документации и исходному коду.',
-          'Права и цену назначаете вы, включая цену в ноль: бесплатный узел тоже набирает историю установок.',
-          'Телеметрия показывает покупателю, сколько проектов уже работают на вашем микросервисе и сколько у них пользователей.',
-        ],
-      },
-    ],
-    outro: 'Всё остальное описано на той вкладке, которой оно принадлежит, — откройте раздел слева.',
+    basics: {
+      anchor: 'basics',
+      tab: 'Ликбез',
+      title: 'Главный ликбез',
+      items: [
+        '**Узел** — ваш компьютер или VPS-сервер, на котором работают ядро и все элементы. Пульт, который вы сейчас видите, — это узел.',
+        '**Элемент** — самостоятельная часть узла со своей папкой, портом, адресом, репозиторием и агентом. Сайт, приложение, бот — всё это элементы.',
+        '**Нативный элемент** — встроенная служба, которой пользуется любой кастомный элемент: авторизация, данные, память, дизайн, блоки. Его не продают и не показывают сети.',
+        '**Кастомный элемент** — ваш собственный проект: сайт, приложение или агент. Он может брать общие настройки узла или жить отдельно, его можно продавать и выставить в сеть Web4.',
+        '**Один хозяин** (тип узла «Единый проект») — все элементы принадлежат одному человеку, у них общие настройки, дизайн и кошелёк.',
+        '**Завод сайтов** (тип узла «Завод приложений») — узел держит проекты разных хозяев; у каждого приложения свои настройки, свой вход и свои люди.',
+        '**Интегратор** — так в Lagrix называют узел, который даёт многим людям готовые элементы на своём компьютере. Для сети это обычный узел, а репутация у каждого элемента на нём своя. [Подробнее в Lagrix](https://lagrix.dev/ru/docs/19-node-requirements)',
+        '**Web4 ready** — элемент в сети Web4: агенты других узлов находят его и дают ему заказы через Lagrix. В Паспорте такой элемент отмечен большой звездой.',
+      ],
+    },
   },
 }
 

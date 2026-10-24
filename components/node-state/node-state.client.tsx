@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { StarIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardAction, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -24,7 +24,11 @@ import type { NodeStateWords } from "@/components/node-state/node-state.i18n"
 // карточка домена говорит, что с ним не так. IP-адрес сегодня не активен никогда: развёртывания на
 // сервер ещё нет, и выдумывать его наличие прибор не должен.
 //
-// 🔒 ЧЕТЫРЕ СОСТОЯНИЯ ОСТРОВКА: «проверяю» · «знаю» · «проверяю заново» · «дверь не ответила».
+// 🔒 ПЯТЬ СОСТОЯНИЙ ОСТРОВКА: «ещё не спрашивали» · «проверяю» · «знаю» · «проверяю заново» · «дверь не ответила».
+//
+// 🔒 ДО НАЖАТИЯ — НИ ЗАПРОСА, НИ КАРТОЧКИ (582, владелец 2026-10-24: «запрос к этому состоянию происходило бы только после
+// нажатия на эту кнопку до этого момента вообще не показывай никакие карточки»). ✗ Оплачено: `useEffect` спрашивал
+// `/api/node/state` (2,6 с) при каждом открытии входа вместе с запросами оболочки — страница не отвечала на клики.
 
 const BASE = process.env.NEXT_PUBLIC_BASE_PATH ?? ""
 
@@ -35,7 +39,7 @@ type Answer = {
   isolation?: { kind: string; detail: string }
 }
 
-type State = "asking" | "known" | "checking" | "unknown"
+type State = "idle" | "asking" | "known" | "checking" | "unknown"
 
 function Choice({
   title,
@@ -86,7 +90,7 @@ function Group({ title, cols, children }: { title: string; cols: string; childre
 }
 
 export function NodeStateIndicator({ lang, words }: { lang: string; words: NodeStateWords }) {
-  const [state, setState] = useState<State>("asking")
+  const [state, setState] = useState<State>("idle")
   const [data, setData] = useState<Answer | null>(null)
 
   const measure = useCallback(async () => {
@@ -96,22 +100,8 @@ export function NodeStateIndicator({ lang, words }: { lang: string; words: NodeS
     return (await r.json()) as Answer
   }, [])
 
-  useEffect(() => {
-    let alive = true
-    measure()
-      .then((answer) => {
-        if (!alive) return
-        setData(answer)
-        setState("known")
-      })
-      .catch(() => alive && setState("unknown"))
-    return () => {
-      alive = false
-    }
-  }, [measure])
-
   async function checkNow() {
-    setState("checking")
+    setState(state === "idle" ? "asking" : "checking")
     try {
       setData(await measure())
       setState("known")
@@ -125,6 +115,16 @@ export function NodeStateIndicator({ lang, words }: { lang: string; words: NodeS
       {words.checkNow}
     </Button>
   )
+
+  if (state === "idle") {
+    return (
+      <div className="my-6" data-node-state="idle">
+        <Button variant="outline" size="sm" onClick={checkNow}>
+          {words.getState}
+        </Button>
+      </div>
+    )
+  }
 
   if (state === "asking" || state === "checking") {
     return (

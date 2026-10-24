@@ -80,18 +80,23 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
   // 🔒 ЯКОРЬ ЗАДАН ЯВНО, А НЕ ВЫВЕДЕН ИЗ ЗАГОЛОВКА. Генератор якорей оставляет от
   // русского заголовка нечитаемый хеш (`h-1f4c…`) — ссылка на такой адрес ничего
   // не говорит человеку и рвётся при первой правке слов.
+  // 582 (владелец 2026-10-24): «три популярных действия чтобы начать … И внизу сразу дай главный ликбез».
+  // Действие — та же карточка со ссылкой, что у страниц главного агента (`docref`); адрес — от корня ядра (285-6).
   const children: Block[] = [
-    { kind: 'p', text: home.intro },
-    { kind: 'callout', title: home.production.title, text: home.production.text },
-    ...home.topics.flatMap((t): Block[] => [
-      { kind: 'h3', text: t.title, id: t.anchor },
-      { kind: 'p', text: t.text },
-      ...(t.points ? [{ kind: 'list' as const, items: t.points }] : []),
-    ]),
-    { kind: 'note', text: home.outro },
+    { kind: 'h3', text: home.start.title, id: home.start.anchor },
+    ...home.start.actions.map((a): Block => ({
+      kind: 'docref',
+      title: a.title,
+      summary: a.text,
+      href: `/${lang}${a.path}`,
+      label: a.label,
+      navigate: true,
+    })),
+    { kind: 'h3', text: home.basics.title, id: home.basics.anchor },
+    { kind: 'list', items: home.basics.items },
   ]
 
-  const tabs: WorkspaceItem[] = home.topics.map(t => ({ label: t.tab, href: `#${t.anchor}` }))
+  const tabs: WorkspaceItem[] = [home.start, home.basics].map(t => ({ label: t.tab, href: `#${t.anchor}` }))
 
   return (
     <ArchitectPage
@@ -105,6 +110,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string 
       // 🔒 СОСТОЯНИЕ УЗЛА — ОСТРОВОК, А НЕ БЛОК (276-2). Эта страница предрендерена: измеренное на
       // сборке утверждение «ваш сайт виден в интернете» застыло бы в HTML и продолжало бы висеть в
       // день, когда домен уехал. Слова выбираются здесь, на сервере, и уезжают одним набором.
+      // 582: островок молчит до кнопки «Получить текущее состояние» — вход не спрашивает узел сам.
       widget={nodeStateWidget(lang)}
     />
   )

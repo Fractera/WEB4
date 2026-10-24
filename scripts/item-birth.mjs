@@ -25,8 +25,9 @@ const { REGISTRY_FILE, itemDir, entryDir } = require('../lib/web4-items/paths.cj
 
 const ROOT = process.cwd()
 const DRAFTS_FILE = join(ROOT, 'data', 'web4-drafts.json')
-// 544-3 (владелец 2026-10-19): нативный элемент рождается из своего шаблона — `--native` (только из командной строки ядра: кнопка
-// «Создать WEB4 ITEM» рождает кастомные). Остальной путь рождения тот же.
+// 544-3 (владелец 2026-10-19): нативный элемент рождается из своего шаблона — `--native`. Остальной путь рождения тот же.
+// 582 (владелец 2026-10-24): `--native` передаёт и дверь рождения — черновику, заведённому кнопкой «Создать нативный элемент»
+// (`native: true` в `data/web4-drafts.json`); «Создать WEB4 ITEM» по-прежнему рождает кастомные.
 const TEMPLATE_FILE = join(ROOT, 'WEB4-ITEMS-REGISTRY', process.argv.includes('--native') ? 'native-template.json' : 'item-template.json')
 const ID = /^[a-z][a-z0-9]{4,23}$/
 const t0 = Date.now()
