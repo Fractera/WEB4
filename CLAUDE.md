@@ -3655,3 +3655,9 @@ the shell requests — «Только вход, как просил», the integ
   birth window asks nothing about the look, and the birth door starts `scripts/item-birth.mjs <id> --native` (`birthArgs` in
   `lib/web4-items/birth.ts`). A live birth of a native element from the button has not been run (owner's word needed: ~3 min and new
   resident processes).
+- **Steps 583–586 (2026-10-24, short):** the entrance basics got «Core» (the centre of the node; the panel is the core, not the node) and
+  «Super-node» with a link to `/<lang>/super-node`; «Passport → How it works» got section 3 «Killer features: reverse engineering and the
+  product quiz» (en 1158 words, over the 1000 of step 535 — the owner decides); Dashboard → Projects: long cells show two lines, hover shows
+  the whole text (`line-clamp-2` + `group-hover/cell:line-clamp-none`); 🔒 **root is a custom element** (owner: «Root элемент это по своей
+  природе кастомный»): first line of the «Custom elements» zone, `custom` in `/api/node/projects` and `kind: "custom"` in the All projects
+  catalog (`lib/web4-items/dashboard-rows.ts`).
