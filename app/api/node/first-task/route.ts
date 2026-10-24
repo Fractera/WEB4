@@ -1,4 +1,4 @@
-// @api the first task of the node: written by the root home (node key), read and removed by the architect or the node
+// @api keep the first task from the root home for the main agent
 import { timingSafeEqual } from "node:crypto"
 import { NextRequest, NextResponse } from "next/server"
 import { requireRoles } from "@/lib/auth/require-roles"

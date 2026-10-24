@@ -20,7 +20,9 @@ const NODE = join(here, '..', '..', '..', '..', '..', '..')
 const args = process.argv.slice(2)
 const fromIdx = args.indexOf('--from')
 const fromArg = fromIdx >= 0 ? args[fromIdx + 1] : null
-const target = args.find((a, i) => !a.startsWith('--') && i !== fromIdx + 1)
+// 587-7: значение `--from` пропускается только когда флаг есть. ✗ Было `i !== fromIdx + 1`: без `--from` (fromIdx = -1) отсекался
+// первый же аргумент, и `npm run shell-kit:add -- .` отвечал «укажите папку».
+const target = args.find((a, i) => !a.startsWith('--') && !(fromIdx >= 0 && i === fromIdx + 1))
 
 function siteDir() {
   if (fromArg) return resolve(fromArg)
