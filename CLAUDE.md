@@ -3613,3 +3613,24 @@ by the person, in his test account) — «y go».
 - 🛑 Before `serve:rebuild`: a narrow `tsc` of the changed files (a `tsconfig` that extends the core's and includes only them) — the build
   failed on type checking without printing the errors (`development-docs/ANTI-PATTERNS.md`).
 - Not proven yet: a live run with models (556-5) — only by the owner's separate «yes» with its price.
+
+## The architect over the node, the administrator of one application (step 580, 2026-10-24)
+
+Owner, 2026-10-24: «архитектор это супер пользователь который имеет покрытие вообще над всем узлом в то время как администратор это уже
+роль также как и любая другая которая может быть связана только с той организации через которую пользователь зарегистрировался».
+- **The rule lives in the auth element** (v2.4.1, `lib/auth/caller.ts`): the node architect (a `node` record with `architect`) may
+  administer any application; an `admin` only the application of their own record (`users.app`, step 554). An element's server names
+  itself in `x-fractera-element`; `/api/session` then recognizes a `node` record on a factory application's site only for the architect
+  and the guest (`admittedTo`), and `/api/admin/users` and `/api/app-users` list and change only that application's people. On a single
+  project every person is a `node` record — one application, nothing changes.
+- **The person behind the request** is the session cookie or, from the machine loopback, the single sign-on ticket
+  (`x-fractera-ticket`): on an element's own domain only the ticket exists. ✗ Before 580 the element's door sent only the cookie, and
+  lagrix.dev showed «Не удалось загрузить записи» (401).
+- **The users table of a custom element** (template v0.3.139, root v2.1.13, lagrix) is the auth element's «Users» tab without
+  organizations — `/<lang>/admin/users`, door `app/api/users/[[...path]]` → `/api/app-users` (its README in the auth element).
+- **«My account» drawer of a custom element**: Accounts, Blocks, Design, Site settings for the admin layer (`lib/menu/account-links.ts`,
+  `ADMIN_PAGES`); the pages (`meta.roles: ["admin"]`) and save doors (`admin/api/settings/*`) let in the architect and the administrator.
+- 🛑 **A rebuild of the auth element signs everyone out of elements' own domains:** the tickets live in its memory. The person opens
+  «Войти» on the element's site once — the node cookie is still valid, no password is asked.
+- Proven by: a stand on a copy of the live auth database (`completed-steps/580-*.md`, 25 checks) and the owner's browser on lagrix.dev
+  and throughsongs.com. Not proven live: an administrator of a factory application (this node is a single project).
