@@ -64,7 +64,8 @@ const DICT: Record<string, ArchitectHomeUi> = {
       tab: 'Basics',
       title: 'The basics',
       items: [
-        '**Node** — your computer or a VPS server where the core and all the elements run. The panel you are looking at is the node.',
+        '**Node** — your computer or a VPS server where the core and all the elements run.',
+        '**Core** — the centre of the node: the panel you are looking at, the registry of elements, their installation and the links between them. The core is not born from a template and is not replaced: it comes with the node.',
         '**Element** — a self-contained part of the node with its own folder, port, address, repository and agent. A site, an app and a bot are all elements.',
         '**Native element** — a built-in service any custom element can use: sign-in, data, memory, design, blocks. It is not sold and is not shown to the network.',
         '**Custom element** — your own project: a site, an app or an agent. It can follow the node’s shared settings or live on its own, and it can be sold and put on the Web4 network.',
@@ -106,7 +107,8 @@ const DICT: Record<string, ArchitectHomeUi> = {
       tab: 'Ликбез',
       title: 'Главный ликбез',
       items: [
-        '**Узел** — ваш компьютер или VPS-сервер, на котором работают ядро и все элементы. Пульт, который вы сейчас видите, — это узел.',
+        '**Узел** — ваш компьютер или VPS-сервер, на котором работают ядро и все элементы.',
+        '**Ядро** — центр узла: пульт, который вы сейчас видите, реестр элементов, их установка и связи между ними. Ядро не рождается из шаблона и не заменяется: оно приходит вместе с узлом.',
         '**Элемент** — самостоятельная часть узла со своей папкой, портом, адресом, репозиторием и агентом. Сайт, приложение, бот — всё это элементы.',
         '**Нативный элемент** — встроенная служба, которой пользуется любой кастомный элемент: авторизация, данные, память, дизайн, блоки. Его не продают и не показывают сети.',
         '**Кастомный элемент** — ваш собственный проект: сайт, приложение или агент. Он может брать общие настройки узла или жить отдельно, его можно продавать и выставить в сеть Web4.',
