@@ -153,7 +153,7 @@ export function StarterBanner({
         ) : null}
         {dismissible && strings.dontShow ? (
           <Label className="ml-2 flex cursor-pointer items-center gap-1.5 text-sm font-normal text-muted-foreground" data-starter-banner-dismiss>
-            <Checkbox onCheckedChange={(v) => { if (v) hideForGood() }} aria-label={strings.dontShow} />
+            <Checkbox onCheckedChange={(v) => { if (v) hideForGood() }} aria-label={strings.dontShow} className="border-foreground/50 bg-background" />
             <span>{strings.dontShow}</span>
           </Label>
         ) : null}
