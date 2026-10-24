@@ -88,8 +88,11 @@ export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang
   if (rows === "failed") return <p className="my-6 text-sm text-destructive" role="alert">{words.unavailable}</p>
 
   const cell = "px-4 py-3 align-top whitespace-nowrap"
-  const wide = "px-4 py-3 align-top min-w-[16rem] max-w-[24rem] whitespace-normal"
+  const wide = "group/cell px-4 py-3 align-top min-w-[16rem] max-w-[24rem] whitespace-normal"
   const link = "text-primary underline-offset-4 hover:underline"
+  // 584 (владелец 2026-10-24): «таблица должна содержать не более двух строк для ячейки при наведении … show all texts» —
+  // длинная ячейка показывает две строки, наведение раскрывает весь текст; чистый CSS, без скрипта.
+  const clamp = "line-clamp-2 group-hover/cell:line-clamp-none"
 
   const head = (
     <tr className="border-b border-border">
@@ -103,11 +106,11 @@ export function ProjectsBoard({ words, lang }: { words: ProjectsBoardWords; lang
     <tr key={r.id} className="border-b border-border last:border-0 text-muted-foreground" data-project={r.id}>
       <td className={`${cell} font-medium text-foreground`}>{i + 1}</td>
       <td className={`${cell} text-foreground`}>{r.service}</td>
-      <td className={wide}>{r.title ?? DASH}</td>
-      <td className={wide}>{r.description ?? DASH}</td>
+      <td className={wide}><div className={clamp}>{r.title ?? DASH}</div></td>
+      <td className={wide}><div className={clamp}>{r.description ?? DASH}</div></td>
       <td className={cell}>{r.domain ?? DASH}</td>
       <td className={cell}>{DASH}</td>
-      <td className={wide}>{r.commit ? <><code className="text-foreground">{r.commit.hash}</code> {r.commit.subject}</> : DASH}</td>
+      <td className={wide}><div className={clamp}>{r.commit ? <><code className="text-foreground">{r.commit.hash}</code> {r.commit.subject}</> : DASH}</div></td>
       <td className={`${cell} ${TONE[r.status]}`} data-status={r.status}>
         {words.status[r.status]}
         {/* 567: выключенный — с причиной, чтобы «не работает» не читалось как поломка. */}
