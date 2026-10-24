@@ -224,11 +224,18 @@ async function printAddresses(coreUrl, freshInstall = false) {
   // путешествия в мире WEB4: адрес сети интернет открывающий административную панель». ✗ 371 печатал три равных адреса — человек
   // не знал, какой его. Главная строка — пульт в интернете (свой домен → `architect.<зона>`, иначе временный адрес); адреса этого
   // компьютера — ниже, справкой. Агент отдаёт человеку только главную строку (README).
-  const journey = own ? `https://${architectHost || own}` : internet ?? coreUrl
+  // 🪦 372-3 «главная строка — пульт» отменено 2026-10-24 (шаг 587-6), владелец: «сразу после успешного развёртывания проекта наш
+  // bootstrap должен возвращать именно эту страницу» — главную root (первый экран агента, 587-3). Главная строка и окно браузера —
+  // root: свой домен → корень зоны (root отвечает там), иначе сайт на этом компьютере (быстрый туннель смотрит на пульт, 371).
+  // Пульт в интернете — строкой ниже.
+  const panel = own ? `https://${architectHost || own}` : internet ?? coreUrl
+  const journey = own ? `https://${own}` : rootPort ? `http://localhost:${rootPort}` : panel
   console.log('')
   console.log(`===PUBLIC_URL=== ${journey}`)
   console.log(`Здесь начинается ваше путешествие в мире WEB4: ${journey}`)
   console.log(`Your journey into the world of WEB4 starts here: ${journey}`)
+  console.log(`===PANEL_URL=== ${panel}`)
+  console.log(`Пульт узла: ${panel}`)
   console.log('')
   console.log('===ADDRESSES=== (справка: на этом компьютере)')
   console.log(`Пульт узла на этом компьютере: ${coreUrl}`)
@@ -825,8 +832,14 @@ else if (command === 'elements') {
   const missing = missingElements()
   console.log(missing.length ? `нет элементов: ${missing.join(', ')}` : 'элементы узла на месте')
 }
+// 587-6: только напечатать итоговые адреса, как в конце установки, — ничего не запуская и не открывая браузер.
+else if (command === 'addresses') {
+  let core = null
+  try { const rt = JSON.parse(readFileSync(path.join(root, 'logs', 'runtime.json'), 'utf8')); core = `http://${rt.hostname || 'localhost'}:${rt.port}` } catch { /* узел не запущен */ }
+  await printAddresses(core ?? 'http://localhost', false)
+}
 else {
-  console.log('Команды: start · stop · status · rebuild · publish · unpublish · autostart · elements · remove')
+  console.log('Команды: start · stop · status · rebuild · publish · unpublish · autostart · elements · addresses · remove')
   console.log('Новый адрес в интернете вместо прежнего: publish -- --new')
   process.exit(1)
 }
