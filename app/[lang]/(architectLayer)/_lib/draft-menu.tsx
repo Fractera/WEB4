@@ -118,7 +118,16 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
   if (c < 0) return withCustom
   // Зона «Нативные» — от «Ядра» до подписи «Кастомные».
   const end = withCustom.findIndex((m) => m.zoneHead?.id === 'custom')
-  const nativeZone = withCustom.slice(c + 1, end)
+  // 586 (владелец 2026-10-24): «Root элемент это по своей природе кастомный элементы … перенеси его в группу выпадающего списка для
+  // кастомных элементов и закрепи его первым». Пункт Root приходит из меню папок между «Ядром» и подписью «Кастомные» — вынимается
+  // из зоны нативных и встаёт первой строкой кастомной зоны (выше кнопки «Создать WEB4 ITEM»).
+  const rootHref = at(`${ARCHITECT_HOME}/root`)
+  const rootItem = withCustom.slice(c + 1, end).find((m) => m.href === rootHref)
+  const nativeZone = withCustom.slice(c + 1, end).filter((m) => m !== rootItem)
+  const tail = withCustom.slice(end)
+  const customTail = rootItem
+    ? [zone(ui.zoneCustom, 'custom', holds([rootItem, ...customs], page)), { ...rootItem, zone: 'custom' }, ...tail.slice(1)]
+    : tail
   // 560-2: элементы памяти — подзона «Память» на месте первого из них; их пункты остаются первым уровнем (глубина деревьев не теряется).
   const memHref = new Map(MEMORY_GROUP.map((id, k) => [at(`${ARCHITECT_HOME}/${addressOf(id)}`), k] as const))
   const memory = nativeZone.filter((m) => m.href && memHref.has(m.href)).sort((a, b) => memHref.get(a.href!)! - memHref.get(b.href!)!)
@@ -138,5 +147,5 @@ export function withDrafts(menu: WorkspaceItem[], lang: string, currentPath: str
   const p = top.findIndex((m) => m.href === at(`${ARCHITECT_HOME}/passport`))
   const main = p < 0 ? [] : top.filter((_, k) => k !== p)
   const head = p < 0 ? top : [top[p], zone(ui.zoneMain, 'main', holds(main, page)), ...inZone(main, 'main')]
-  return [...head, zone(ui.zoneNative, 'native', holds(nativeZone, page)), nativeButton, ...grouped, ...withCustom.slice(end)]
+  return [...head, zone(ui.zoneNative, 'native', holds(nativeZone, page)), nativeButton, ...grouped, ...customTail]
 }

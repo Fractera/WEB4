@@ -193,7 +193,8 @@ export async function projectRows(lang: string): Promise<ProjectRow[]> {
   const byId = new Map(services.map((s) => [s.id, s]))
   const r = roles()
   const jobs = [
-    ...services.filter((s) => !customIds.has(s.id)).map((s) => row(s.id, s, false, lang, d, r[s.id] ?? null)),
+    // 586 (владелец 2026-10-24): «Root элемент это по своей природе кастомный» — в таблице он кастомный, как и в левом меню.
+    ...services.filter((s) => !customIds.has(s.id)).map((s) => row(s.id, s, s.id === "root", lang, d, r[s.id] ?? null)),
     ...drafts.map((x) => row(x.id, byId.get(x.id) ?? null, true, lang, d, r[x.id] ?? null)),
   ]
   return Promise.all(jobs)
@@ -262,7 +263,8 @@ export async function catalogEntries(lang: "en" | "ru"): Promise<CatalogEntry[]>
   const byId = new Map(services.map((s) => [s.id, s]))
   const root = byId.get("root")
   const jobs = [
-    ...(root ? [catalogEntry("root", root, false, lang, d)] : []),
+    // 586: root — кастомный (слово владельца 2026-10-24), первым, как и прежде.
+    ...(root ? [catalogEntry("root", root, true, lang, d)] : []),
     ...drafts.filter((x) => x.id !== "root" && byId.has(x.id)).map((x) => catalogEntry(x.id, byId.get(x.id) as RegistryEntry, true, lang, d)),
     ...services.filter((s) => s.id !== "root" && !customIds.has(s.id)).map((s) => catalogEntry(s.id, s, false, lang, d)),
   ]
