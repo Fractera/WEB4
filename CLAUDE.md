@@ -3661,3 +3661,19 @@ the shell requests — «Только вход, как просил», the integ
   the whole text (`line-clamp-2` + `group-hover/cell:line-clamp-none`); 🔒 **root is a custom element** (owner: «Root элемент это по своей
   природе кастомный»): first line of the «Custom elements» zone, `custom` in `/api/node/projects` and `kind: "custom"` in the All projects
   catalog (`lib/web4-items/dashboard-rows.ts`).
+
+## Root on the custom template; the first task from the root home to the main agent (step 587, 2026-10-24)
+
+Owner's words verbatim — `/code/development-docs/development-steps/completed-steps/587-main.md`; plan — «Подтвердить, /clear и делать до конца (Рекомендую)».
+- 🔒 **Root is the custom template plus three things of its own** (`Fractera/fractera-root-starter` v3.0.0, pinned in `web4-items.json`):
+  the AI agent home (`widget-static-root-home`), the starter banner with «Don't show again», own files (passport, port 24683, README,
+  package name). A newer template comes the same way: the template tree over root, then root's own files back.
+- **The first task:** the root home keeps the task in its `localStorage` through sign-in, then its door `POST /api/first-task` (architect
+  only) passes it with the node key to the core's `POST /api/node/first-task` → `data/node/first-task.json` (`lib/web4-items/first-task.ts`;
+  GET and DELETE — architect or node key). The agent kit bridge (`kits/_agent-kit/core/server/bridge.cjs`, `spawnAgent`): the first session of
+  the main agent (`build`) started without its own instruction takes the task and removes the record — in the terminal as the task, with
+  the Telegram bot as the question «Запускаем его в работу?». The trust question about the folder stays with the person.
+- **After install** `serve.mjs` prints and opens the root home (`===PUBLIC_URL===`: own domain → the zone root, else the site on this
+  computer — the quick tunnel shows the panel), the panel is `===PANEL_URL===`; `node scripts/serve.mjs addresses` prints both without
+  starting anything.
+- 🛑 Not proven live: the Telegram bot writing first after activation (a run of the main agent with the bot — the owner's word, with its cost).
